@@ -1,4 +1,4 @@
-package cn.itcast.oa.admin.addressbook.service;
+package org.happybirds.oa.admin.addressbook.service;
 /**
  * 通讯录模块业务处理接口
  * @author LEE.SIU.WAH

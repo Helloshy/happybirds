@@ -1,4 +1,4 @@
-package cn.itcast.oa.admin.leave.entity;
+package org.happybirds.oa.admin.leave.entity;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -7,9 +7,11 @@ import java.util.Set;
 
 
 
+
 import javax.persistence.*;
 
-import cn.itcast.oa.admin.identity.entity.User;
+import org.happybirds.oa.admin.identity.entity.User;
+
 /**
  * 假期类型实体
  * @author LEE.SIU.WAH

@@ -1,8 +1,7 @@
-package cn.itcast.oa.admin.identity.dao.impl;
+package org.happybirds.oa.admin.identity.dao.impl;
 
-import cn.itcast.oa.admin.identity.dao.DeptDao;
-import cn.itcast.oa.core.dao.impl.HibernateDaoImpl;
-
+import org.happybirds.oa.admin.identity.dao.DeptDao;
+import org.happybirds.oa.core.dao.impl.HibernateDaoImpl;
 /**
  * 部门数据访问接口实现类
  * @author LEE.SIU.WAH

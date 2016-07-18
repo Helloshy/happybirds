@@ -1,11 +1,15 @@
-package cn.itcast.oa.admin.leave.entity;
+package org.happybirds.oa.admin.leave.entity;
+
+ 
 
 import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.*;
 
-import cn.itcast.oa.admin.identity.entity.User;
+import org.happybirds.oa.admin.identity.entity.User;
+
+
 
 
 /**

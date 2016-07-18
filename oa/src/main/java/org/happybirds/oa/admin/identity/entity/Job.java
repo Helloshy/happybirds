@@ -1,4 +1,4 @@
-package cn.itcast.oa.admin.identity.entity;
+package org.happybirds.oa.admin.identity.entity;
 
 import java.io.Serializable;
 

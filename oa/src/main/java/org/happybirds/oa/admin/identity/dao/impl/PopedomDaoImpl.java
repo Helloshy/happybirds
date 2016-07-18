@@ -1,8 +1,7 @@
-package cn.itcast.oa.admin.identity.dao.impl;
+package org.happybirds.oa.admin.identity.dao.impl;
 
-import cn.itcast.oa.admin.identity.dao.PopedomDao;
-import cn.itcast.oa.core.dao.impl.HibernateDaoImpl;
-
+import org.happybirds.oa.admin.identity.dao.PopedomDao;
+import org.happybirds.oa.core.dao.impl.HibernateDaoImpl;
 /**
  * 权限数据访问接口实现类
  * @author LEE.SIU.WAH

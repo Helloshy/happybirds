@@ -1,11 +1,9 @@
-package cn.itcast.oa.admin.identity.action;
+package org.happybirds.oa.admin.identity.action;
 
 import java.util.List;
 
-import javax.annotation.Resource;
-
-import cn.itcast.oa.admin.identity.entity.Job;
-import cn.itcast.oa.admin.identity.service.IdentityService;
+import org.happybirds.oa.admin.identity.entity.Job;
+import org.happybirds.oa.admin.identity.service.IdentityService;
 
 import com.opensymphony.xwork2.ActionSupport;
 
@@ -18,6 +16,10 @@ import com.opensymphony.xwork2.ActionSupport;
  */
 public class JobAction extends ActionSupport {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 4101440155621349762L;
 	private IdentityService identityService;
 	
 	@Override

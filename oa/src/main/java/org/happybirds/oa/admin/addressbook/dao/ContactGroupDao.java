@@ -1,6 +1,7 @@
-package cn.itcast.oa.admin.addressbook.dao;
+package org.happybirds.oa.admin.addressbook.dao;
 
-import cn.itcast.oa.core.dao.HibernateDao;
+import org.happybirds.oa.core.dao.HibernateDao;
+
 
 /**
  * 联系组数据访问接口

@@ -1,4 +1,4 @@
-package cn.itcast.oa.admin.addressbook.entity;
+package org.happybirds.oa.admin.addressbook.entity;
 
 import java.io.Serializable;
 import java.util.HashSet;

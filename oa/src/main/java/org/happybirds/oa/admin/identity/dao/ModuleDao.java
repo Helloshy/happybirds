@@ -1,7 +1,6 @@
-package cn.itcast.oa.admin.identity.dao;
+package org.happybirds.oa.admin.identity.dao;
 
-import cn.itcast.oa.core.dao.HibernateDao;
-
+import org.happybirds.oa.core.dao.HibernateDao;
 /**
  * 模块数据访问接口
  * @author LEE.SIU.WAH

@@ -1,6 +1,7 @@
-package cn.itcast.oa.admin.leave.dao;
+package org.happybirds.oa.admin.leave.dao;
 
-import cn.itcast.oa.core.dao.HibernateDao;
+import org.happybirds.oa.core.dao.HibernateDao;
+
 
 /**
  * 假期审批数据访问接口

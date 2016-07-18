@@ -1,7 +1,10 @@
-package cn.itcast.oa.admin.leave.dao.impl;
+package org.happybirds.oa.admin.leave.dao.impl;
 
-import cn.itcast.oa.admin.leave.dao.LeaveTypeDao;
-import cn.itcast.oa.core.dao.impl.HibernateDaoImpl;
+import org.happybirds.oa.admin.leave.dao.LeaveTypeDao;
+import org.happybirds.oa.core.dao.impl.HibernateDaoImpl;
+
+
+
 
 /**
  * 假期类型数据访问接口实现类

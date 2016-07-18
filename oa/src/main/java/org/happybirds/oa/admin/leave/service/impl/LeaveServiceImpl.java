@@ -1,6 +1,13 @@
-package cn.itcast.oa.admin.leave.service.impl;
+package org.happybirds.oa.admin.leave.service.impl;
 
-import cn.itcast.oa.admin.leave.service.LeaveService;
+import javax.annotation.Resource;
+
+import org.happybirds.oa.admin.leave.dao.LeaveAuditDao;
+import org.happybirds.oa.admin.leave.dao.LeaveItemDao;
+import org.happybirds.oa.admin.leave.dao.LeaveTypeDao;
+import org.happybirds.oa.admin.leave.service.LeaveService;
+
+
 
 /**
  * 假期模块业务处理接口实现类
@@ -10,5 +17,16 @@ import cn.itcast.oa.admin.leave.service.LeaveService;
  * @version 1.0
  */
 public class LeaveServiceImpl implements LeaveService {
-
+	/**
+	 * 注入dao接口实体
+	 * 
+	 * 
+	 */
+	@Resource
+	private LeaveAuditDao leaveAuditDao;
+	@Resource
+	private LeaveItemDao leaveItemDao;
+	@Resource
+	private LeaveTypeDao leaveTypeDao;
+	
 }
