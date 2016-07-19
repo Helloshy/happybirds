@@ -69,6 +69,14 @@
 		<dependency>
 			<groupId>org.apache.struts</groupId>
 			<artifactId>struts2-core</artifactId>
+			<!-- 排除javassist这个jar包依赖 跟hibernate 中依赖冲突 -->
+			<exclusions>
+				<exclusion>
+		          <groupId>javassist</groupId>
+		          <artifactId>javassist</artifactId>
+	        </exclusion>
+			
+			</exclusions>
 		</dependency>
 		<!-- 3.2 struts2 spring -->
 		<dependency>
