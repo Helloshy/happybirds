@@ -110,7 +110,6 @@ public class IdentityServiceImpl implements IdentityService {
 			}
 			return user;
 		}catch(Exception ex){
-			ex.printStackTrace();
 			throw new OAException("根据主键userId查询用户方法时出现了异常！", ex);
 		}
 	}

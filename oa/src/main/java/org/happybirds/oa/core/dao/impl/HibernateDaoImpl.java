@@ -228,7 +228,6 @@ public class HibernateDaoImpl  implements HibernateDao {
 	 * @param id
 	 */
 	@Override public <T> T get(Class<T> entityClass, Serializable id) {
-		System.out.println(getSession().get(entityClass, id));
 		return (T)getSession().get(entityClass, id);
 	}
 
