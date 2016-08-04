@@ -44,16 +44,40 @@
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>
 		</dependency>
+		<!-- 2.1.2 hibernate second level cache -->
+		<dependency>
+		    <groupId>org.hibernate</groupId>
+		    <artifactId>hibernate-ehcache</artifactId>
+		</dependency>
 		<!-- 2.2 slf4j -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
+		</dependency>
+		<!-- common-logging 实际调用slf4j -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>jcl-over-slf4j</artifactId>
+		</dependency>
+		<!-- java.util.logging 实际调用slf4j -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>jul-to-slf4j</artifactId>
+		</dependency>
+		<!-- log4j -->
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
 		</dependency>
 		<!-- 2.3 mysql -->
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<scope>runtime</scope>
+			<!-- <scope>runtime</scope> -->
 		</dependency>
 		<!-- 2.4 c3p0 -->
 		<dependency>
@@ -109,6 +133,60 @@
 			<artifactId>json-lib</artifactId>
 			<classifier>jdk15</classifier>
 		</dependency>
+		<!-- MyBatis -->
+		<dependency>
+			<groupId>org.mybatis</groupId>
+			<artifactId>mybatis</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.mybatis</groupId>
+			<artifactId>mybatis-spring</artifactId>
+		</dependency>
+		
+		<!-- Activiti -->
+		<dependency>
+			<groupId>org.activiti</groupId>
+			<artifactId>activiti-engine</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.activiti</groupId>
+			<artifactId>activiti-spring</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.activiti</groupId>
+			<artifactId>activiti-explorer</artifactId>
+			<exclusions>
+				<exclusion>
+					<artifactId>vaadin</artifactId>
+					<groupId>com.vaadin</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>dcharts-widget</artifactId>
+					<groupId>org.vaadin.addons</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>activiti-simple-workflow</artifactId>
+					<groupId>org.activiti</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.activiti</groupId>
+			<artifactId>activiti-modeler</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.activiti</groupId>
+			<artifactId>activiti-diagram-rest</artifactId>
+		</dependency>
+		<!-- email -->
+		<dependency>
+			<groupId>javax.mail</groupId>
+			<artifactId>mail</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>javax.activation</groupId>
+			<artifactId>activation</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -133,8 +211,6 @@
 			</plugin>
 		</plugins>
 	</build>
-  
-  
   <developers>
   	<developer>
   		<id>happybirds</id>

@@ -1,5 +1,8 @@
 package org.happybirds.oa.admin.identity.dao;
 
+import java.util.List;
+import java.util.Map;
+
 import org.happybirds.oa.core.dao.HibernateDao;
 
 /**
@@ -10,5 +13,13 @@ import org.happybirds.oa.core.dao.HibernateDao;
  * @version 1.0
  */
 public interface DeptDao extends HibernateDao {
+	/**
+	 * TODO 查询部门id与部门名称
+	 * @return
+	 * @Since 2016年7月20日
+	 * @Version 1.0
+	 */
+	List<Map<String, Object>> getDeptByIdAndName();
+
 
 }

@@ -1,5 +1,8 @@
 package org.happybirds.oa.admin.identity.dao;
 
+import java.util.List;
+import java.util.Map;
+
 import org.happybirds.oa.core.dao.HibernateDao;
 /**
  * 职位数据访问接口
@@ -9,5 +12,12 @@ import org.happybirds.oa.core.dao.HibernateDao;
  * @version 1.0
  */
 public interface JobDao extends HibernateDao {
+	/**
+	 * TODO   查询所有的职位信息
+	 * @return List<Map<String, Object>>
+	 * @Since 2016年7月21日
+	 * @Version 1.0
+	 */
+	List<Map<String, Object>> getJobByCodeAndName();
 
 }

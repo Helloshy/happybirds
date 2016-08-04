@@ -100,4 +100,10 @@ public class Module implements Serializable {
 	public void setCreateDate(Date createDate) {
 		this.createDate = createDate;
 	}
+	@Override
+	public String toString() {
+		return "Module [code=" + code + ", name=" + name + "]";
+	}
+	
+	
 }

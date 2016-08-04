@@ -95,6 +95,7 @@ public class HibernateDaoImpl  implements HibernateDao {
 				query.setParameter(i, obj[i]);
 			}
 			Object result = query.uniqueResult();
+			System.out.println(result);
 			return ((Long)result).intValue();
 		}
 	}

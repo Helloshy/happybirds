@@ -7,6 +7,9 @@ import java.util.Set;
 
 import javax.persistence.*;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
 
 /**
  * 用户持久化类
@@ -17,8 +20,8 @@ import javax.persistence.*;
  */
 @Entity @Table(name="OA_ID_USER", 
 		indexes={@Index(columnList="NAME", name="IDX_USER_NAME")})
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE,region="Cache1")
 public class User implements Serializable {
-	
 	private static final long serialVersionUID = -3417930882448168081L;
 	/** 用户ID	PK，大小写英文和数字 */
 	@Id @Column(name="USER_ID", length=50)
@@ -215,4 +218,10 @@ public class User implements Serializable {
 	public void setRoles(Set<Role> roles) {
 		this.roles = roles;
 	}
+	@Override
+	public String toString() {
+		return "User [userId=" + userId + ", name=" + name + ", status="
+				+ status + "]";
+	}
+	
 }

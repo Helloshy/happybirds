@@ -43,6 +43,13 @@
 				<url-pattern>*.jsp</url-pattern>
 				<!-- 在拦截的所有jsp页面前面引入taglib.jsp页面 -->
 				<include-prelude>/WEB-INF/jsp/taglib.jsp</include-prelude>
+				<include-prelude>/WEB-INF/jsp/linklib.jsp</include-prelude>
 			</jsp-property-group>  	
 		  </jsp-config>
+		  <!-- 配置全局的404页面 -->
+		 <!--  <error-page>
+		  	<error-code>404</error-code>
+		  	<location>/404.jsp</location>
+		  </error-page> -->
+		  
 </web-app>
