@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kapphk.web.dao.mapper.homepage.BeanGuideMapper" >
+    <resultMap id="BaseResultMap" type="com.kapphk.web.bean.homepage.BeanGuide" >
+        <!--  自动生成 2016年12月22日 表与实体类字段对应 -->
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="item_link" property="itemLink" jdbcType="VARCHAR" />
+        <result column="logo_path" property="logoPath" jdbcType="VARCHAR" />
+        <result column="teacher_id" property="teacherId" jdbcType="BIGINT" />
+        <result column="record_type" property="recordType" jdbcType="INTEGER" />
+        <result column="sort" property="sort" jdbcType="INTEGER" />
+        <result column="state" property="state" jdbcType="INTEGER" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+    
+    <!-- 集团轮播图  zoneyu 16-12-22 -->
+    <select id="findAllSort" resultMap="BaseResultMap">
+    	select sg.* from sys_guide AS sg where sg.record_type = #{param.recordType} ORDER BY sg.sort DESC 
+    </select>
+    
+    <!-- 首页轮播图 zoneyu 16-10-10 -->
+    <select id="getHomeGuideList" resultType="java.util.Map">
+    	SELECT sg.id,sg.item_link AS itemLink,sg.logo_path AS logoPath 
+		FROM sys_guide AS sg WHERE sg.record_type = 1 ORDER BY sg.sort DESC 
+    </select>
+    
+    <!-- 查询列表 -->
+    <select id="findList" resultType="java.util.Map">
+    	SELECT g.id,g.content,g.item_link AS itemLink,g.logo_path AS logoPath,g.state ,g.sort,
+		g.teacher_id AS teacherId,t.item_name AS teacherName,CAST(g.create_time AS CHAR) AS createTime
+		FROM sys_guide g 
+		LEFT JOIN app_teacher t ON t.id=g.teacher_id
+		WHERE g.record_type=#{param.recordType}
+		ORDER BY g.create_time DESC 
+    </select>
+    
+    <!-- 查询列表总数 -->
+    <select id="findCount" resultType="java.lang.Integer">
+    	SELECT COUNT(1)
+		FROM sys_guide g 
+		WHERE g.record_type=#{param.recordType}
+    </select>
+    
+    <resultMap id="ResultMapWithBLOBs" type="com.kapphk.web.bean.homepage.BeanGuide" extends="BaseResultMap" >
+        <!--  自动生成 2016年12月22日 表与实体类字段对应 -->
+        <result column="content" property="content" jdbcType="LONGVARCHAR" />
+    </resultMap>
+    
+    <sql id="Base_Column_List" >
+        <!--  自动生成 2016年12月22日 表字段名称 -->
+        id, item_link, logo_path, teacher_id, record_type, sort, state, create_time
+    </sql>
+    
+    <sql id="Blob_Column_List" >
+        <!--  自动生成 2016年12月22日 表字段名称 -->
+        content
+    </sql>
+    
+    <sql id="findByPageSql" >
+        <!-- WARNING -  自动生成 2016-12-22  分页查询SQL -->
+        select a.* from sys_guide a
+        <where >
+            <if test="param.id != null " >
+                and a.id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.itemLink != null and param.itemLink != ''" >
+                and a.item_link = #{param.itemLink,jdbcType=VARCHAR}
+            </if>
+            <if test="param.logoPath != null and param.logoPath != ''" >
+                and a.logo_path = #{param.logoPath,jdbcType=VARCHAR}
+            </if>
+            <if test="param.teacherId != null " >
+                and a.teacher_id = #{param.teacherId,jdbcType=BIGINT}
+            </if>
+            <if test="param.recordType != null " >
+                and a.record_type = #{param.recordType,jdbcType=INTEGER}
+            </if>
+            <if test="param.sort != null " >
+                and a.sort = #{param.sort,jdbcType=INTEGER}
+            </if>
+            <if test="param.state != null " >
+                and a.state = #{param.state,jdbcType=INTEGER}
+            </if>
+            <if test="param.content != null " >
+                and a.content = #{param.content,jdbcType=LONGVARCHAR}
+            </if>
+        </where>
+        order by a.id desc
+    </sql>
+    
+    <select id="findByPage" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-22  分页查询 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit #{offset}, #{pageSize}
+    </select>
+    
+    <select id="findByPageCount" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-12-22  分页查询总条数 -->
+        select count(1) from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findById" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年12月22日 根据ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        ,
+        <include refid="Blob_Column_List" />
+        from sys_guide
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    
+    <select id="load" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-22  根据多个ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from sys_guide where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </select>
+    
+    <select id="all" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-22  查询所有 -->
+        select 
+        <include refid="Base_Column_List" />
+        from sys_guide
+    </select>
+    
+    <select id="count" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-12-22 查询总条数 -->
+        select count(1) from sys_guide
+    </select>
+    
+    <update id="update" parameterType="com.kapphk.web.bean.homepage.BeanGuide" >
+        <!--  自动生成 2016年12月22日 更新数据 -->
+        update sys_guide
+        <set >
+            <if test="itemLink != null" >
+                item_link = #{itemLink,jdbcType=VARCHAR},
+            </if>
+            <if test="logoPath != null" >
+                logo_path = #{logoPath,jdbcType=VARCHAR},
+            </if>
+            <if test="teacherId != null" >
+                teacher_id = #{teacherId,jdbcType=BIGINT},
+            </if>
+            <if test="recordType != null" >
+                record_type = #{recordType,jdbcType=INTEGER},
+            </if>
+            <if test="sort != null" >
+                sort = #{sort,jdbcType=INTEGER},
+            </if>
+            <if test="state != null" >
+                state = #{state,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null" >
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="content != null" >
+                content = #{content,jdbcType=LONGVARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    
+    <insert id="insert" parameterType="com.kapphk.web.bean.homepage.BeanGuide" useGeneratedKeys="true" keyProperty="id" >
+        <!--  自动生成 2016年12月22日 添加数据 -->
+        insert into sys_guide
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="itemLink != null" >
+                item_link,
+            </if>
+            <if test="logoPath != null" >
+                logo_path,
+            </if>
+            <if test="teacherId != null" >
+                teacher_id,
+            </if>
+            <if test="recordType != null" >
+                record_type,
+            </if>
+            <if test="sort != null" >
+                sort,
+            </if>
+            <if test="state != null" >
+                state,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+            <if test="content != null" >
+                content,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="itemLink != null" >
+                #{itemLink,jdbcType=VARCHAR},
+            </if>
+            <if test="logoPath != null" >
+                #{logoPath,jdbcType=VARCHAR},
+            </if>
+            <if test="teacherId != null" >
+                #{teacherId,jdbcType=BIGINT},
+            </if>
+            <if test="recordType != null" >
+                #{recordType,jdbcType=INTEGER},
+            </if>
+            <if test="sort != null" >
+                #{sort,jdbcType=INTEGER},
+            </if>
+            <if test="state != null" >
+                #{state,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="content != null" >
+                #{content,jdbcType=LONGVARCHAR},
+            </if>
+        </trim>
+    </insert>
+    
+    <delete id="delete" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年12月22日 删除数据 -->
+        delete from sys_guide
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    
+    <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.kapphk.web.bean.homepage.BeanGuide" >
+        <!--  自动生成 2016年12月22日 更新数据 -->
+        update sys_guide
+        set item_link = #{itemLink,jdbcType=VARCHAR},
+            logo_path = #{logoPath,jdbcType=VARCHAR},
+            teacher_id = #{teacherId,jdbcType=BIGINT},
+            record_type = #{recordType,jdbcType=INTEGER},
+            sort = #{sort,jdbcType=INTEGER},
+            state = #{state,jdbcType=INTEGER},
+            create_time = #{createTime,jdbcType=TIMESTAMP},
+            content = #{content,jdbcType=LONGVARCHAR}
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    
+    <insert id="inserts" parameterType="java.util.List" >
+        <!-- WARNING -  自动生成 2016-12-22 添加多条数据 -->
+        insert into sys_guide (item_link, logo_path, teacher_id, record_type, sort, state, create_time, content)
+        values
+        <foreach collection="list" item="item" separator="," >
+            (#{item.itemLink,jdbcType=VARCHAR}, #{item.logoPath,jdbcType=VARCHAR}, #{item.teacherId,jdbcType=BIGINT}, #{item.recordType,jdbcType=INTEGER}, #{item.sort,jdbcType=INTEGER}, #{item.state,jdbcType=INTEGER}, #{item.createTime,jdbcType=TIMESTAMP}, #{item.content,jdbcType=LONGVARCHAR})
+        </foreach>
+    </insert>
+    
+    <delete id="deletes" >
+        <!-- WARNING -  自动生成 2016-12-22 删除多条数据 -->
+        delete from sys_guide where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteByEntity" >
+        <!-- WARNING -  自动生成 2016-12-22 通过实体类中的条件删除数据 -->
+        delete from sys_guide
+        <where >
+            <if test="param.id != null " >
+                and id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.itemLink != null and param.itemLink != ''" >
+                and item_link = #{param.itemLink,jdbcType=VARCHAR}
+            </if>
+            <if test="param.logoPath != null and param.logoPath != ''" >
+                and logo_path = #{param.logoPath,jdbcType=VARCHAR}
+            </if>
+            <if test="param.teacherId != null " >
+                and teacher_id = #{param.teacherId,jdbcType=BIGINT}
+            </if>
+            <if test="param.recordType != null " >
+                and record_type = #{param.recordType,jdbcType=INTEGER}
+            </if>
+            <if test="param.sort != null " >
+                and sort = #{param.sort,jdbcType=INTEGER}
+            </if>
+            <if test="param.state != null " >
+                and state = #{param.state,jdbcType=INTEGER}
+            </if>
+            <if test="param.content != null " >
+                and content = #{param.content,jdbcType=LONGVARCHAR}
+            </if>
+        </where>
+    </delete>
+    
+    <select id="findAll" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-22  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findEntityByCondition" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-22  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit 0,1
+    </select>
+</mapper>

@@ -1,0 +1,560 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kapphk.web.dao.mapper.course.BeanCourseMapper" >
+    <resultMap id="BaseResultMap" type="com.kapphk.web.bean.course.BeanCourse" >
+        <!--  自动生成 2016年12月22日 表与实体类字段对应 -->
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="item_name" property="itemName" jdbcType="VARCHAR" />
+        <result column="logo_path" property="logoPath" jdbcType="VARCHAR" />
+        <result column="amount" property="amount" jdbcType="DECIMAL" />
+        <result column="is_public" property="isPublic" jdbcType="INTEGER" />
+        <result column="record_type" property="recordType" jdbcType="INTEGER" />
+        <result column="is_financial" property="isFinancial" jdbcType="INTEGER" />
+        <result column="is_offline" property="isOffline" jdbcType="INTEGER" />
+        <result column="sort" property="sort" jdbcType="INTEGER" />
+        <result column="state" property="state" jdbcType="INTEGER" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+    
+    <!-- 批量更新课程状态 -->
+    <update id="upstatusByCourseIds">
+    	update app_course set state = 0 where id in
+    	<foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </update>
+    
+    <!-- 财商课程  系统课程 zoneyu 16-10-22 -->
+    <select id="getFinancialListSystem" resultType="java.util.Map">
+    	SELECT DISTINCT ac.id AS courseId,ac.item_name AS itemName,ac.logo_path AS logoPath,
+    	ac.amount,acs.item_remark AS courseRemark 
+		FROM app_course AS ac
+		INNER JOIN app_course_system AS acs ON acs.system_id = ac.id AND ac.record_type = 3 AND ac.is_financial = 1 AND ac.state = 1 
+		ORDER BY ac.sort DESC LIMIT #{page},#{rows}
+    </select>
+    
+    <!-- 财商课程  网络课程 zoneyu 16-10-22 -->
+    <select id="getFinancialListOnline" resultType="java.util.Map">
+    	SELECT ac.id,ac.item_name AS itemName,ac.logo_path AS logoPath,ac.amount,
+		ac.is_public AS isPublic,aco.vedio_length AS vedioLength,
+		aco.vedio_palys AS vedioPalys,aco.teacher_name AS teacherName,
+		aco.teacher_remark AS teacherRemark 
+		FROM app_course_online AS aco 
+		INNER JOIN app_course AS ac ON aco.id = ac.id AND ac.record_type = 2 AND ac.is_financial = 1 AND ac.state = 1
+		ORDER BY ac.sort DESC limit #{page},#{rows}
+    </select>
+    
+    <!-- 动能财商  线下课程  zoneyu 16-10-21 -->
+    <select id="getFinancialListOffline" resultType="java.util.Map">
+		SELECT aco.id,ac.item_name AS itemName,ac.amount,act.course_group AS typeName,ac.logo_path AS logoPath,
+		aco.province,aco.city,aco.district,aco.address,aco.register_date AS registerDate,
+		ac.is_public AS isPublic,
+		aco.phone,acte.user_name AS teacherName,acte.teacher_id AS teacherId 
+		FROM app_course_offline AS aco 
+		INNER JOIN app_course AS ac ON aco.id = ac.id AND ac.record_type = 1 AND ac.state = 1
+		INNER JOIN app_course_type AS act ON aco.course_type_id = act.id AND act.course_tag='财商课程'
+		LEFT JOIN app_course_teacher acte ON aco.id = acte.course_id 
+		group by aco.id ORDER BY ac.sort DESC limit #{page},#{rows}
+    </select>
+    
+    <!-- 系统课程 内容 zoneyu 16-10-21 -->
+    <select id="getSystemCourseList" resultType="java.util.Map">
+    	SELECT ac.item_name AS itemName,ac.amount,acs.course_id AS courseId,acs.record_type AS recordType,
+		act.course_group AS courseGroup 
+		FROM app_course AS ac 
+		INNER JOIN app_course_offline AS aco ON ac.id = aco.id 
+		INNER JOIN app_course_type AS act ON aco.course_type_id = act.id 
+		INNER JOIN app_course_system AS acs ON ac.id = acs.course_id AND acs.record_type = 1
+		WHERE acs.system_id = #{courseId}
+		UNION ALL 
+		SELECT ac.item_name AS itemName,ac.amount,acs.course_id AS courseId,acs.record_type AS recordType,
+		'' AS courseGroup 
+		FROM app_course AS ac 
+		INNER JOIN app_course_system AS acs ON ac.id = acs.course_id AND acs.record_type = 2
+		WHERE acs.system_id = #{courseId} 
+    </select>
+    
+    <!-- 系统课程 报名联系人 zoneyu 16-10-21 -->
+    <select id="getContactList" resultType="java.util.Map">
+    	SELECT acc.logo_path AS logoPath,acc.user_name AS userName,acc.tel 
+		FROM app_course_contact AS acc WHERE acc.course_id = #{courseId}
+    </select>
+    
+    <!-- 系统课程详情 zoneyu 16-10-21 -->
+    <select id="getSystemCourseDetail" resultType="java.util.Map">
+    	SELECT DISTINCT ac.id AS courseId,ac.item_name AS itemName,ac.logo_path AS logoPath,
+		ac.amount,acs.item_remark AS courseRemark,FLOOR(ss.value*ac.amount*0.01) AS blueCurrencyRate
+		FROM app_course AS ac 
+		CROSS JOIN sys_setting AS ss 
+		INNER JOIN app_course_system AS acs ON acs.system_id = ac.id AND ac.record_type = 3 
+		WHERE ac.id = #{courseId} AND ss.id = 'ded_system_course'
+    </select>
+    
+    <!-- 系统课程列表  zoneyu 16-10-21 -->
+    <select id="getSystemList" resultType="java.util.Map">
+    	SELECT DISTINCT ac.id AS courseId,ac.item_name AS itemName,ac.logo_path AS logoPath,
+    	ac.amount,acs.item_remark AS courseRemark 
+		FROM app_course AS ac
+		INNER JOIN app_course_system AS acs ON acs.system_id = ac.id AND ac.record_type = 3 
+		LEFT JOIN app_course_teacher AS act ON ac.id = act.course_id 
+		<where> 
+			ac.state = 1
+			<if test="name != null and name != ''">
+				and (ac.item_name like '%${name}%' or act.user_name like '%${name}%')
+			</if>
+		</where>
+		ORDER BY ac.sort DESC LIMIT #{page},#{rows}
+    </select>
+    
+    <!-- 网络课程详情 zoneyu 16-10-20 -->
+    <select id="getOnlineCourseDetail" resultType="java.util.Map">
+    	<choose>
+    		<when test="uid != null">
+    			SELECT aco.id,aco.vedio_link AS vedioLink,ac.item_name AS itemName,
+				aco.vedio_length AS vedioLength,aco.vedio_palys AS vedioPalys,aco.item_remark as itemRemark,
+				ac.is_public AS isPublic,aco.teacher_id AS teacherId,ac.amount,ac.logo_path as logoPath,
+				FLOOR(ss.value*ac.amount*0.01) AS blueCurrencyRate,aco.link_type as linkType,aco.course_type as courseType,
+				aco.teacher_logo_path AS teacherLogoPath,aco.teacher_name AS teacherName,
+				COUNT(DISTINCT acor.id) AS acount,COUNT(DISTINCT acor2.id) AS buyFlag,
+				aco.teacher_remark AS teacherRemark 
+				FROM app_course_online AS aco 
+				CROSS JOIN sys_setting AS ss 
+				LEFT JOIN app_course_order AS acor2 ON aco.id = acor2.course_id AND acor2.record_type = 2 AND acor2.is_pay = 1 AND acor2.uid = #{uid}
+				INNER JOIN app_course AS ac ON aco.id = ac.id 
+				LEFT JOIN app_course_order AS acor ON aco.id = acor.course_id AND acor.pay_status = 3 AND acor.is_pay = 1 
+				WHERE aco.id = #{courseId} AND ss.id = 'ded_online_course' 
+				GROUP BY aco.id 
+    		</when>
+    		<otherwise>
+    			SELECT aco.id,aco.vedio_link AS vedioLink,ac.item_name AS itemName,
+				aco.vedio_length AS vedioLength,aco.vedio_palys AS vedioPalys,aco.item_remark as itemRemark,
+				ac.is_public AS isPublic,aco.teacher_id AS teacherId,ac.amount,ac.logo_path as logoPath,
+				FLOOR(ss.value*ac.amount*0.01) AS blueCurrencyRate,aco.course_type as courseType,
+				aco.teacher_logo_path AS teacherLogoPath,aco.teacher_name AS teacherName,
+				COUNT(DISTINCT acor.id) AS acount,0 AS buyFlag,aco.link_type as linkType,
+				aco.teacher_remark AS teacherRemark 
+				FROM app_course_online AS aco 
+				CROSS JOIN sys_setting AS ss 
+				INNER JOIN app_course AS ac ON aco.id = ac.id 
+				LEFT JOIN app_course_order AS acor ON aco.id = acor.course_id AND acor.pay_status = 3 AND acor.is_pay = 1 
+				WHERE aco.id = #{courseId} AND ss.id = 'ded_online_course' 
+				GROUP BY aco.id 
+    		</otherwise>
+    	</choose>
+    </select>
+    
+    <!-- 网络课程列表  zoneyu 16-10-19 -->
+    <select id="getOnlineList" resultType="java.util.Map">
+    	SELECT ac.id,ac.item_name AS itemName,ac.logo_path AS logoPath,ac.amount,
+		ac.is_public AS isPublic,aco.item_remark AS itemRemark,aco.vedio_length AS vedioLength,
+		aco.vedio_palys AS vedioPalys,aco.teacher_name AS teacherName,aco.link_type as linkType,
+		aco.teacher_remark AS teacherRemark,aco.course_type as courseType
+		FROM app_course_online AS aco 
+		INNER JOIN app_course AS ac ON aco.id = ac.id AND ac.record_type = 2 AND ac.state = 1
+		<where> 
+			<if test="name != null and name != ''">
+				and (ac.item_name like '%${name}%' or aco.teacher_name like '%${name}%')
+			</if>
+			<if test="courseGroup != null and courseGroup != ''">
+				and aco.course_group = #{courseGroup}
+			</if>
+			<if test="isPublic != null">
+				and ac.is_public = #{isPublic}
+			</if>
+			<if test="courseType != null">
+				and aco.course_type = #{courseType}
+			</if>
+		</where>
+		order by ac.sort desc limit #{page},#{rows}
+    </select>
+    
+    <!-- 报名联系人  zoneyu 16-10-12 -->
+    <select id="getPushInfo" resultType="java.util.Map">
+    	SELECT ac.item_name AS itemName,ac.amount,act.course_group AS typeName,ac.logo_path AS logoPath,
+		aco.id,aco.province,aco.city,aco.district,aco.address,aco.register_date AS registerDate,
+		ac.is_public AS isPublic,acte.user_name AS teacherName,acte.teacher_id AS teacherId,
+		(SELECT tel FROM app_course_contact WHERE course_id = aco.id ORDER BY create_time LIMIT 1)AS phone
+		FROM app_course_offline AS aco 
+		INNER JOIN app_course AS ac ON aco.id = ac.id 
+		INNER JOIN app_course_type AS act ON aco.course_type_id = act.id 
+		LEFT JOIN app_course_teacher acte ON aco.id = acte.course_id
+		INNER JOIN app_course_offline AS aco1 ON (aco.id = aco1.course_id OR aco.id = aco1.course_id2) AND aco1.id = #{courseId}
+		order by aco.id desc 
+    </select>
+    
+    <!-- 报名联系人  zoneyu 16-10-12 -->
+    <select id="getConnectList" resultType="java.util.Map">
+    	SELECT uid,logo_path AS logoPath,user_name AS userName,tel FROM app_course_contact WHERE course_id = #{courseId}
+    </select>
+    
+    <!-- 主讲老师  zoneyu 16-10-12 -->
+    <select id="getTeachersList" resultType="java.util.Map">
+    	SELECT logo_path AS logoPath,user_name AS userName,remark FROM app_course_teacher WHERE course_id = #{courseId}
+    </select>
+    
+    <!-- 课程详情  zoneyu 16-10-12 -->
+    <select id="getCourseInfo" resultType="java.util.Map">
+    	<choose>
+    		<when test="uid != null">
+    			SELECT ac.item_name AS itemName,act.course_group AS typeName,ac.logo_path AS logoPath,
+				aco.id,aco.province,aco.city,aco.district,aco.address,aco.register_date AS registerDate,
+				COUNT(acc.id) AS isCollection,act.id AS courseTypeId,
+				FLOOR(act.blue_currency_rate*0.01*(CASE WHEN acor.id IS NOT NULL THEN act.retrain_amount ELSE ac.amount END)) AS blueCurrencyRate,
+				(CASE WHEN acor.id IS NOT NULL THEN act.retrain_amount ELSE ac.amount END) AS amount,
+				acte.user_name AS teacherName,acte.teacher_id AS teacherId,
+				ac.is_public AS isPublic,ac.is_offline AS isOffline,
+				(SELECT tel FROM app_course_contact WHERE course_id = #{courseId} ORDER BY create_time LIMIT 1)AS phone
+				FROM app_course_offline AS aco 
+				INNER JOIN app_course AS ac ON aco.id = ac.id 
+				LEFT JOIN app_course_teacher acte ON aco.id = acte.course_id
+				INNER JOIN app_course_type AS act ON aco.course_type_id = act.id 
+				left join app_course_order AS acor on ac.id = acor.course_id and act.id = acor.course_type_id AND acor.is_pay = 1 AND acor.uid = #{uid} 
+				LEFT JOIN app_course_collection AS acc ON aco.id = acc.course_id AND acc.uid = #{uid} AND acc.collection_type = 1
+				where aco.id = #{courseId} group by aco.id 
+    		</when>
+    		<otherwise>
+    			SELECT ac.item_name AS itemName,ac.amount,act.course_group AS typeName,ac.logo_path AS logoPath,
+				aco.id,aco.province,aco.city,aco.district,aco.address,aco.register_date AS registerDate,
+				0 AS isCollection,FLOOR(act.blue_currency_rate*0.01*ac.amount) as blueCurrencyRate,act.id as courseTypeId,
+				acte.user_name AS teacherName,acte.teacher_id AS teacherId,
+				ac.is_public AS isPublic,ac.is_offline AS isOffline,
+				(SELECT tel FROM app_course_contact WHERE course_id = #{courseId} ORDER BY create_time LIMIT 1)AS phone 
+				FROM app_course_offline AS aco 
+				INNER JOIN app_course AS ac ON aco.id = ac.id 
+				LEFT JOIN app_course_teacher acte ON aco.id = acte.course_id
+				INNER JOIN app_course_type AS act ON aco.course_type_id = act.id 
+				where aco.id = #{courseId} group by aco.id 
+    		</otherwise>
+    	</choose>
+    </select>
+    
+    <!-- 线下课程列表  zoneyu 16-10-12 -->
+    <select id="getOfflineList" resultType="java.util.Map">
+		<choose>
+			<when test="uid != null">
+				SELECT ac.item_name AS itemName,ac.amount,act.course_group AS typeName,ac.logo_path AS logoPath,
+				aco.id,aco.province,aco.city,aco.district,aco.address,aco.register_date AS registerDate,
+				ac.is_public as isPublic,acte.user_name AS teacherName,acte.teacher_id AS teacherId, 
+				(SELECT tel FROM app_course_contact WHERE course_id=aco.id LIMIT 1) AS phone
+				FROM app_course_offline AS aco 
+				INNER JOIN app_course AS ac ON aco.id = ac.id and ac.record_type = 1 AND ac.state = 1
+				INNER JOIN app_course_type AS act ON aco.course_type_id = act.id and act.course_tag = '线下课程' 
+				INNER JOIN app_course_type_tag as actt on act.id = actt.course_type_id 
+				INNER JOIN sys_user as su on actt.tag_identity = su.position and su.id = #{uid}
+			</when>
+			<otherwise>
+				SELECT distinct ac.item_name AS itemName,ac.amount,act.course_group AS typeName,ac.logo_path AS logoPath,
+				aco.id,aco.province,aco.city,aco.district,aco.address,aco.register_date AS registerDate,
+				ac.is_public as isPublic,acte.user_name AS teacherName,acte.teacher_id AS teacherId, 
+				(SELECT tel FROM app_course_contact WHERE course_id=aco.id LIMIT 1) AS phone 
+				FROM app_course_offline AS aco 
+				INNER JOIN app_course AS ac ON aco.id = ac.id and ac.record_type = 1 AND ac.state = 1
+				INNER JOIN app_course_type AS act ON aco.course_type_id = act.id and act.course_tag = '线下课程' 
+				INNER JOIN app_course_type_tag as actt on act.id = actt.course_type_id and (actt.tag_identity = '其他' or actt.tag_identity = '动能集团学员')
+			</otherwise>
+		</choose>
+		LEFT JOIN app_course_teacher acte ON aco.id = acte.course_id
+		<where> 
+			ac.is_financial = 0 
+			<if test="name != null and name != ''">
+				and (ac.item_name like '%${name}%' or acte.user_name like '%${name}%')
+			</if>
+			<if test="courseGroup != null and courseGroup != ''">
+				and act.course_group = #{courseGroup}
+			</if>
+			<if test="isPublic != null">
+				and ac.is_public = #{isPublic}
+			</if>
+		</where>
+		order by ac.sort desc limit #{page},#{rows}
+    </select>
+    
+    <!-- 首页推荐课程  zoneyu 16-10-10 -->
+    <select id="findHomeData" resultType="java.util.Map">
+    	SELECT DISTINCT aco.id,aco.province,aco.city,aco.district,aco.address,aco.register_date AS registerDate,
+		ac.item_name AS itemName,ac.amount,ac.logo_path AS logoPath,
+		act.course_group AS typeName,
+		acte.user_name AS teacherName,acte.teacher_id AS teacherId,
+		(SELECT tel FROM app_course_contact WHERE course_id=aco.id LIMIT 1) AS phone
+		FROM app_course_offline AS aco 
+		INNER JOIN app_course AS ac ON aco.id = ac.id AND ac.state != 0 
+		INNER JOIN app_course_type AS act ON aco.course_type_id = act.id 
+		LEFT JOIN app_course_teacher acte ON aco.id = acte.course_id 
+		WHERE aco.is_recommend = 1 ORDER BY aco.id DESC LIMIT 0,3
+    </select>
+    
+    <!-- 获取全部课程标题 -->
+    <select id="searchCourseList" resultType="java.util.Map">
+    	SELECT c.id,c.item_name
+    	 AS `text` FROM app_course c WHERE c.record_type=#{recordType} AND c.state != 0 
+    </select>
+    
+    <sql id="Base_Column_List" >
+        <!--  自动生成 2016年12月22日 表字段名称 -->
+        id, item_name, logo_path, amount, is_public, record_type, is_financial, is_offline, 
+        sort, state, create_time
+    </sql>
+    
+    <sql id="findByPageSql" >
+        <!-- WARNING -  自动生成 2016-12-22  分页查询SQL -->
+        select a.* from app_course a
+        <where >
+            <if test="param.id != null " >
+                and a.id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.itemName != null and param.itemName != ''" >
+                and a.item_name = #{param.itemName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.logoPath != null and param.logoPath != ''" >
+                and a.logo_path = #{param.logoPath,jdbcType=VARCHAR}
+            </if>
+            <if test="param.amount != null " >
+                and a.amount = #{param.amount,jdbcType=DECIMAL}
+            </if>
+            <if test="param.isPublic != null " >
+                and a.is_public = #{param.isPublic,jdbcType=INTEGER}
+            </if>
+            <if test="param.recordType != null " >
+                and a.record_type = #{param.recordType,jdbcType=INTEGER}
+            </if>
+            <if test="param.isFinancial != null " >
+                and a.is_financial = #{param.isFinancial,jdbcType=INTEGER}
+            </if>
+            <if test="param.isOffline != null " >
+                and a.is_offline = #{param.isOffline,jdbcType=INTEGER}
+            </if>
+            <if test="param.sort != null " >
+                and a.sort = #{param.sort,jdbcType=INTEGER}
+            </if>
+            <if test="param.state != null " >
+                and a.state = #{param.state,jdbcType=INTEGER}
+            </if>
+        </where>
+        order by a.id desc
+    </sql>
+    
+    <select id="findByPage" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-22  分页查询 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit #{offset}, #{pageSize}
+    </select>
+    
+    <select id="findByPageCount" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-12-22  分页查询总条数 -->
+        select count(1) from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findById" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年12月22日 根据ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_course
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    
+    <select id="load" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-22  根据多个ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_course where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </select>
+    
+    <select id="all" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-22  查询所有 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_course
+    </select>
+    
+    <select id="count" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-12-22 查询总条数 -->
+        select count(1) from app_course
+    </select>
+    
+    <update id="update" parameterType="com.kapphk.web.bean.course.BeanCourse" >
+        <!--  自动生成 2016年12月22日 更新数据 -->
+        update app_course
+        <set >
+            <if test="itemName != null" >
+                item_name = #{itemName,jdbcType=VARCHAR},
+            </if>
+            <if test="logoPath != null" >
+                logo_path = #{logoPath,jdbcType=VARCHAR},
+            </if>
+            <if test="amount != null" >
+                amount = #{amount,jdbcType=DECIMAL},
+            </if>
+            <if test="isPublic != null" >
+                is_public = #{isPublic,jdbcType=INTEGER},
+            </if>
+            <if test="recordType != null" >
+                record_type = #{recordType,jdbcType=INTEGER},
+            </if>
+            <if test="isFinancial != null" >
+                is_financial = #{isFinancial,jdbcType=INTEGER},
+            </if>
+            <if test="isOffline != null" >
+                is_offline = #{isOffline,jdbcType=INTEGER},
+            </if>
+            <if test="sort != null" >
+                sort = #{sort,jdbcType=INTEGER},
+            </if>
+            <if test="state != null" >
+                state = #{state,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null" >
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    
+    <insert id="insert" parameterType="com.kapphk.web.bean.course.BeanCourse" useGeneratedKeys="true" keyProperty="id" >
+        <!--  自动生成 2016年12月22日 添加数据 -->
+        insert into app_course
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="itemName != null" >
+                item_name,
+            </if>
+            <if test="logoPath != null" >
+                logo_path,
+            </if>
+            <if test="amount != null" >
+                amount,
+            </if>
+            <if test="isPublic != null" >
+                is_public,
+            </if>
+            <if test="recordType != null" >
+                record_type,
+            </if>
+            <if test="isFinancial != null" >
+                is_financial,
+            </if>
+            <if test="isOffline != null" >
+                is_offline,
+            </if>
+            <if test="sort != null" >
+                sort,
+            </if>
+            <if test="state != null" >
+                state,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="itemName != null" >
+                #{itemName,jdbcType=VARCHAR},
+            </if>
+            <if test="logoPath != null" >
+                #{logoPath,jdbcType=VARCHAR},
+            </if>
+            <if test="amount != null" >
+                #{amount,jdbcType=DECIMAL},
+            </if>
+            <if test="isPublic != null" >
+                #{isPublic,jdbcType=INTEGER},
+            </if>
+            <if test="recordType != null" >
+                #{recordType,jdbcType=INTEGER},
+            </if>
+            <if test="isFinancial != null" >
+                #{isFinancial,jdbcType=INTEGER},
+            </if>
+            <if test="isOffline != null" >
+                #{isOffline,jdbcType=INTEGER},
+            </if>
+            <if test="sort != null" >
+                #{sort,jdbcType=INTEGER},
+            </if>
+            <if test="state != null" >
+                #{state,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    
+    <insert id="inserts" parameterType="java.util.List" >
+        <!-- WARNING -  自动生成 2016-12-22 添加多条数据 -->
+        insert into app_course (item_name, logo_path, amount, is_public, record_type, is_financial, is_offline, sort, state, create_time)
+        values
+        <foreach collection="list" item="item" separator="," >
+            (#{item.itemName,jdbcType=VARCHAR}, #{item.logoPath,jdbcType=VARCHAR}, #{item.amount,jdbcType=DECIMAL}, #{item.isPublic,jdbcType=INTEGER}, #{item.recordType,jdbcType=INTEGER}, #{item.isFinancial,jdbcType=INTEGER}, #{item.isOffline,jdbcType=INTEGER}, #{item.sort,jdbcType=INTEGER}, #{item.state,jdbcType=INTEGER}, #{item.createTime,jdbcType=TIMESTAMP})
+        </foreach>
+    </insert>
+    
+    <delete id="delete" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年12月22日 删除数据 -->
+        delete from app_course
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    
+    <delete id="deletes" >
+        <!-- WARNING -  自动生成 2016-12-22 删除多条数据 -->
+        delete from app_course where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteByEntity" >
+        <!-- WARNING -  自动生成 2016-12-22 通过实体类中的条件删除数据 -->
+        delete from app_course
+        <where >
+            <if test="param.id != null " >
+                and id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.itemName != null and param.itemName != ''" >
+                and item_name = #{param.itemName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.logoPath != null and param.logoPath != ''" >
+                and logo_path = #{param.logoPath,jdbcType=VARCHAR}
+            </if>
+            <if test="param.amount != null " >
+                and amount = #{param.amount,jdbcType=DECIMAL}
+            </if>
+            <if test="param.isPublic != null " >
+                and is_public = #{param.isPublic,jdbcType=INTEGER}
+            </if>
+            <if test="param.recordType != null " >
+                and record_type = #{param.recordType,jdbcType=INTEGER}
+            </if>
+            <if test="param.isFinancial != null " >
+                and is_financial = #{param.isFinancial,jdbcType=INTEGER}
+            </if>
+            <if test="param.isOffline != null " >
+                and is_offline = #{param.isOffline,jdbcType=INTEGER}
+            </if>
+            <if test="param.sort != null " >
+                and sort = #{param.sort,jdbcType=INTEGER}
+            </if>
+            <if test="param.state != null " >
+                and state = #{param.state,jdbcType=INTEGER}
+            </if>
+        </where>
+    </delete>
+    
+    <select id="findAll" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-22  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findEntityByCondition" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-22  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit 0,1
+    </select>
+</mapper>

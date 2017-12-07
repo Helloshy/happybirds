@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kapphk.web.dao.mapper.teacher.BeanTeacherArrangeMapper" >
+    <resultMap id="BaseResultMap" type="com.kapphk.web.bean.teacher.BeanTeacherArrange" >
+        <!--  自动生成 2016年10月11日 表与实体类字段对应 -->
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="teacher_id" property="teacherId" jdbcType="BIGINT" />
+        <result column="arrange_date" property="arrangeDate" jdbcType="DATE" />
+        <result column="state" property="state" jdbcType="INTEGER" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+        <result column="end_date" property="endDate" jdbcType="DATE" />
+    </resultMap>
+    
+    <sql id="Base_Column_List" >
+        <!--  自动生成 2016年10月11日 表字段名称 -->
+        id, teacher_id, arrange_date, state, create_time,end_date
+    </sql>
+    
+    <sql id="findByPageSql" >
+        <!-- WARNING -  自动生成 2016-10-11  分页查询SQL -->
+        select a.* from app_teacher_arrange a
+        <where >
+            <if test="param.id != null " >
+                and a.id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.teacherId != null " >
+                and a.teacher_id = #{param.teacherId,jdbcType=BIGINT}
+            </if>
+            <if test="param.arrangeDate != null " >
+                and a.arrange_date = #{param.arrangeDate,jdbcType=DATE}
+            </if>
+            <if test="param.state != null " >
+                and a.state = #{param.state,jdbcType=INTEGER}
+            </if>
+            <if test="param.endDate != null " >
+                and a.end_date = #{param.endDate,jdbcType=DATE}
+            </if>
+        </where>
+        order by a.id desc
+    </sql>
+    
+    <select id="findByPage" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-11  分页查询 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit #{offset}, #{pageSize}
+    </select>
+    
+    <select id="findByPageCount" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-10-11  分页查询总条数 -->
+        select count(1) from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findById" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年10月11日 根据ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_teacher_arrange
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    
+    <select id="load" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-11  根据多个ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_teacher_arrange where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </select>
+    
+    <select id="all" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-11  查询所有 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_teacher_arrange
+    </select>
+    
+    <select id="count" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-10-11 查询总条数 -->
+        select count(1) from app_teacher_arrange
+    </select>
+    
+    <update id="update" parameterType="com.kapphk.web.bean.teacher.BeanTeacherArrange" >
+        <!--  自动生成 2016年10月11日 更新数据 -->
+        update app_teacher_arrange
+        <set >
+            <if test="teacherId != null" >
+                teacher_id = #{teacherId,jdbcType=BIGINT},
+            </if>
+            <if test="arrangeDate != null" >
+                arrange_date = #{arrangeDate,jdbcType=DATE},
+            </if>
+            <if test="state != null" >
+                state = #{state,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null" >
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="endDate != null" >
+                end_date = #{endDate,jdbcType=DATE},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    
+    <insert id="insert" parameterType="com.kapphk.web.bean.teacher.BeanTeacherArrange" useGeneratedKeys="true" keyProperty="id" >
+        <!--  自动生成 2016年10月11日 添加数据 -->
+        insert into app_teacher_arrange
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="teacherId != null" >
+                teacher_id,
+            </if>
+            <if test="arrangeDate != null" >
+                arrange_date,
+            </if>
+            <if test="state != null" >
+                state,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+            <if test="endDate != null" >
+                end_date,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="teacherId != null" >
+                #{teacherId,jdbcType=BIGINT},
+            </if>
+            <if test="arrangeDate != null" >
+                #{arrangeDate,jdbcType=DATE},
+            </if>
+            <if test="state != null" >
+                #{state,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="endDate != null" >
+                #{endDate,jdbcType=DATE},
+            </if>
+        </trim>
+    </insert>
+    
+    <insert id="inserts" parameterType="java.util.List" >
+        <!-- WARNING -  自动生成 2016-10-11 添加多条数据 -->
+        insert into app_teacher_arrange (end_date,teacher_id, arrange_date, state, create_time)
+        values
+        <foreach collection="list" item="item" separator="," >
+            (#{item.endDate,jdbcType=DATE}, #{item.teacherId,jdbcType=BIGINT}, #{item.arrangeDate,jdbcType=DATE}, #{item.state,jdbcType=INTEGER}, #{item.createTime,jdbcType=TIMESTAMP})
+        </foreach>
+    </insert>
+    
+    <delete id="delete" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年10月11日 删除数据 -->
+        delete from app_teacher_arrange
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    
+    <delete id="deletes" >
+        <!-- WARNING -  自动生成 2016-10-11 删除多条数据 -->
+        delete from app_teacher_arrange where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteByEntity" >
+        <!-- WARNING -  自动生成 2016-10-11 通过实体类中的条件删除数据 -->
+        delete from app_teacher_arrange
+        <where >
+            <if test="param.id != null " >
+                and id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.teacherId != null " >
+                and teacher_id = #{param.teacherId,jdbcType=BIGINT}
+            </if>
+            <if test="param.arrangeDate != null " >
+                and arrange_date = #{param.arrangeDate,jdbcType=DATE}
+            </if>
+            <if test="param.state != null " >
+                and state = #{param.state,jdbcType=INTEGER}
+            </if>
+            <if test="param.endDate != null " >
+                and end_date = #{param.endDate,jdbcType=DATE}
+            </if>
+        </where>
+    </delete>
+    
+    <select id="findAll" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-11  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+</mapper>

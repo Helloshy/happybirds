@@ -20,7 +20,10 @@ import org.happybirds.oa.core.common.web.PageModel;
  */
 public interface IdentityService {
 	int CODE_LEN = 4;
-
+	/**
+	 * 注意事务的传播特性，当进行一组操作事，操作单元中的一个操作具有事务性，则会传播到整个操作单元
+	 * 
+	 */
 	List<Job> getJobs();
 	
 	/**

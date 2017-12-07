@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kapphk.web.dao.mapper.course.BeanCourseContactMapper" >
+    <resultMap id="BaseResultMap" type="com.kapphk.web.bean.course.BeanCourseContact" >
+        <!--  自动生成 2016年09月26日 表与实体类字段对应 -->
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="uid" property="uid" jdbcType="BIGINT" />
+        <result column="course_id" property="courseId" jdbcType="BIGINT" />
+        <result column="logo_path" property="logoPath" jdbcType="VARCHAR" />
+        <result column="user_name" property="userName" jdbcType="VARCHAR" />
+        <result column="tel" property="tel" jdbcType="VARCHAR" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+    
+    <!-- 查询教务人员列表 -->
+    <select id="findContactList" resultType="java.util.Map">
+    	SELECT u.id,u.real_name AS `text` FROM sys_user u WHERE u.id IN (SELECT uid FROM user_identity WHERE tag_type='员工岗位' AND tag_identity='教务人员')
+    </select>
+    
+    <!-- 查询报名联系人列表 -->
+    <select id="findList" resultType="java.util.Map">
+    	SELECT cc.id,cc.logo_path AS logoPath,cc.user_name AS userName,CAST(cc.create_time AS CHAR) AS createTime,
+		cc.tel,c.item_name AS itemName,act.item_name AS courseTypeId
+		FROM app_course_contact cc
+		INNER JOIN app_course c ON cc.course_id=c.id
+		LEFT JOIN app_course_offline co ON co.id=c.id
+		LEFT JOIN app_course_type act ON act.id=co.course_type_id
+		WHERE cc.course_id=#{param.courseId} ORDER BY cc.create_time LIMIT #{page},#{rows}
+    </select>
+    
+    <!-- 查询报名联系人总数 -->
+    <select id="findCount" resultType="java.lang.Integer">
+    	SELECT COUNT(1) FROM app_course_contact cc WHERE cc.course_id=#{param.courseId}
+    </select>
+    
+    <sql id="Base_Column_List" >
+        <!--  自动生成 2016年09月26日 表字段名称 -->
+        id, course_id,uid, logo_path, user_name, tel
+    </sql>
+    
+    <sql id="findByPageSql" >
+        <!-- WARNING -  自动生成 2016-09-26  分页查询SQL -->
+        select a.* from app_course_contact a
+        <where >
+            <if test="param.id != null " >
+                and a.id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.courseId != null " >
+                and a.course_id = #{param.courseId,jdbcType=BIGINT}
+            </if>
+            <if test="param.uid != null " >
+                and a.uid = #{param.uid,jdbcType=BIGINT}
+            </if>
+            <if test="param.logoPath != null and param.logoPath != ''" >
+                and a.logo_path = #{param.logoPath,jdbcType=VARCHAR}
+            </if>
+            <if test="param.userName != null and param.userName != ''" >
+                and a.user_name = #{param.userName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.tel != null and param.tel != ''" >
+                and a.tel = #{param.tel,jdbcType=VARCHAR}
+            </if>
+        </where>
+        order by a.id desc
+    </sql>
+    
+    <select id="findByPage" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-09-26  分页查询 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit #{offset}, #{pageSize}
+    </select>
+    
+    <select id="findByPageCount" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-09-26  分页查询总条数 -->
+        select count(1) from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findById" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年09月26日 根据ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_course_contact
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    
+    <select id="load" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-09-26  根据多个ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_course_contact where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </select>
+    
+    <select id="all" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-09-26  查询所有 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_course_contact
+    </select>
+    
+    <select id="count" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-09-26 查询总条数 -->
+        select count(1) from app_course_contact
+    </select>
+    
+    <update id="update" parameterType="com.kapphk.web.bean.course.BeanCourseContact" >
+        <!--  自动生成 2016年09月26日 更新数据 -->
+        update app_course_contact
+        <set >
+            <if test="uid != null" >
+                uid = #{uid,jdbcType=BIGINT},
+            </if>
+            <if test="courseId != null" >
+                course_id = #{courseId,jdbcType=BIGINT},
+            </if>
+            <if test="logoPath != null" >
+                logo_path = #{logoPath,jdbcType=VARCHAR},
+            </if>
+            <if test="userName != null" >
+                user_name = #{userName,jdbcType=VARCHAR},
+            </if>
+            <if test="tel != null" >
+                tel = #{tel,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null" >
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    
+    <insert id="insert" parameterType="com.kapphk.web.bean.course.BeanCourseContact" useGeneratedKeys="true" keyProperty="id" >
+        <!--  自动生成 2016年09月26日 添加数据 -->
+        insert into app_course_contact
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="uid != null" >
+                uid,
+            </if>
+            <if test="courseId != null">
+            	course_id,
+            </if>
+            <if test="logoPath != null" >
+                logo_path,
+            </if>
+            <if test="userName != null" >
+                user_name,
+            </if>
+            <if test="tel != null" >
+                tel,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+        	<if test="uid != null" >
+                #{uid,jdbcType=BIGINT},
+            </if>
+            <if test="courseId != null" >
+                #{courseId,jdbcType=BIGINT},
+            </if>
+            <if test="logoPath != null" >
+                #{logoPath,jdbcType=VARCHAR},
+            </if>
+            <if test="userName != null" >
+                #{userName,jdbcType=VARCHAR},
+            </if>
+            <if test="tel != null" >
+                #{tel,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    
+    <insert id="inserts" parameterType="java.util.List" >
+        <!-- WARNING -  自动生成 2016-09-26 添加多条数据 -->
+        insert into app_course_contact (course_id, uid, logo_path, user_name, tel,create_time)
+        values
+        <foreach collection="list" item="item" separator="," >
+            (#{item.courseId,jdbcType=BIGINT},#{item.uid,jdbcType=BIGINT}, #{item.logoPath,jdbcType=VARCHAR}, #{item.userName,jdbcType=VARCHAR}, #{item.tel,jdbcType=VARCHAR}, #{item.createTime,jdbcType=TIMESTAMP})
+        </foreach>
+    </insert>
+    
+    <delete id="delete" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年09月26日 删除数据 -->
+        delete from app_course_contact
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    
+    <delete id="deletes" >
+        <!-- WARNING -  自动生成 2016-09-26 删除多条数据 -->
+        delete from app_course_contact where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteByEntity" >
+        <!-- WARNING -  自动生成 2016-09-26 通过实体类中的条件删除数据 -->
+        delete from app_course_contact
+        <where >
+            <if test="param.id != null " >
+                and id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.courseId != null " >
+                and course_id = #{param.courseId,jdbcType=BIGINT}
+            </if>
+            <if test="param.uid != null " >
+                and uid = #{param.uid,jdbcType=BIGINT}
+            </if>
+            <if test="param.logoPath != null and param.logoPath != ''" >
+                and logo_path = #{param.logoPath,jdbcType=VARCHAR}
+            </if>
+            <if test="param.userName != null and param.userName != ''" >
+                and user_name = #{param.userName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.tel != null and param.tel != ''" >
+                and tel = #{param.tel,jdbcType=VARCHAR}
+            </if>
+            <if test="param.createTime != null and param.createTime != ''" >
+                and create_time = #{param.createTime,jdbcType=TIMESTAMP}
+            </if>
+        </where>
+    </delete>
+    
+    <select id="findAll" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-09-26  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+</mapper>

@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kapphk.web.dao.mapper.tag.BeanAppCommissionMapper" >
+    <resultMap id="BaseResultMap" type="com.kapphk.web.bean.tag.BeanAppCommission" >
+        <!--  自动生成 2016年10月28日 表与实体类字段对应 -->
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="tag_id" property="tagId" jdbcType="VARCHAR" />
+        <result column="tag_type" property="tagType" jdbcType="VARCHAR" />
+        <result column="level_one" property="levelOne" jdbcType="DECIMAL" />
+        <result column="level_two" property="levelTwo" jdbcType="DECIMAL" />
+        <result column="level_three" property="levelThree" jdbcType="DECIMAL" />
+        <result column="level_one_upgrade" property="levelOneUpgrade" jdbcType="DECIMAL" />
+        <result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+    
+    <!-- 导出数据 -->
+    <select id="exportExcel" resultType="java.util.Map">
+    	SELECT c.tag_id AS tagId,c.level_one AS levelOne,c.level_two AS levelTwo,c.level_three AS levelThree,
+		c.level_one_upgrade AS levelOneUpgrade,CAST(c.modify_time AS CHAR) AS modifyTime
+		FROM app_commission c
+    </select>
+    
+    <sql id="Base_Column_List" >
+        <!--  自动生成 2016年10月28日 表字段名称 -->
+        id, tag_id, tag_type, level_one, level_two, level_three, level_one_upgrade, modify_time, 
+        create_time
+    </sql>
+    
+    <sql id="findByPageSql" >
+        <!-- WARNING -  自动生成 2016-10-28  分页查询SQL -->
+        select a.* from app_commission a
+        <where >
+            <if test="param.id != null " >
+                and a.id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.tagId != null and param.tagId != ''" >
+                and a.tag_id = #{param.tagId,jdbcType=VARCHAR}
+            </if>
+            <if test="param.tagType != null and param.tagType != ''" >
+                and a.tag_type = #{param.tagType,jdbcType=VARCHAR}
+            </if>
+            <if test="param.levelOne != null " >
+                and a.level_one = #{param.levelOne,jdbcType=DECIMAL}
+            </if>
+            <if test="param.levelTwo != null " >
+                and a.level_two = #{param.levelTwo,jdbcType=DECIMAL}
+            </if>
+            <if test="param.levelThree != null " >
+                and a.level_three = #{param.levelThree,jdbcType=DECIMAL}
+            </if>
+            <if test="param.levelOneUpgrade != null " >
+                and a.level_one_upgrade = #{param.levelOneUpgrade,jdbcType=DECIMAL}
+            </if>
+        </where>
+        order by a.id desc
+    </sql>
+    
+    <select id="findByPage" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-28  分页查询 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit #{offset}, #{pageSize}
+    </select>
+    
+    <select id="findByPageCount" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-10-28  分页查询总条数 -->
+        select count(1) from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findById" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年10月28日 根据ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_commission
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    
+    <select id="load" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-28  根据多个ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_commission where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </select>
+    
+    <select id="all" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-28  查询所有 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_commission
+    </select>
+    
+    <select id="count" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-10-28 查询总条数 -->
+        select count(1) from app_commission
+    </select>
+    
+    <update id="update" parameterType="com.kapphk.web.bean.tag.BeanAppCommission" >
+        <!--  自动生成 2016年10月28日 更新数据 -->
+        update app_commission
+        <set >
+            <if test="tagId != null" >
+                tag_id = #{tagId,jdbcType=VARCHAR},
+            </if>
+            <if test="tagType != null" >
+                tag_type = #{tagType,jdbcType=VARCHAR},
+            </if>
+            <if test="levelOne != null" >
+                level_one = #{levelOne,jdbcType=DECIMAL},
+            </if>
+            <if test="levelTwo != null" >
+                level_two = #{levelTwo,jdbcType=DECIMAL},
+            </if>
+            <if test="levelThree != null" >
+                level_three = #{levelThree,jdbcType=DECIMAL},
+            </if>
+            <if test="levelOneUpgrade != null" >
+                level_one_upgrade = #{levelOneUpgrade,jdbcType=DECIMAL},
+            </if>
+            <if test="modifyTime != null" >
+                modify_time = #{modifyTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="createTime != null" >
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    
+    <insert id="insert" parameterType="com.kapphk.web.bean.tag.BeanAppCommission" useGeneratedKeys="true" keyProperty="id" >
+        <!--  自动生成 2016年10月28日 添加数据 -->
+        insert into app_commission
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="tagId != null" >
+                tag_id,
+            </if>
+            <if test="tagType != null" >
+                tag_type,
+            </if>
+            <if test="levelOne != null" >
+                level_one,
+            </if>
+            <if test="levelTwo != null" >
+                level_two,
+            </if>
+            <if test="levelThree != null" >
+                level_three,
+            </if>
+            <if test="levelOneUpgrade != null" >
+                level_one_upgrade,
+            </if>
+            <if test="modifyTime != null" >
+                modify_time,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="tagId != null" >
+                #{tagId,jdbcType=VARCHAR},
+            </if>
+            <if test="tagType != null" >
+                #{tagType,jdbcType=VARCHAR},
+            </if>
+            <if test="levelOne != null" >
+                #{levelOne,jdbcType=DECIMAL},
+            </if>
+            <if test="levelTwo != null" >
+                #{levelTwo,jdbcType=DECIMAL},
+            </if>
+            <if test="levelThree != null" >
+                #{levelThree,jdbcType=DECIMAL},
+            </if>
+            <if test="levelOneUpgrade != null" >
+                #{levelOneUpgrade,jdbcType=DECIMAL},
+            </if>
+            <if test="modifyTime != null" >
+                #{modifyTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    
+    <insert id="inserts" parameterType="java.util.List" >
+        <!-- WARNING -  自动生成 2016-10-28 添加多条数据 -->
+        insert into app_commission (tag_id, tag_type, level_one, level_two, level_three, level_one_upgrade, modify_time, create_time)
+        values
+        <foreach collection="list" item="item" separator="," >
+            (#{item.tagId,jdbcType=VARCHAR}, #{item.tagType,jdbcType=VARCHAR}, #{item.levelOne,jdbcType=DECIMAL}, #{item.levelTwo,jdbcType=DECIMAL}, #{item.levelThree,jdbcType=DECIMAL}, #{item.levelOneUpgrade,jdbcType=DECIMAL}, #{item.modifyTime,jdbcType=TIMESTAMP}, #{item.createTime,jdbcType=TIMESTAMP})
+        </foreach>
+    </insert>
+    
+    <delete id="delete" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年10月28日 删除数据 -->
+        delete from app_commission
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    
+    <delete id="deletes" >
+        <!-- WARNING -  自动生成 2016-10-28 删除多条数据 -->
+        delete from app_commission where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteByEntity" >
+        <!-- WARNING -  自动生成 2016-10-28 通过实体类中的条件删除数据 -->
+        delete from app_commission
+        <where >
+            <if test="param.id != null " >
+                and id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.tagId != null and param.tagId != ''" >
+                and tag_id = #{param.tagId,jdbcType=VARCHAR}
+            </if>
+            <if test="param.tagType != null and param.tagType != ''" >
+                and tag_type = #{param.tagType,jdbcType=VARCHAR}
+            </if>
+            <if test="param.levelOne != null " >
+                and level_one = #{param.levelOne,jdbcType=DECIMAL}
+            </if>
+            <if test="param.levelTwo != null " >
+                and level_two = #{param.levelTwo,jdbcType=DECIMAL}
+            </if>
+            <if test="param.levelThree != null " >
+                and level_three = #{param.levelThree,jdbcType=DECIMAL}
+            </if>
+            <if test="param.levelOneUpgrade != null " >
+                and level_one_upgrade = #{param.levelOneUpgrade,jdbcType=DECIMAL}
+            </if>
+        </where>
+    </delete>
+    
+    <select id="findAll" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-28  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+</mapper>

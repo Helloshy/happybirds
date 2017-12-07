@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kapphk.web.dao.mapper.course.BeanCourseTagMapper" >
+    <resultMap id="BaseResultMap" type="com.kapphk.web.bean.course.BeanCourseTag" >
+        <!--  自动生成 2016年09月27日 表与实体类字段对应 -->
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="course_id" property="courseId" jdbcType="BIGINT" />
+        <result column="tag_identity" property="tagIdentity" jdbcType="VARCHAR" />
+        <result column="tag_type" property="tagType" jdbcType="VARCHAR" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+    
+    <sql id="Base_Column_List" >
+        <!--  自动生成 2016年09月27日 表字段名称 -->
+        id, course_id, tag_identity, tag_type, create_time
+    </sql>
+    
+    <sql id="findByPageSql" >
+        <!-- WARNING -  自动生成 2016-09-27  分页查询SQL -->
+        select a.* from app_course_tag a
+        <where >
+            <if test="param.id != null " >
+                and a.id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.courseId != null " >
+                and a.course_id = #{param.courseId,jdbcType=BIGINT}
+            </if>
+            <if test="param.tagIdentity != null and param.tagIdentity != ''" >
+                and a.tag_identity = #{param.tagIdentity,jdbcType=VARCHAR}
+            </if>
+            <if test="param.tagType != null and param.tagType != ''" >
+                and a.tag_type = #{param.tagType,jdbcType=VARCHAR}
+            </if>
+        </where>
+        order by a.id desc
+    </sql>
+    
+    <select id="findByPage" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-09-27  分页查询 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit #{offset}, #{pageSize}
+    </select>
+    
+    <select id="findByPageCount" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-09-27  分页查询总条数 -->
+        select count(1) from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findById" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年09月27日 根据ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_course_tag
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    
+    <select id="load" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-09-27  根据多个ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_course_tag where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </select>
+    
+    <select id="all" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-09-27  查询所有 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_course_tag
+    </select>
+    
+    <select id="count" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-09-27 查询总条数 -->
+        select count(1) from app_course_tag
+    </select>
+    
+    <update id="update" parameterType="com.kapphk.web.bean.course.BeanCourseTag" >
+        <!--  自动生成 2016年09月27日 更新数据 -->
+        update app_course_tag
+        <set >
+            <if test="courseId != null" >
+                course_id = #{courseId,jdbcType=BIGINT},
+            </if>
+            <if test="tagIdentity != null" >
+                tag_identity = #{tagIdentity,jdbcType=VARCHAR},
+            </if>
+            <if test="tagType != null" >
+                tag_type = #{tagType,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null" >
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    
+    <insert id="insert" parameterType="com.kapphk.web.bean.course.BeanCourseTag" useGeneratedKeys="true" keyProperty="id" >
+        <!--  自动生成 2016年09月27日 添加数据 -->
+        insert into app_course_tag
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="courseId != null" >
+                course_id,
+            </if>
+            <if test="tagIdentity != null" >
+                tag_identity,
+            </if>
+            <if test="tagType != null" >
+                tag_type,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="courseId != null" >
+                #{courseId,jdbcType=BIGINT},
+            </if>
+            <if test="tagIdentity != null" >
+                #{tagIdentity,jdbcType=VARCHAR},
+            </if>
+            <if test="tagType != null" >
+                #{tagType,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    
+    <insert id="inserts" parameterType="java.util.List" >
+        <!-- WARNING -  自动生成 2016-09-27 添加多条数据 -->
+        insert into app_course_tag (course_id, tag_identity, tag_type, create_time)
+        values
+        <foreach collection="list" item="item" separator="," >
+            (#{item.courseId,jdbcType=BIGINT}, #{item.tagIdentity,jdbcType=VARCHAR}, #{item.tagType,jdbcType=VARCHAR}, #{item.createTime,jdbcType=TIMESTAMP})
+        </foreach>
+    </insert>
+    
+    <delete id="delete" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年09月27日 删除数据 -->
+        delete from app_course_tag
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    
+    <delete id="deletes" >
+        <!-- WARNING -  自动生成 2016-09-27 删除多条数据 -->
+        delete from app_course_tag where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteByEntity" >
+        <!-- WARNING -  自动生成 2016-09-27 通过实体类中的条件删除数据 -->
+        delete from app_course_tag
+        <where >
+            <if test="param.id != null " >
+                and id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.courseId != null " >
+                and course_id = #{param.courseId,jdbcType=BIGINT}
+            </if>
+            <if test="param.tagIdentity != null and param.tagIdentity != ''" >
+                and tag_identity = #{param.tagIdentity,jdbcType=VARCHAR}
+            </if>
+            <if test="param.tagType != null and param.tagType != ''" >
+                and tag_type = #{param.tagType,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </delete>
+    
+    <select id="findAll" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-09-27  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+</mapper>

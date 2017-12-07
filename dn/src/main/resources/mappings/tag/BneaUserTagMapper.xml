@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kapphk.web.dao.mapper.tag.BeanUserTagMapper" >
+    <resultMap id="BaseResultMap" type="com.kapphk.web.bean.tag.BeanUserTag" >
+        <!--  自动生成 2016年09月22日 表与实体类字段对应 -->
+        <id column="id" property="id" jdbcType="VARCHAR" />
+        <id column="tag_type" property="tagType" jdbcType="VARCHAR" />
+        <result column="state" property="state" jdbcType="INTEGER" />
+        <result column="row_seq" property="rowSeq" jdbcType="INTEGER" />
+        <result column="logo_path" property="logoPath" jdbcType="VARCHAR" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+    
+    <!-- APP获取讲师团列表 -->
+    <select id="findTagIdList" resultType="java.lang.String">
+    	SELECT id FROM user_tag WHERE tag_type = #{tagType} ORDER BY create_time DESC 
+    </select>
+    
+    <!-- 标签集合 zoneyu 16-9-30 -->
+  	<select id="getTagList" resultType="java.util.Map">
+  		select id,tag_type as tagType,logo_path as logoPath from user_tag where tag_type = #{tagType} ORDER BY row_seq DESC 
+  	</select>  
+    
+    <!-- 查询标签列表 -->
+    <select id="findTagTypeList" resultType="java.util.Map">
+		SELECT id, id AS `text` FROM user_tag WHERE tag_type=#{param.tagType}
+    </select>
+    
+    <!-- 批量删除 -->
+    <delete id="dele">
+    	delete from user_tag where tag_type = #{param.tagType} and id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </delete>
+    
+    <sql id="Base_Column_List" >
+        <!--  自动生成 2016年09月22日 表字段名称 -->
+        id, tag_type, state, row_seq, logo_path, create_time
+    </sql>
+    
+    <sql id="findByPageSql" >
+        <!-- WARNING -  自动生成 2016-09-22  分页查询SQL -->
+        select a.* from user_tag a
+        <where >
+            <if test="param.id != null and param.id != '' " >
+                and a.id = #{param.id,jdbcType=VARCHAR}
+            </if>
+            <if test="param.tagType != null and param.tagType != ''" >
+                and a.tag_type = #{param.tagType,jdbcType=VARCHAR}
+            </if>
+            <if test="param.state != null" >
+                and a.state = #{param.state,jdbcType=INTEGER}
+            </if>
+            <if test="param.rowSeq != null" >
+                and a.row_seq = #{param.rowSeq,jdbcType=INTEGER}
+            </if>
+            <if test="param.logoPath != null and param.logoPath != ''" >
+                and a.logo_path = #{param.logoPath,jdbcType=VARCHAR}
+            </if>
+        </where>
+        order by a.create_time desc
+    </sql>
+    
+    <select id="findByPage" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-09-22  分页查询 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit #{offset}, #{pageSize}
+    </select>
+    
+    <select id="findByPageCount" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-09-22  分页查询总条数 -->
+        select count(1) from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findById" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年09月22日 根据ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from user_tag
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    
+    <select id="load" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-09-22  根据多个ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from user_tag where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </select>
+    
+    <select id="all" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-09-22  查询所有 -->
+        select 
+        <include refid="Base_Column_List" />
+        from user_identity
+    </select>
+    
+    <select id="count" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-09-22 查询总条数 -->
+        select count(1) from user_identity
+    </select>
+    
+    <update id="update" parameterType="com.kapphk.web.bean.tag.BeanUserTag" >
+        <!--  自动生成 2016年09月22日 更新数据 -->
+        update user_tag
+        <set >
+            <if test="id != null" >
+                id = #{id,jdbcType=VARCHAR},
+            </if>
+            <if test="tagType != null" >
+                tag_type = #{tagType,jdbcType=VARCHAR},
+            </if>
+            <if test="state != null" >
+                state = #{state,jdbcType=INTEGER},
+            </if>
+            <if test="rowSeq != null" >
+                row_seq = #{rowSeq,jdbcType=INTEGER},
+            </if>
+            <if test="logoPath != null" >
+                logo_path = #{logoPath,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null" >
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{oldId,jdbcType=VARCHAR} and tag_type =#{tagType,jdbcType=VARCHAR}
+    </update>
+    
+    <insert id="insert" parameterType="com.kapphk.web.bean.tag.BeanUserTag" useGeneratedKeys="true" keyProperty="id" >
+        <!--  自动生成 2016年09月22日 添加数据 -->
+        insert into user_tag
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                id,
+            </if>
+            <if test="tagType != null" >
+                tag_type,
+            </if>
+            <if test="state != null" >
+                state,
+            </if>
+            <if test="rowSeq != null" >
+                row_seq,
+            </if>
+            <if test="logoPath != null" >
+                logo_path,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                #{id,jdbcType=VARCHAR},
+            </if>
+            <if test="tagType != null" >
+                #{tagType,jdbcType=VARCHAR},
+            </if>
+            <if test="state != null" >
+                #{state,jdbcType=INTEGER},
+            </if>
+            <if test="rowSeq != null" >
+                #{rowSeq,jdbcType=INTEGER},
+            </if>
+            <if test="logoPath != null" >
+                #{logoPath,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    
+    <insert id="inserts" parameterType="java.util.List" >
+        <!-- WARNING -  自动生成 2016-09-22 添加多条数据 -->
+        insert into user_tag (id, tag_type, state, row_seq, logo_path, create_time)
+        values
+        <foreach collection="list" item="item" separator="," >
+            (#{item.id,jdbcType=VARCHAR}, #{item.tagType,jdbcType=VARCHAR}, #{item.state,jdbcType=INTEGER}, #{item.rowSeq,jdbcType=INTEGER}, #{item.logoPath,jdbcType=VARCHAR}, #{item.createTime,jdbcType=TIMESTAMP})
+        </foreach>
+    </insert>
+    
+    <delete id="delete" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年09月22日 删除数据 -->
+        delete from user_tag
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    
+    <delete id="deletes" >
+        <!-- WARNING -  自动生成 2016-09-22 删除多条数据 -->
+        delete from user_tag where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteByEntity" >
+        <!-- WARNING -  自动生成 2016-09-22 通过实体类中的条件删除数据 -->
+        delete from user_tag
+        <where >
+            <if test="id != null" >
+                id = #{id,jdbcType=VARCHAR},
+            </if>
+            <if test="tagType != null" >
+                tag_type = #{tagType,jdbcType=VARCHAR},
+            </if>
+            <if test="state != null" >
+                state = #{state,jdbcType=INTEGER},
+            </if>
+            <if test="rowSeq != null" >
+                row_seq = #{rowSeq,jdbcType=INTEGER},
+            </if>
+            <if test="logoPath != null" >
+                logo_path = #{logoPath,jdbcType=VARCHAR},
+            </if>
+        </where>
+    </delete>
+    
+    <select id="findAll" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-09-22  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+</mapper>

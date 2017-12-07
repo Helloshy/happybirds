@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kapphk.yyt.mapper.CompanyPriceMapper" >
+    <resultMap id="BaseResultMap" type="com.kapphk.yyt.bean.CompanyPrice" >
+        <!--  自动生成 2016年12月06日 表与实体类字段对应 -->
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="company_id" property="companyId" jdbcType="BIGINT" />
+        <result column="record_tag" property="recordTag" jdbcType="VARCHAR" />
+        <result column="record_tag_type" property="recordTagType" jdbcType="VARCHAR" />
+        <result column="price" property="price" jdbcType="DECIMAL" />
+        <result column="price_date" property="priceDate" jdbcType="TIMESTAMP" />
+        <result column="update_by" property="updateBy" jdbcType="BIGINT" />
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+    
+    <sql id="Base_Column_List" >
+        <!--  自动生成 2016年12月06日 表字段名称 -->
+        id, company_id, record_tag, record_tag_type, price, price_date, update_by, update_time, 
+        create_time
+    </sql>
+    
+    <sql id="findByPageSql" >
+        <!-- WARNING -  自动生成 2016-12-06  分页查询SQL -->
+        select a.* from app_company_price a
+        <where >
+            <if test="param.id != null " >
+                and a.id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.companyId != null " >
+                and a.company_id = #{param.companyId,jdbcType=BIGINT}
+            </if>
+            <if test="param.recordTag != null and param.recordTag != ''" >
+                and a.record_tag = #{param.recordTag,jdbcType=VARCHAR}
+            </if>
+            <if test="param.recordTagType != null and param.recordTagType != ''" >
+                and a.record_tag_type = #{param.recordTagType,jdbcType=VARCHAR}
+            </if>
+            <if test="param.price != null " >
+                and a.price = #{param.price,jdbcType=DECIMAL}
+            </if>
+            <if test="param.priceDate != null " >
+                and a.price_date = #{param.priceDate,jdbcType=TIMESTAMP}
+            </if>
+            <if test="param.updateBy != null " >
+                and a.update_by = #{param.updateBy,jdbcType=BIGINT}
+            </if>
+            <if test="param.updateTime != null " >
+                and a.update_time = #{param.updateTime,jdbcType=TIMESTAMP}
+            </if>
+        </where>
+        order by a.id desc
+    </sql>
+    
+    <select id="findByPage" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-06  分页查询 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit #{offset}, #{pageSize}
+    </select>
+    
+    <select id="findByPageCount" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-12-06  分页查询总条数 -->
+        select count(1) from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findById" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年12月06日 根据ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_company_price
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    
+    <select id="load" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-06  根据多个ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_company_price where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </select>
+    
+    <select id="all" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-06  查询所有 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_company_price
+    </select>
+    
+    <select id="count" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-12-06 查询总条数 -->
+        select count(1) from app_company_price
+    </select>
+    
+    <update id="update" parameterType="com.kapphk.yyt.bean.CompanyPrice" >
+        <!--  自动生成 2016年12月06日 更新数据 -->
+        update app_company_price
+        <set >
+            <if test="companyId != null" >
+                company_id = #{companyId,jdbcType=BIGINT},
+            </if>
+            <if test="recordTag != null" >
+                record_tag = #{recordTag,jdbcType=VARCHAR},
+            </if>
+            <if test="recordTagType != null" >
+                record_tag_type = #{recordTagType,jdbcType=VARCHAR},
+            </if>
+            <if test="price != null" >
+                price = #{price,jdbcType=DECIMAL},
+            </if>
+            <if test="priceDate != null" >
+                price_date = #{priceDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateBy != null" >
+                update_by = #{updateBy,jdbcType=BIGINT},
+            </if>
+            <if test="updateTime != null" >
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="createTime != null" >
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    
+    <insert id="insert" parameterType="com.kapphk.yyt.bean.CompanyPrice" useGeneratedKeys="true" keyProperty="id" >
+        <!--  自动生成 2016年12月06日 添加数据 -->
+        insert into app_company_price
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="companyId != null" >
+                company_id,
+            </if>
+            <if test="recordTag != null" >
+                record_tag,
+            </if>
+            <if test="recordTagType != null" >
+                record_tag_type,
+            </if>
+            <if test="price != null" >
+                price,
+            </if>
+            <if test="priceDate != null" >
+                price_date,
+            </if>
+            <if test="updateBy != null" >
+                update_by,
+            </if>
+            <if test="updateTime != null" >
+                update_time,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="companyId != null" >
+                #{companyId,jdbcType=BIGINT},
+            </if>
+            <if test="recordTag != null" >
+                #{recordTag,jdbcType=VARCHAR},
+            </if>
+            <if test="recordTagType != null" >
+                #{recordTagType,jdbcType=VARCHAR},
+            </if>
+            <if test="price != null" >
+                #{price,jdbcType=DECIMAL},
+            </if>
+            <if test="priceDate != null" >
+                #{priceDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateBy != null" >
+                #{updateBy,jdbcType=BIGINT},
+            </if>
+            <if test="updateTime != null" >
+                #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    
+    <insert id="inserts" parameterType="java.util.List" >
+        <!-- WARNING -  自动生成 2016-12-06 添加多条数据 -->
+        insert into app_company_price (company_id, record_tag, record_tag_type, price, price_date, update_by, update_time, create_time)
+        values
+        <foreach collection="list" item="item" separator="," >
+            (#{item.companyId,jdbcType=BIGINT}, #{item.recordTag,jdbcType=VARCHAR}, #{item.recordTagType,jdbcType=VARCHAR}, #{item.price,jdbcType=DECIMAL}, #{item.priceDate,jdbcType=TIMESTAMP}, #{item.updateBy,jdbcType=BIGINT}, #{item.updateTime,jdbcType=TIMESTAMP}, #{item.createTime,jdbcType=TIMESTAMP})
+        </foreach>
+    </insert>
+    
+    <delete id="delete" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年12月06日 删除数据 -->
+        delete from app_company_price
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    
+    <delete id="deletes" >
+        <!-- WARNING -  自动生成 2016-12-06 删除多条数据 -->
+        delete from app_company_price where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteByEntity" >
+        <!-- WARNING -  自动生成 2016-12-06 通过实体类中的条件删除数据 -->
+        delete from app_company_price
+        <where >
+            <if test="param.id != null " >
+                and id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.companyId != null " >
+                and company_id = #{param.companyId,jdbcType=BIGINT}
+            </if>
+            <if test="param.recordTag != null and param.recordTag != ''" >
+                and record_tag = #{param.recordTag,jdbcType=VARCHAR}
+            </if>
+            <if test="param.recordTagType != null and param.recordTagType != ''" >
+                and record_tag_type = #{param.recordTagType,jdbcType=VARCHAR}
+            </if>
+            <if test="param.price != null " >
+                and price = #{param.price,jdbcType=DECIMAL}
+            </if>
+            <if test="param.priceDate != null " >
+                and price_date = #{param.priceDate,jdbcType=TIMESTAMP}
+            </if>
+            <if test="param.updateBy != null " >
+                and update_by = #{param.updateBy,jdbcType=BIGINT}
+            </if>
+            <if test="param.updateTime != null " >
+                and update_time = #{param.updateTime,jdbcType=TIMESTAMP}
+            </if>
+        </where>
+    </delete>
+    
+    <select id="findAll" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-06  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    <select id="findList" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-06  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findListByParam" resultType="java.util.Map" >
+        SELECT cp.*,ap.company_name,su.user_name 
+        FROM app_company_price cp 
+        LEFT JOIN app_company ap ON cp.company_id = ap.id
+		LEFT JOIN sys_system_user su ON cp.update_by = su.id
+		 <where >
+            <if test="param.companyId != null " >
+                and cp.company_id = #{param.companyId,jdbcType=BIGINT}
+            </if>
+           
+        </where>
+    </select>
+
+    <!--查询录入当期表字时最新的价格-->
+    <select id="findLastPrice" resultType="com.kapphk.yyt.bean.CompanyPrice">
+        SELECT
+        cp.`price` as price,
+        cp.`record_tag` AS recordTag,
+        cp.`price_date` AS priceDate
+        FROM app_company_price cp
+        <where>
+            <if test="param.companyId != null">
+                cp.`company_id`=#{param.companyId,jdbcType=BIGINT}
+            </if>
+            <if test="param.recordTag != null and param.recordTag != ''" >
+                and cp.record_tag = #{param.recordTag,jdbcType=VARCHAR}
+            </if>
+           <!-- <if test="param.recordTime != null and param.recordTime != ''" >
+                <![CDATA[ AND cp.id = (SELECT id FROM app_company_price cp2 WHERE cp2.`price_date`<#{param.recordTime,jdbcType=TIMESTAMP} ORDER BY price_date DESC LIMIT 1 ) ]]>
+            </if>-->
+            <if test="param.recordTime != null and param.recordTime != ''" >
+                <![CDATA[ AND cp.`price_date`<#{param.recordTime,jdbcType=TIMESTAMP} ORDER BY cp.price_date DESC LIMIT 1  ]]>
+            </if>
+        </where>
+    </select>
+</mapper>

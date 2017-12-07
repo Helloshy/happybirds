@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kapphk.web.dao.mapper.course.BeanCourseSystemMapper" >
+    <resultMap id="BaseResultMap" type="com.kapphk.web.bean.course.BeanCourseSystem" >
+        <!--  自动生成 2016年10月12日 表与实体类字段对应 -->
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="system_id" property="systemId" jdbcType="BIGINT" />
+        <result column="course_id" property="courseId" jdbcType="BIGINT" />
+        <result column="record_type" property="recordType" jdbcType="INTEGER" />
+        <result column="item_remark" property="itemRemark" jdbcType="VARCHAR" />
+    </resultMap>
+    
+    <!-- 查询网络课程关联的系统课程 -->
+    <select id="findByCourseId" resultType="java.lang.Long">
+    	SELECT system_id FROM app_course_system WHERE course_id IN 
+    	<foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </select>
+    
+    <!-- 查询列表 -->
+    <select id="findList" resultType="java.util.Map">
+    	SELECT c.id,c.amount,c.item_name AS itemName,c.logo_path AS logoPath,CAST(c.create_time AS CHAR) AS createTime,c.sort,
+		(SELECT item_remark FROM app_course_system WHERE system_id=c.id LIMIT 1) AS itemRemark,c.is_financial as isFinancial,
+		(SELECT GROUP_CONCAT(c1.item_name) FROM app_course_system s1 INNER JOIN app_course c1 ON s1.course_id = c1.id WHERE s1.system_id=c.id) AS courses,
+		(SELECT COUNT(1) FROM app_course_system s1 INNER JOIN app_course c1 ON s1.course_id = c1.id WHERE s1.system_id=c.id) AS counts
+		FROM app_course c 
+		<where>
+			c.record_type=3 and c.state != 0
+			<if test="param.itemName != null and param.itemName != ''">
+				and c.item_name like '%${param.itemName}%'
+			</if>
+		</where>
+		ORDER BY c.create_time DESC LIMIT #{page},#{rows}
+    </select>
+    
+    <!-- 查询列表总数 -->
+    <select id="findCount" resultType="java.lang.Integer">
+    	SELECT COUNT(1)
+		FROM app_course c 
+		<where>
+			c.record_type=3 and c.state != 0
+			<if test="param.itemName != null and param.itemName != ''">
+				and c.item_name like '%${param.itemName}%'
+			</if>
+		</where>
+    </select>
+    
+    <!-- 详情 -->
+    <select id="findDetailById" resultType="java.util.Map">
+    	SELECT c.id,c.amount,c.item_name AS itemName,c.logo_path AS logoPath,c.is_financial as isFinancial,
+		(SELECT item_remark FROM app_course_system WHERE system_id=c.id LIMIT 1) AS itemRemark,c.sort,
+		(SELECT CAST(GROUP_CONCAT(s1.course_id) AS CHAR) FROM app_course_system s1 WHERE s1.system_id=c.id AND s1.record_type=1) AS courseOffline,
+		(SELECT CAST(GROUP_CONCAT(s1.course_id) AS CHAR) FROM app_course_system s1 WHERE s1.system_id=c.id AND s1.record_type=2) AS courseOnline
+		FROM app_course c
+		WHERE c.id=#{id}
+    </select>
+    
+    <sql id="Base_Column_List" >
+        <!--  自动生成 2016年10月12日 表字段名称 -->
+        id, system_id, course_id, record_type, item_remark
+    </sql>
+    
+    <sql id="findByPageSql" >
+        <!-- WARNING -  自动生成 2016-10-12  分页查询SQL -->
+        select a.* from app_course_system a
+        <where >
+            <if test="param.id != null " >
+                and a.id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.systemId != null " >
+                and a.system_id = #{param.systemId,jdbcType=BIGINT}
+            </if>
+            <if test="param.courseId != null " >
+                and a.course_id = #{param.courseId,jdbcType=BIGINT}
+            </if>
+            <if test="param.recordType != null " >
+                and a.record_type = #{param.recordType,jdbcType=INTEGER}
+            </if>
+            <if test="param.itemRemark != null and param.itemRemark != ''" >
+                and a.item_remark = #{param.itemRemark,jdbcType=VARCHAR}
+            </if>
+        </where>
+        order by a.id desc
+    </sql>
+    
+    <select id="findByPage" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-12  分页查询 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit #{offset}, #{pageSize}
+    </select>
+    
+    <select id="findByPageCount" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-10-12  分页查询总条数 -->
+        select count(1) from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findById" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年10月12日 根据ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_course_system
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    
+    <select id="load" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-12  根据多个ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_course_system where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </select>
+    
+    <select id="all" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-12  查询所有 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_course_system
+    </select>
+    
+    <select id="count" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-10-12 查询总条数 -->
+        select count(1) from app_course_system
+    </select>
+    
+    <update id="update" parameterType="com.kapphk.web.bean.course.BeanCourseSystem" >
+        <!--  自动生成 2016年10月12日 更新数据 -->
+        update app_course_system
+        <set >
+            <if test="systemId != null" >
+                system_id = #{systemId,jdbcType=BIGINT},
+            </if>
+            <if test="courseId != null" >
+                course_id = #{courseId,jdbcType=BIGINT},
+            </if>
+            <if test="recordType != null" >
+                record_type = #{recordType,jdbcType=INTEGER},
+            </if>
+            <if test="itemRemark != null" >
+                item_remark = #{itemRemark,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    
+    <insert id="insert" parameterType="com.kapphk.web.bean.course.BeanCourseSystem" useGeneratedKeys="true" keyProperty="id" >
+        <!--  自动生成 2016年10月12日 添加数据 -->
+        insert into app_course_system
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="systemId != null" >
+                system_id,
+            </if>
+            <if test="courseId != null" >
+                course_id,
+            </if>
+            <if test="recordType != null" >
+                record_type,
+            </if>
+            <if test="itemRemark != null" >
+                item_remark,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="systemId != null" >
+                #{systemId,jdbcType=BIGINT},
+            </if>
+            <if test="courseId != null" >
+                #{courseId,jdbcType=BIGINT},
+            </if>
+            <if test="recordType != null" >
+                #{recordType,jdbcType=INTEGER},
+            </if>
+            <if test="itemRemark != null" >
+                #{itemRemark,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+    
+    <insert id="inserts" parameterType="java.util.List" >
+        <!-- WARNING -  自动生成 2016-10-12 添加多条数据 -->
+        insert into app_course_system (system_id, course_id, record_type, item_remark)
+        values
+        <foreach collection="list" item="item" separator="," >
+            (#{item.systemId,jdbcType=BIGINT}, #{item.courseId,jdbcType=BIGINT}, #{item.recordType,jdbcType=INTEGER}, #{item.itemRemark,jdbcType=VARCHAR})
+        </foreach>
+    </insert>
+    
+    <delete id="delete" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年10月12日 删除数据 -->
+        delete from app_course_system
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    
+    <delete id="deletes" >
+        <!-- WARNING -  自动生成 2016-10-12 删除多条数据 -->
+        delete from app_course_system where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteByEntity" >
+        <!-- WARNING -  自动生成 2016-10-12 通过实体类中的条件删除数据 -->
+        delete from app_course_system
+        <where >
+            <if test="param.id != null " >
+                and id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.systemId != null " >
+                and system_id = #{param.systemId,jdbcType=BIGINT}
+            </if>
+            <if test="param.courseId != null " >
+                and course_id = #{param.courseId,jdbcType=BIGINT}
+            </if>
+            <if test="param.recordType != null " >
+                and record_type = #{param.recordType,jdbcType=INTEGER}
+            </if>
+            <if test="param.itemRemark != null and param.itemRemark != ''" >
+                and item_remark = #{param.itemRemark,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </delete>
+    
+    <select id="findAll" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-12  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+</mapper>

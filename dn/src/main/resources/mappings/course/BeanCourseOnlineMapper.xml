@@ -1,0 +1,419 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kapphk.web.dao.mapper.course.BeanCourseOnlineMapper" >
+    <resultMap id="BaseResultMap" type="com.kapphk.web.bean.course.BeanCourseOnline" >
+        <!--  自动生成 2016年09月23日 表与实体类字段对应 -->
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="item_remark" property="itemRemark" jdbcType="VARCHAR" />
+        <result column="course_group" property="courseGroup" jdbcType="VARCHAR" />
+        <result column="course_type" property="courseType" jdbcType="INTEGER" />
+        <result column="vedio_link" property="vedioLink" jdbcType="VARCHAR" />
+        <result column="vedio_palys" property="vedioPalys" jdbcType="INTEGER" />
+        <result column="teacher_id" property="teacherId" jdbcType="BIGINT" />
+        <result column="teacher_logo_path" property="teacherLogoPath" jdbcType="VARCHAR" />
+        <result column="teacher_name" property="teacherName" jdbcType="VARCHAR" />
+        <result column="teacher_remark" property="teacherRemark" jdbcType="VARCHAR" />
+        <result column="rate" property="rate" jdbcType="DECIMAL" />
+        <result column="link_type" property="linkType" jdbcType="INTEGER" />
+    </resultMap>
+    
+    <!-- 详情 -->
+    <select id="findDetailById" resultType="java.util.Map">
+    	SELECT co.item_remark AS itemRemark,co.course_content AS courseContent,co.course_group AS courseGroup,
+		co.course_type AS courseType,co.id,co.rate,co.vedio_link AS vedioLink,co.vedio_palys AS vedioPalys,
+		co.teacher_name AS teacherName,c.item_name AS itemName,c.amount,c.is_public AS isPublic,c.is_financial as isFinancial,
+		co.teacher_id AS teacherId,co.teacher_logo_path AS teacherLogoPath,co.teacher_remark AS teacherRemark,c.sort,
+		(SELECT GROUP_CONCAT(ct.tag_identity) FROM app_course_tag ct WHERE ct.course_id=c.id) AS ct,
+		c.logo_path as logoPath,co.link_type as linkType
+		FROM app_course_online co
+		INNER JOIN app_course c ON c.id=co.id
+		where c.record_type=2 and co.id=#{id}
+    </select>
+    
+    <!-- 查询网络课程列表 -->
+    <select id="findList" resultType="java.util.Map">
+    	SELECT co.item_remark AS itemRemark,co.course_content AS courseContent,co.course_group AS courseGroup,c.is_financial as isFinancial,
+		co.course_type AS courseType,co.id,co.rate,co.vedio_link AS vedioLink,co.vedio_palys AS vedioPalys,c.logo_path as logoPath,
+		co.teacher_name AS teacherName,c.item_name AS itemName,c.amount,CAST(c.create_time as CHAR) as createTime,c.sort,
+		(SELECT GROUP_CONCAT(ct.tag_identity) FROM app_course_tag ct WHERE ct.course_id=c.id) AS ct,co.link_type as linkType
+		FROM app_course_online co
+		INNER JOIN app_course c ON c.id=co.id
+		<where>
+			c.record_type=2 and c.state != 0
+			<if test="itemName != null and itemName != ''">
+				and c.item_name like '%${itemName}%'
+			</if>
+			<if test="amount != null and amount != ''">
+				and c.amount &gt;= #{amount}
+			</if>
+			<if test="courseGroup != null and courseGroup != ''">
+				and co.course_group = #{courseGroup}
+			</if>
+			<if test="teacherName != null and teacherName != ''">
+				and co.teacher_name like '%${teacherName}%'
+			</if>
+			<if test="teacherId != null">
+				and co.teacher_id = #{teacherId}
+			</if>
+		</where>
+		ORDER BY c.create_time DESC LIMIT #{page},#{rows}
+    </select>
+    
+    <!-- 查询网络课程总数 -->
+    <select id="findCount" resultType="java.lang.Integer">
+    	SELECT COUNT(1)
+		FROM app_course_online co
+		INNER JOIN app_course c ON c.id=co.id
+		<where>
+			c.record_type=2 and c.state != 0
+			<if test="itemName != null and itemName != ''">
+				and c.item_name like '%${itemName}%'
+			</if>
+			<if test="amount != null and amount != ''">
+				and c.amount &gt;= #{amount}
+			</if>
+			<if test="courseGroup != null and courseGroup != ''">
+				and co.course_group = #{courseGroup}
+			</if>
+			<if test="teacherName != null and teacherName != ''">
+				and co.teacher_name like '%${teacherName}%'
+			</if>
+			<if test="teacherId != null">
+				and co.teacher_id = #{teacherId}
+			</if>
+		</where>
+    </select>
+    
+    <resultMap id="ResultMapWithBLOBs" type="com.kapphk.web.bean.course.BeanCourseOnline" extends="BaseResultMap" >
+        <!--  自动生成 2016年09月23日 表与实体类字段对应 -->
+        <result column="course_content" property="courseContent" jdbcType="LONGVARCHAR" />
+    </resultMap>
+    
+    <sql id="Base_Column_List" >
+        <!--  自动生成 2016年09月23日 表字段名称 -->
+        id, item_remark, course_group, course_type, vedio_link, vedio_palys, teacher_id, 
+        teacher_logo_path, teacher_name, teacher_remark, rate, link_type
+    </sql>
+    
+    <sql id="Blob_Column_List" >
+        <!--  自动生成 2016年09月23日 表字段名称 -->
+        course_content
+    </sql>
+    
+    <sql id="findByPageSql" >
+        <!-- WARNING -  自动生成 2016-09-23  分页查询SQL -->
+        select a.* from app_course_online a
+        <where >
+            <if test="param.id != null " >
+                and a.id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.itemRemark != null and param.itemRemark != ''" >
+                and a.item_remark = #{param.itemRemark,jdbcType=VARCHAR}
+            </if>
+            <if test="param.courseGroup != null and param.courseGroup != ''" >
+                and a.course_group = #{param.courseGroup,jdbcType=VARCHAR}
+            </if>
+            <if test="param.courseType != null " >
+                and a.course_type = #{param.courseType,jdbcType=INTEGER}
+            </if>
+            <if test="param.vedioLink != null and param.vedioLink != ''" >
+                and a.vedio_link = #{param.vedioLink,jdbcType=VARCHAR}
+            </if>
+            <if test="param.vedioPalys != null " >
+                and a.vedio_palys = #{param.vedioPalys,jdbcType=INTEGER}
+            </if>
+            <if test="param.teacherId != null " >
+                and a.teacher_id = #{param.teacherId,jdbcType=BIGINT}
+            </if>
+            <if test="param.teacherLogoPath != null and param.teacherLogoPath != ''" >
+                and a.teacher_logo_path = #{param.teacherLogoPath,jdbcType=VARCHAR}
+            </if>
+            <if test="param.teacherName != null and param.teacherName != ''" >
+                and a.teacher_name = #{param.teacherName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.teacherRemark != null and param.teacherRemark != ''" >
+                and a.teacher_remark = #{param.teacherRemark,jdbcType=VARCHAR}
+            </if>
+            <if test="param.rate != null " >
+                and a.rate = #{param.rate,jdbcType=DECIMAL}
+            </if>
+            <if test="param.courseContent != null " >
+                and a.course_content = #{param.courseContent,jdbcType=LONGVARCHAR}
+            </if>
+             <if test="param.linkType != null " >
+                and a.link_type = #{param.linkType,jdbcType=INTEGER}
+            </if>
+        </where>
+        order by a.id desc
+    </sql>
+    
+    <select id="findByPage" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-09-23  分页查询 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit #{offset}, #{pageSize}
+    </select>
+    
+    <select id="findByPageCount" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-09-23  分页查询总条数 -->
+        select count(1) from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findById" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年09月23日 根据ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        ,
+        <include refid="Blob_Column_List" />
+        from app_course_online
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    
+    <select id="load" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-09-23  根据多个ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_course_online where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </select>
+    
+    <select id="all" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-09-23  查询所有 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_course_online
+    </select>
+    
+    <select id="count" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-09-23 查询总条数 -->
+        select count(1) from app_course_online
+    </select>
+    
+    <update id="update" parameterType="com.kapphk.web.bean.course.BeanCourseOnline" >
+        <!--  自动生成 2016年09月23日 更新数据 -->
+        update app_course_online
+        <set >
+            <if test="itemRemark != null" >
+                item_remark = #{itemRemark,jdbcType=VARCHAR},
+            </if>
+            <if test="courseGroup != null" >
+                course_group = #{courseGroup,jdbcType=VARCHAR},
+            </if>
+            <if test="courseType != null" >
+                course_type = #{courseType,jdbcType=INTEGER},
+            </if>
+            <if test="vedioLink != null" >
+                vedio_link = #{vedioLink,jdbcType=VARCHAR},
+            </if>
+            <if test="vedioPalys != null" >
+                vedio_palys = #{vedioPalys,jdbcType=INTEGER},
+            </if>
+            <if test="teacherId != null" >
+                teacher_id = #{teacherId,jdbcType=BIGINT},
+            </if>
+            <if test="teacherLogoPath != null" >
+                teacher_logo_path = #{teacherLogoPath,jdbcType=VARCHAR},
+            </if>
+            <if test="teacherName != null" >
+                teacher_name = #{teacherName,jdbcType=VARCHAR},
+            </if>
+            <if test="teacherRemark != null" >
+                teacher_remark = #{teacherRemark,jdbcType=VARCHAR},
+            </if>
+            <if test="rate != null" >
+                rate = #{rate,jdbcType=DECIMAL},
+            </if>
+            <if test="courseContent != null" >
+                course_content = #{courseContent,jdbcType=LONGVARCHAR},
+            </if>
+            <if test="linkType != null" >
+                link_type = #{linkType,jdbcType=INTEGER},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    
+    <insert id="insert" parameterType="com.kapphk.web.bean.course.BeanCourseOnline" useGeneratedKeys="true" keyProperty="id" >
+        <!--  自动生成 2016年09月23日 添加数据 -->
+        insert into app_course_online
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+        	<if test="id != null" >
+                id,
+            </if>
+            <if test="itemRemark != null" >
+                item_remark,
+            </if>
+            <if test="courseGroup != null" >
+                course_group,
+            </if>
+            <if test="courseType != null" >
+                course_type,
+            </if>
+            <if test="vedioLink != null" >
+                vedio_link,
+            </if>
+            <if test="vedioPalys != null" >
+                vedio_palys,
+            </if>
+            <if test="teacherId != null" >
+                teacher_id,
+            </if>
+            <if test="teacherLogoPath != null" >
+                teacher_logo_path,
+            </if>
+            <if test="teacherName != null" >
+                teacher_name,
+            </if>
+            <if test="teacherRemark != null" >
+                teacher_remark,
+            </if>
+            <if test="rate != null" >
+                rate,
+            </if>
+            <if test="courseContent != null" >
+                course_content,
+            </if>
+            <if test="linkType != null" >
+                link_type,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+        	<if test="id != null" >
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="itemRemark != null" >
+                #{itemRemark,jdbcType=VARCHAR},
+            </if>
+            <if test="courseGroup != null" >
+                #{courseGroup,jdbcType=VARCHAR},
+            </if>
+            <if test="courseType != null" >
+                #{courseType,jdbcType=INTEGER},
+            </if>
+            <if test="vedioLink != null" >
+                #{vedioLink,jdbcType=VARCHAR},
+            </if>
+            <if test="vedioPalys != null" >
+                #{vedioPalys,jdbcType=INTEGER},
+            </if>
+            <if test="teacherId != null" >
+                #{teacherId,jdbcType=BIGINT},
+            </if>
+            <if test="teacherLogoPath != null" >
+                #{teacherLogoPath,jdbcType=VARCHAR},
+            </if>
+            <if test="teacherName != null" >
+                #{teacherName,jdbcType=VARCHAR},
+            </if>
+            <if test="teacherRemark != null" >
+                #{teacherRemark,jdbcType=VARCHAR},
+            </if>
+            <if test="rate != null" >
+                #{rate,jdbcType=DECIMAL},
+            </if>
+            <if test="courseContent != null" >
+                #{courseContent,jdbcType=LONGVARCHAR},
+            </if>
+            <if test="linkType != null" >
+                #{linkType,jdbcType=INTEGER},
+            </if>
+        </trim>
+    </insert>
+    
+    <delete id="delete" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年09月23日 删除数据 -->
+        delete from app_course_online
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    
+    <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.kapphk.web.bean.course.BeanCourseOnline" >
+        <!--  自动生成 2016年09月23日 更新数据 -->
+        update app_course_online
+        set item_remark = #{itemRemark,jdbcType=VARCHAR},
+            course_group = #{courseGroup,jdbcType=VARCHAR},
+            course_type = #{courseType,jdbcType=INTEGER},
+            vedio_link = #{vedioLink,jdbcType=VARCHAR},
+            vedio_palys = #{vedioPalys,jdbcType=INTEGER},
+            teacher_id = #{teacherId,jdbcType=BIGINT},
+            teacher_logo_path = #{teacherLogoPath,jdbcType=VARCHAR},
+            teacher_name = #{teacherName,jdbcType=VARCHAR},
+            teacher_remark = #{teacherRemark,jdbcType=VARCHAR},
+            rate = #{rate,jdbcType=DECIMAL},
+            course_content = #{courseContent,jdbcType=LONGVARCHAR}
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    
+    <insert id="inserts" parameterType="java.util.List" >
+        <!-- WARNING -  自动生成 2016-09-23 添加多条数据 -->
+        insert into app_course_online (link_type,id,item_remark, course_group, course_type, vedio_link, vedio_palys, teacher_id, teacher_logo_path, teacher_name, teacher_remark, rate, course_content)
+        values
+        <foreach collection="list" item="item" separator="," >
+            (#{item.linkType,jdbcType=INTEGER},#{item.id,jdbcType=BIGINT},#{item.itemRemark,jdbcType=VARCHAR}, #{item.courseGroup,jdbcType=VARCHAR}, #{item.courseType,jdbcType=INTEGER}, #{item.vedioLink,jdbcType=VARCHAR}, #{item.vedioPalys,jdbcType=INTEGER}, #{item.teacherId,jdbcType=BIGINT}, #{item.teacherLogoPath,jdbcType=VARCHAR}, #{item.teacherName,jdbcType=VARCHAR}, #{item.teacherRemark,jdbcType=VARCHAR}, #{item.rate,jdbcType=DECIMAL}, #{item.courseContent,jdbcType=LONGVARCHAR})
+        </foreach>
+    </insert>
+    
+    <delete id="deletes" >
+        <!-- WARNING -  自动生成 2016-09-23 删除多条数据 -->
+        delete from app_course_online where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteByEntity" >
+        <!-- WARNING -  自动生成 2016-09-23 通过实体类中的条件删除数据 -->
+        delete from app_course_online
+        <where >
+            <if test="param.id != null " >
+                and id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.itemRemark != null and param.itemRemark != ''" >
+                and item_remark = #{param.itemRemark,jdbcType=VARCHAR}
+            </if>
+            <if test="param.courseGroup != null and param.courseGroup != ''" >
+                and course_group = #{param.courseGroup,jdbcType=VARCHAR}
+            </if>
+            <if test="param.courseType != null " >
+                and course_type = #{param.courseType,jdbcType=INTEGER}
+            </if>
+            <if test="param.vedioLink != null and param.vedioLink != ''" >
+                and vedio_link = #{param.vedioLink,jdbcType=VARCHAR}
+            </if>
+            <if test="param.vedioPalys != null " >
+                and vedio_palys = #{param.vedioPalys,jdbcType=INTEGER}
+            </if>
+            <if test="param.teacherId != null " >
+                and teacher_id = #{param.teacherId,jdbcType=BIGINT}
+            </if>
+            <if test="param.teacherLogoPath != null and param.teacherLogoPath != ''" >
+                and teacher_logo_path = #{param.teacherLogoPath,jdbcType=VARCHAR}
+            </if>
+            <if test="param.teacherName != null and param.teacherName != ''" >
+                and teacher_name = #{param.teacherName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.teacherRemark != null and param.teacherRemark != ''" >
+                and teacher_remark = #{param.teacherRemark,jdbcType=VARCHAR}
+            </if>
+            <if test="param.rate != null " >
+                and rate = #{param.rate,jdbcType=DECIMAL}
+            </if>
+            <if test="param.courseContent != null " >
+                and course_content = #{param.courseContent,jdbcType=LONGVARCHAR}
+            </if>
+            <if test="param.linkType != null " >
+                and link_type = #{param.linkType,jdbcType=INTEGER}
+            </if>
+        </where>
+    </delete>
+    
+    <select id="findAll" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-09-23  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+</mapper>

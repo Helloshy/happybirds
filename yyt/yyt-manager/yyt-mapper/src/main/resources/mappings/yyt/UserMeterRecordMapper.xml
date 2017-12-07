@@ -1,0 +1,652 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kapphk.yyt.mapper.UserMeterRecordMapper" >
+    <resultMap id="BaseResultMap" type="com.kapphk.yyt.bean.UserMeterRecord" >
+        <!--  自动生成 2016年12月06日 表与实体类字段对应 -->
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="company_id" property="companyId" jdbcType="BIGINT" />
+        <result column="unid" property="unid" jdbcType="BIGINT" />
+        <result column="last_count" property="lastCount" jdbcType="INTEGER" />
+        <result column="current_count" property="currentCount" jdbcType="INTEGER" />
+        <result column="amount" property="amount" jdbcType="DECIMAL" />
+        <result column="price" property="price" jdbcType="DECIMAL" />
+        <result column="balance_amount" property="balanceAmount" jdbcType="DECIMAL" />
+        <result column="sid" property="sid" jdbcType="BIGINT" />
+        <result column="uid" property="uid" jdbcType="BIGINT" />
+        <result column="record_time" property="recordTime" jdbcType="TIMESTAMP" />
+        <result column="remark" property="remark" jdbcType="VARCHAR" />
+        <result column="state" property="state" jdbcType="INTEGER" />
+        <result column="update_by" property="updateBy" jdbcType="BIGINT" />
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+    
+    <sql id="Base_Column_List" >
+        <!--  自动生成 2016年12月06日 表字段名称 -->
+        id, company_id, unid, price,last_count, current_count, amount, balance_amount, sid, uid,
+        record_time, remark, state, update_by, update_time, create_time
+    </sql>
+    
+    <sql id="findByPageSql" >
+        <!-- WARNING -  自动生成 2016-12-06  分页查询SQL -->
+        select a.* from user_meter_record a
+        <where >
+            <if test="param.id != null " >
+                and a.id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.companyId != null " >
+                and a.company_id = #{param.companyId,jdbcType=BIGINT}
+            </if>
+            <if test="param.unid != null " >
+                and a.unid = #{param.unid,jdbcType=BIGINT}
+            </if>
+            <if test="param.lastCount != null " >
+                and a.last_count = #{param.lastCount,jdbcType=INTEGER}
+            </if>
+            <if test="param.currentCount != null " >
+                and a.current_count = #{param.currentCount,jdbcType=INTEGER}
+            </if>
+            <if test="param.amount != null " >
+                and a.amount = #{param.amount,jdbcType=DECIMAL}
+            </if>
+            <if test="param.balanceAmount != null " >
+                and a.balance_amount = #{param.balanceAmount,jdbcType=DECIMAL}
+            </if>
+            <if test="param.sid != null " >
+                and a.sid = #{param.sid,jdbcType=BIGINT}
+            </if>
+            <if test="param.uid != null " >
+                and a.uid = #{param.uid,jdbcType=BIGINT}
+            </if>
+            <if test="param.recordTime != null " >
+                and a.record_time = #{param.recordTime,jdbcType=TIMESTAMP}
+            </if>
+            <if test="param.remark != null and param.remark != ''" >
+                and a.remark = #{param.remark,jdbcType=VARCHAR}
+            </if>
+            <if test="param.state != null " >
+                and a.state = #{param.state,jdbcType=INTEGER}
+            </if>
+            <if test="param.updateBy != null " >
+                and a.update_by = #{param.updateBy,jdbcType=BIGINT}
+            </if>
+            <if test="param.updateTime != null " >
+                and a.update_time = #{param.updateTime,jdbcType=TIMESTAMP}
+            </if>
+        </where>
+        order by a.id desc
+    </sql>
+    
+    <select id="findByPage" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-06  分页查询 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit #{offset}, #{pageSize}
+    </select>
+    
+    <select id="findByPageCount" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-12-06  分页查询总条数 -->
+        select count(1) from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findById" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年12月06日 根据ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from user_meter_record
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    
+    <select id="load" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-06  根据多个ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from user_meter_record where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </select>
+    
+    <select id="all" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-06  查询所有 -->
+        select 
+        <include refid="Base_Column_List" />
+        from user_meter_record
+    </select>
+    
+    <select id="count" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-12-06 查询总条数 -->
+        select count(1) from user_meter_record
+    </select>
+    
+    <update id="update" parameterType="com.kapphk.yyt.bean.UserMeterRecord" >
+        <!--  自动生成 2016年12月06日 更新数据 -->
+        update user_meter_record
+        <set >
+            <if test="companyId != null" >
+                company_id = #{companyId,jdbcType=BIGINT},
+            </if>
+            <if test="unid != null" >
+                unid = #{unid,jdbcType=BIGINT},
+            </if>
+            <if test="lastCount != null" >
+                last_count = #{lastCount,jdbcType=INTEGER},
+            </if>
+            <if test="currentCount != null" >
+                current_count = #{currentCount,jdbcType=INTEGER},
+            </if>
+            <if test="amount != null" >
+                amount = #{amount,jdbcType=DECIMAL},
+            </if>
+            <if test="balanceAmount != null" >
+                balance_amount = #{balanceAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="sid != null" >
+                sid = #{sid,jdbcType=BIGINT},
+            </if>
+            <if test="uid != null" >
+                uid = #{uid,jdbcType=BIGINT},
+            </if>
+            <if test="recordTime != null" >
+                record_time = #{recordTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="remark != null" >
+                remark = #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="state != null" >
+                state = #{state,jdbcType=INTEGER},
+            </if>
+            <if test="updateBy != null" >
+                update_by = #{updateBy,jdbcType=BIGINT},
+            </if>
+            <if test="updateTime != null" >
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="createTime != null" >
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <!--更新用户气表使用记录-->
+    <update id="updateData" parameterType="com.kapphk.yyt.bean.UserMeterRecord">
+      update user_meter_record
+        <set >
+            <if test="currentCount != null" >
+                current_count = #{currentCount,jdbcType=INTEGER},
+            </if>
+            <if test="state != null" >
+                state = #{state,jdbcType=INTEGER},
+            </if>
+            <if test="updateBy != null" >
+                update_by = #{updateBy,jdbcType=BIGINT},
+            </if>
+            <if test="updateTime != null" >
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        <where>
+            id =#{id}
+            <if test="currentCount != null">
+                <![CDATA[ and last_count <= #{currentCount}  ]]>
+            </if>
+        </where>
+    </update>
+
+    <!--调整表字-->
+    <update id="updateMeter" parameterType="com.kapphk.yyt.bean.UserMeterRecord">
+        update user_meter_record
+        <set >
+            <if test="currentCount != null" >
+                current_count = #{currentCount,jdbcType=INTEGER},
+            </if>
+            <if test="amount != null" >
+                amount = #{amount,jdbcType=DECIMAL},
+            </if>
+            <if test="balanceAmount != null" >
+                balance_amount = #{balanceAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="updateBy != null" >
+                update_by = #{updateBy,jdbcType=BIGINT},
+            </if>
+            <if test="updateTime != null" >
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        <where>
+            id =#{id}
+            <if test="currentCount != null">
+                <![CDATA[ and last_count <= #{currentCount}  ]]>
+            </if>
+        </where>
+    </update>
+    <!--批量更新审核状态-->
+    <update id="updateMany">
+      update user_meter_record
+    <set>
+            state = #{state,jdbcType=INTEGER},
+    </set>
+    <where>
+        id in
+    </where>
+    <foreach collection="ids" item="item" open="(" separator="," close=")" >
+        #{item}
+    </foreach>
+    </update>
+
+    <insert id="insert" parameterType="com.kapphk.yyt.bean.UserMeterRecord" useGeneratedKeys="true" keyProperty="id" >
+        <!--  自动生成 2016年12月06日 添加数据 -->
+        insert into user_meter_record
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="companyId != null" >
+                company_id,
+            </if>
+            <if test="unid != null" >
+                unid,
+            </if>
+            <if test="lastCount != null" >
+                last_count,
+            </if>
+            <if test="currentCount != null" >
+                current_count,
+            </if>
+            <if test="price != null" >
+                price,
+            </if>
+            <if test="amount != null" >
+                amount,
+            </if>
+            <if test="balanceAmount != null" >
+                balance_amount,
+            </if>
+            <if test="sid != null" >
+                sid,
+            </if>
+            <if test="uid != null" >
+                uid,
+            </if>
+            <if test="recordTime != null" >
+                record_time,
+            </if>
+            <if test="remark != null" >
+                remark,
+            </if>
+            <if test="state != null" >
+                state,
+            </if>
+            <if test="updateBy != null" >
+                update_by,
+            </if>
+            <if test="updateTime != null" >
+                update_time,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="companyId != null" >
+                #{companyId,jdbcType=BIGINT},
+            </if>
+            <if test="unid != null" >
+                #{unid,jdbcType=BIGINT},
+            </if>
+            <if test="lastCount != null" >
+                #{lastCount,jdbcType=INTEGER},
+            </if>
+            <if test="currentCount != null" >
+                #{currentCount,jdbcType=INTEGER},
+            </if>
+            <if test="price != null" >
+                #{price,jdbcType=DECIMAL},
+            </if>
+            <if test="amount != null" >
+                #{amount,jdbcType=DECIMAL},
+            </if>
+            <if test="balanceAmount != null" >
+                #{balanceAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="sid != null" >
+                #{sid,jdbcType=BIGINT},
+            </if>
+            <if test="uid != null" >
+                #{uid,jdbcType=BIGINT},
+            </if>
+            <if test="recordTime != null" >
+                #{recordTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="remark != null" >
+                #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="state != null" >
+                #{state,jdbcType=INTEGER},
+            </if>
+            <if test="updateBy != null" >
+                #{updateBy,jdbcType=BIGINT},
+            </if>
+            <if test="updateTime != null" >
+                #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    
+    <insert id="inserts" parameterType="java.util.List" >
+        <!-- WARNING -  自动生成 2016-12-06 添加多条数据 -->
+        insert into user_meter_record (company_id, unid, last_count, current_count, amount, balance_amount, sid, uid, record_time, remark, state, update_by, update_time, create_time)
+        values
+        <foreach collection="list" item="item" separator="," >
+            (#{item.companyId,jdbcType=BIGINT}, #{item.unid,jdbcType=BIGINT}, #{item.lastCount,jdbcType=INTEGER}, #{item.currentCount,jdbcType=INTEGER}, #{item.amount,jdbcType=DECIMAL}, #{item.balanceAmount,jdbcType=DECIMAL}, #{item.sid,jdbcType=BIGINT}, #{item.uid,jdbcType=BIGINT}, #{item.recordTime,jdbcType=TIMESTAMP}, #{item.remark,jdbcType=VARCHAR}, #{item.state,jdbcType=INTEGER}, #{item.updateBy,jdbcType=BIGINT}, #{item.updateTime,jdbcType=TIMESTAMP}, #{item.createTime,jdbcType=TIMESTAMP})
+        </foreach>
+    </insert>
+    
+    <delete id="delete" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年12月06日 删除数据 -->
+        delete from user_meter_record
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    
+    <delete id="deletes" >
+        <!-- WARNING -  自动生成 2016-12-06 删除多条数据 -->
+        delete from user_meter_record where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteByEntity" >
+        <!-- WARNING -  自动生成 2016-12-06 通过实体类中的条件删除数据 -->
+        delete from user_meter_record
+        <where >
+            <if test="param.id != null " >
+                and id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.companyId != null " >
+                and company_id = #{param.companyId,jdbcType=BIGINT}
+            </if>
+            <if test="param.unid != null " >
+                and unid = #{param.unid,jdbcType=BIGINT}
+            </if>
+            <if test="param.lastCount != null " >
+                and last_count = #{param.lastCount,jdbcType=INTEGER}
+            </if>
+            <if test="param.currentCount != null " >
+                and current_count = #{param.currentCount,jdbcType=INTEGER}
+            </if>
+            <if test="param.amount != null " >
+                and amount = #{param.amount,jdbcType=DECIMAL}
+            </if>
+            <if test="param.balanceAmount != null " >
+                and balance_amount = #{param.balanceAmount,jdbcType=DECIMAL}
+            </if>
+            <if test="param.sid != null " >
+                and sid = #{param.sid,jdbcType=BIGINT}
+            </if>
+            <if test="param.uid != null " >
+                and uid = #{param.uid,jdbcType=BIGINT}
+            </if>
+            <if test="param.recordTime != null " >
+                and record_time = #{param.recordTime,jdbcType=TIMESTAMP}
+            </if>
+            <if test="param.remark != null and param.remark != ''" >
+                and remark = #{param.remark,jdbcType=VARCHAR}
+            </if>
+            <if test="param.state != null " >
+                and state = #{param.state,jdbcType=INTEGER}
+            </if>
+            <if test="param.updateBy != null " >
+                and update_by = #{param.updateBy,jdbcType=BIGINT}
+            </if>
+            <if test="param.updateTime != null " >
+                and update_time = #{param.updateTime,jdbcType=TIMESTAMP}
+            </if>
+        </where>
+    </delete>
+    
+    <select id="findAll" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-06  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findMeterRecordChart" resultType="java.util.HashMap" >
+      select * from (
+	      select (current_count-last_count) as totalGas
+	      ,create_time,DATE_FORMAT(create_time,'%y/%m') as date
+	       from user_meter_record
+	      <where>
+	      	unid = #{param.unid,jdbcType=BIGINT}
+	   		<if test="param.startTime != null and param.endTime != null" >
+		             and (DATE_FORMAT(create_time,'%Y-%m-%d') 
+		             BETWEEN DATE_FORMAT( #{param.startTime,jdbcType=TIMESTAMP},'%Y-%m-%d')
+					and  DATE_FORMAT(#{param.endTime,jdbcType=TIMESTAMP},'%Y-%m-%d'))
+	          </if>
+	         </where>
+	         order by create_time desc limit #{param.limit,jdbcType=INTEGER}) temp
+         order by temp.create_time asc
+    </select>
+    
+    
+        <select id="findListByParam" resultType="java.util.Map" >
+	     	SELECT
+	     	r.id,
+			r.record_time AS recordTime,
+			r.price AS price,
+			(r.current_count - r.last_count) AS periodCount,
+			r.amount AS periodAmount,
+			0 AS overdueAmount,
+			r.amount AS totalAmount,
+			<![CDATA[
+			(SELECT SUM(r1.current_count - r1.last_count) FROM user_meter_record r1  WHERE r1.record_time<=r.record_time AND r1.unid=r.unid) AS totalGas,
+			(SELECT SUM(r2.amount) FROM user_meter_record r2 WHERE r2.record_time<=r.record_time AND r2.unid=r.unid) AS totalMoney
+			]]>
+			FROM
+			user_meter_record AS r
+			<where>
+				<if test="param.id != null and param.id != ''" >
+	               r.id = #{param.id,jdbcType=BIGINT}
+	           </if>
+				<if test="param.sid != null" >
+	               r.sid = #{param.sid,jdbcType=BIGINT}
+	           </if>
+				<if test="param.unid != null and param.unid != ''" >
+	               r.unid = #{param.unid,jdbcType=BIGINT}
+	           </if>
+			  <if test="param.startTime != null and param.endTime != null" >
+	             and (DATE_FORMAT(r.create_time,'%Y-%m-%d') 
+	             BETWEEN DATE_FORMAT( #{param.startTime,jdbcType=TIMESTAMP},'%Y-%m-%d')
+				AND  DATE_FORMAT(#{param.endTime,jdbcType=TIMESTAMP},'%Y-%m-%d'))
+	          </if>
+        	</where>
+    	</select>
+    <!-- 查询用户抄表记录-->
+    <select id="findMeterRecordsByParam" resultType="java.util.Map">
+
+        SELECT * FROM
+        (SELECT
+        r.`id`  AS meterRecordId,
+        (SELECT c2.company_name FROM app_company c2 WHERE c2.id = n.`company_id`)AS company_name,
+        n.`id` ,
+        n.`record_tag` ,
+        n.`real_name` ,
+        n.`tel` ,
+        CONCAT(n.`province`,n.`city`,n.`district`,cn.`item_name`,n.`unit`) address,
+        n.`meter_type`,
+        n.`meter_no` ,
+        r.`last_count`  ,
+        r.`current_count` ,
+        <![CDATA[
+        (CASE WHEN r.`current_count` - r.`last_count` <=0 THEN 0
+        ELSE r.`current_count` - r.`last_count` END) gasConsum, ]]>
+        r.`amount` ,
+        n.`balance_amount` ,
+        su.`real_name` AS recordName ,
+        r.`record_time` ,
+        r.`state` ,
+        r.update_time ,
+        r.`create_time`,
+        n.company_id,
+        (SELECT su2.`real_name` FROM sys_system_user su2 WHERE su2.id=r.`update_by`) user_name
+        FROM
+        user_number n
+        LEFT JOIN user_meter_record r ON n.`id` = r.`unid`
+        LEFT JOIN sys_system_user su ON r.`sid`=su.`id`
+        LEFT JOIN app_community cn ON n.`community_id` = cn.`id`
+        ORDER BY r.`record_time` DESC ) temp
+        <where>
+            <if test="param.id!=null">
+                and id =#{param.id,jdbcType=BIGINT}
+            </if>
+
+            <if test="param.companyId != null " >
+                and company_id= #{param.companyId,jdbcType=BIGINT}
+            </if>
+            <if test="param.state != null" >
+                and state = #{param.state,jdbcType=TINYINT}
+            </if>
+            <if test="param.queryParam != null and param.queryParam !='' " >
+                and id like CONCAT('%',#{param.queryParam,jdbcType=VARCHAR},'%')
+                or real_name like CONCAT('%',#{param.queryParam,jdbcType=VARCHAR},'%')
+                or  address  like CONCAT('%',#{param.queryParam,jdbcType=VARCHAR},'%')
+            </if>
+        </where>
+        GROUP BY id
+    </select>
+    <!-- 查询用户抄表记录最新版本 -->
+    <select id="findMeterRecordsByQueryParam" resultType="java.util.Map">
+        SELECT
+        temp.*
+        FROM
+        (SELECT
+        (SELECT c2.`company_name` FROM app_company c2 WHERE c2.`id`= n.company_id )AS companyName,
+        n.`id`,
+        n.`company_id`,
+        n.`record_tag`,
+        n.`real_name`,
+        n.`tel`,
+        n.state,
+        (SELECT cn2.sid FROM app_community cn2 WHERE cn2.`id`=n.community_id) AS sid,
+        CONCAT(n.`province`,n.`city`,n.`district`,
+        (SELECT cn2.`item_name` FROM app_community cn2 WHERE cn2.`id`=n.community_id),n.`unit`) AS address,
+        (SELECT su2.`real_name` FROM sys_system_user su2 WHERE su2.`id`= (SELECT cn2.sid FROM app_community cn2 WHERE cn2.`id`= n.community_id))AS recordName,
+        n.`meter_type`,
+        n.`meter_no`,
+        n.`status`,
+        n.`balance_amount`,
+        umr.`id` AS recordId,
+        umr.`amount`,
+        umr.`last_count`,
+        umr.`current_count`,
+        umr.`record_time` AS recordTime,
+        umr.update_time,
+        (SELECT su2.`real_name` FROM sys_system_user su2 WHERE su2.id=umr.`update_by`) user_name,
+        <![CDATA[
+        (CASE WHEN umr.`current_count` - umr.`last_count` <=0 THEN 0
+        ELSE umr.`current_count` - umr.`last_count` END) gasConsum, ]]>
+        <choose>
+            <when test="param.recordTime != null and param.recordTime != ''">
+                <![CDATA[ (SELECT
+                cp.`price`
+                FROM app_company_price cp
+                WHERE n.`company_id` = cp.`company_id` AND n.`record_tag`=cp.`record_tag`
+                AND cp.price_date <=#{param.recordTime}
+                GROUP BY cp.`company_id`,cp.`record_tag`
+                ORDER BY cp.`price_date` DESC )AS price,]]>
+            </when>
+            <otherwise>
+                (SELECT
+                cp.`price`
+                FROM app_company_price cp
+                WHERE n.`company_id` = cp.`company_id`
+                AND n.`record_tag`=cp.`record_tag`
+                GROUP BY cp.`company_id`,cp.`record_tag`
+                ORDER BY cp.`price_date` DESC )AS price
+            </otherwise>
+        </choose>
+        FROM user_number n LEFT JOIN user_meter_record umr ON n.`id`=umr.`unid`
+        ORDER BY recordTime DESC )temp
+        <where>
+            <if test="param.id!=null">
+                and id =#{param.id,jdbcType=BIGINT}
+            </if>
+
+            <if test="param.companyId != null " >
+                and company_id= #{param.companyId,jdbcType=BIGINT}
+            </if>
+            <if test="param.state != null" >
+                and state = #{param.state,jdbcType=TINYINT}
+            </if>
+            <if test="param.queryParam != null and param.queryParam !='' " >
+                and id like CONCAT('%',#{param.queryParam,jdbcType=VARCHAR},'%')
+                or real_name like CONCAT('%',#{param.queryParam,jdbcType=VARCHAR},'%')
+                or  address  like CONCAT('%',#{param.queryParam,jdbcType=VARCHAR},'%')
+            </if>
+        </where>
+        GROUP BY id
+    </select>
+
+
+
+    <!-- 查询用户审核抄表记录-->
+    <select id="findMeterAuditRecordsByParam" resultType="java.util.HashMap">
+
+        SELECT * FROM
+        (SELECT
+        r.`id` as id ,
+        (SELECT c2.company_name FROM app_company c2 WHERE c2.id = n.`company_id`)AS company_name,
+        n.`id` as unid,
+        n.`record_tag` ,
+        n.`real_name` ,
+        n.`tel` ,
+        CONCAT(n.`province`,n.`city`,n.`district`,cn.`item_name`,n.`unit`) address,
+        n.`meter_type`,
+        n.`meter_no` ,
+        r.`last_count`  ,
+        r.`current_count` ,
+        <![CDATA[
+        (CASE WHEN r.`current_count` - r.`last_count` <=0 THEN 0
+        ELSE r.`current_count` - r.`last_count` END) gasConsum, ]]>
+        r.`amount` ,
+        n.`balance_amount` ,
+        su.`real_name` AS recordName ,
+        r.`record_time` ,
+        r.`state` ,
+        r.update_time ,
+        r.`create_time`,
+        n.company_id,
+        (SELECT su2.`real_name` FROM sys_system_user su2 WHERE su2.id=r.`update_by`) user_name
+        FROM
+        user_number n
+        LEFT JOIN user_meter_record r ON n.`id` = r.`unid`
+        LEFT JOIN sys_system_user su ON r.`sid`=su.`id`
+        LEFT JOIN app_community cn ON n.`community_id` = cn.`id`
+        ORDER BY r.`record_time` DESC ) temp
+        <where>
+            <if test="param.id!=null">
+                and id =#{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.unid!=null">
+                and unid =#{param.unid,jdbcType=BIGINT}
+            </if>
+            <if test="param.companyId != null " >
+                and company_id= #{param.companyId,jdbcType=BIGINT}
+            </if>
+            <if test="param.state != null" >
+                and state = #{param.state,jdbcType=TINYINT}
+            </if>
+            <if test="param.queryParam != null and param.queryParam !='' " >
+                and unid like CONCAT('%',#{param.queryParam,jdbcType=VARCHAR},'%')
+                or  real_name like CONCAT('%',#{param.queryParam,jdbcType=VARCHAR},'%')
+                or  address like CONCAT('%',#{param.queryParam,jdbcType=VARCHAR},'%')
+            </if>
+        </where>
+        GROUP BY unid
+    </select>
+
+</mapper>

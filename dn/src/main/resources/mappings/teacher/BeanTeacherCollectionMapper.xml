@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kapphk.web.dao.mapper.teacher.BeanTeacherCollectionMapper" >
+    <resultMap id="BaseResultMap" type="com.kapphk.web.bean.teacher.BeanTeacherCollection" >
+        <!--  自动生成 2016年10月14日 表与实体类字段对应 -->
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="uid" property="uid" jdbcType="BIGINT" />
+        <result column="teacher_id" property="teacherId" jdbcType="BIGINT" />
+        <result column="collection_type" property="collectionType" jdbcType="INTEGER" />
+        <result column="data_type" property="dataType" jdbcType="INTEGER" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+    
+    <!-- APP-获取陪伴师收藏列表 -->
+    <select id="getCollectionList" resultType="java.util.Map">
+    	SELECT u.logo_path AS logoPath,u.city,u.longitude,u.latitude,t.item_name AS teacherName,t.tag_value AS itemTheme,u.sex,c.id,t.id as teacherId,
+		ROUND(6378.138*2*ASIN(SQRT(POW(SIN(
+		(u.latitude*PI()/180-su.latitude*PI()/180)/2),2)+COS(u.latitude*PI()/180)*COS(su.latitude*PI()/180)*
+		POW(SIN( (u.longitude*PI()/180-su.longitude*PI()/180)/2),2)))) AS distance,CAST(c.create_time AS CHAR) AS createTime,
+		(CASE WHEN t.teacher_level='预备级' THEN 0.5 WHEN t.teacher_level='1 星级' THEN 1 
+			WHEN t.teacher_level='2 星级' THEN 2 WHEN t.teacher_level='3 星级' THEN 3
+			WHEN t.teacher_level='4 星级' THEN 4 WHEN t.teacher_level='5 星级' THEN 5
+			WHEN t.teacher_level='6 星级' THEN 6 END) AS star,
+		(SELECT COUNT(1) FROM app_teacher_order WHERE teacher_id=t.id AND state =4) AS counts,
+		(SELECT FLOOR(actual_amount) FROM app_teacher_order WHERE teacher_id=t.id AND state !=3 ORDER BY id DESC LIMIT 1) AS amount
+		FROM app_teacher_collection c
+		INNER JOIN app_teacher t ON t.id=c.teacher_id
+		INNER JOIN sys_user u ON u.id=t.uid
+		INNER JOIN sys_user su ON c.uid=su.id
+		WHERE c.uid=#{uid} AND c.collection_type=2 AND c.data_type=1
+		order by c.create_time DESC limit #{page}, #{rows}
+    </select>
+    
+    <sql id="Base_Column_List" >
+        <!--  自动生成 2016年10月14日 表字段名称 -->
+        id, uid, teacher_id, collection_type, data_type, create_time
+    </sql>
+    
+    <sql id="findByPageSql" >
+        <!-- WARNING -  自动生成 2016-10-14  分页查询SQL -->
+        select a.* from app_teacher_collection a
+        <where >
+            <if test="param.id != null " >
+                and a.id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.uid != null " >
+                and a.uid = #{param.uid,jdbcType=BIGINT}
+            </if>
+            <if test="param.teacherId != null " >
+                and a.teacher_id = #{param.teacherId,jdbcType=BIGINT}
+            </if>
+            <if test="param.collectionType != null " >
+                and a.collection_type = #{param.collectionType,jdbcType=INTEGER}
+            </if>
+            <if test="param.dataType != null " >
+                and a.data_type = #{param.dataType,jdbcType=INTEGER}
+            </if>
+        </where>
+        order by a.id desc
+    </sql>
+    
+    <select id="findByPage" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-14  分页查询 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit #{offset}, #{pageSize}
+    </select>
+    
+    <select id="findByPageCount" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-10-14  分页查询总条数 -->
+        select count(1) from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findById" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年10月14日 根据ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_teacher_collection
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    
+    <select id="load" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-14  根据多个ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_teacher_collection where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </select>
+    
+    <select id="all" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-14  查询所有 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_teacher_collection
+    </select>
+    
+    <select id="count" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-10-14 查询总条数 -->
+        select count(1) from app_teacher_collection
+    </select>
+    
+    <update id="update" parameterType="com.kapphk.web.bean.teacher.BeanTeacherCollection" >
+        <!--  自动生成 2016年10月14日 更新数据 -->
+        update app_teacher_collection
+        <set >
+            <if test="uid != null" >
+                uid = #{uid,jdbcType=BIGINT},
+            </if>
+            <if test="teacherId != null" >
+                teacher_id = #{teacherId,jdbcType=BIGINT},
+            </if>
+            <if test="collectionType != null" >
+                collection_type = #{collectionType,jdbcType=INTEGER},
+            </if>
+            <if test="dataType != null" >
+                data_type = #{dataType,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null" >
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    
+    <insert id="insert" parameterType="com.kapphk.web.bean.teacher.BeanTeacherCollection" useGeneratedKeys="true" keyProperty="id" >
+        <!--  自动生成 2016年10月14日 添加数据 -->
+        insert into app_teacher_collection
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="uid != null" >
+                uid,
+            </if>
+            <if test="teacherId != null" >
+                teacher_id,
+            </if>
+            <if test="collectionType != null" >
+                collection_type,
+            </if>
+            <if test="dataType != null" >
+                data_type,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="uid != null" >
+                #{uid,jdbcType=BIGINT},
+            </if>
+            <if test="teacherId != null" >
+                #{teacherId,jdbcType=BIGINT},
+            </if>
+            <if test="collectionType != null" >
+                #{collectionType,jdbcType=INTEGER},
+            </if>
+            <if test="dataType != null" >
+                #{dataType,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    
+    <insert id="inserts" parameterType="java.util.List" >
+        <!-- WARNING -  自动生成 2016-10-14 添加多条数据 -->
+        insert into app_teacher_collection (uid, teacher_id, collection_type, data_type, create_time)
+        values
+        <foreach collection="list" item="item" separator="," >
+            (#{item.uid,jdbcType=BIGINT}, #{item.teacherId,jdbcType=BIGINT}, #{item.collectionType,jdbcType=INTEGER}, #{item.dataType,jdbcType=INTEGER}, #{item.createTime,jdbcType=TIMESTAMP})
+        </foreach>
+    </insert>
+    
+    <delete id="delete" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年10月14日 删除数据 -->
+        delete from app_teacher_collection
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    
+    <delete id="deletes" >
+        <!-- WARNING -  自动生成 2016-10-14 删除多条数据 -->
+        delete from app_teacher_collection where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteByEntity" >
+        <!-- WARNING -  自动生成 2016-10-14 通过实体类中的条件删除数据 -->
+        delete from app_teacher_collection
+        <where >
+            <if test="param.id != null " >
+                and id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.uid != null " >
+                and uid = #{param.uid,jdbcType=BIGINT}
+            </if>
+            <if test="param.teacherId != null " >
+                and teacher_id = #{param.teacherId,jdbcType=BIGINT}
+            </if>
+            <if test="param.collectionType != null " >
+                and collection_type = #{param.collectionType,jdbcType=INTEGER}
+            </if>
+            <if test="param.dataType != null " >
+                and data_type = #{param.dataType,jdbcType=INTEGER}
+            </if>
+        </where>
+    </delete>
+    
+    <select id="findAll" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-14  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+</mapper>

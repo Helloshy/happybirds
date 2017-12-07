@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kapphk.web.dao.mapper.course.BeanUserCouponMapper" >
+    <resultMap id="BaseResultMap" type="com.kapphk.web.bean.course.BeanUserCoupon" >
+        <!--  自动生成 2016年09月22日 表与实体类字段对应 -->
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="uid" property="uid" jdbcType="BIGINT" />
+        <result column="course_id" property="courseId" jdbcType="BIGINT" />
+        <result column="coupon_name" property="couponName" jdbcType="VARCHAR" />
+        <result column="coupon_content" property="couponContent" jdbcType="VARCHAR" />
+        <result column="date_from" property="dateFrom" jdbcType="DATE" />
+        <result column="date_to" property="dateTo" jdbcType="DATE" />
+        <result column="state" property="state" jdbcType="INTEGER" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+    
+    <!-- 验证抵扣卷是否有效 -->
+    <select id="findByCourseId" resultMap="BaseResultMap">
+    	SELECT * FROM user_coupon c
+		WHERE c.uid=#{uid} AND c.course_id=(SELECT course_type_id FROM app_course_offline WHERE id=#{courseId})
+		AND c.date_from &lt;=#{startTime} 
+    </select>
+    
+    <!-- 课程抵扣券  zoneyu 16-10-13 -->
+    <select id="getUnUseCoupon" resultType="java.util.Map">
+    	SELECT uc.id,uc.coupon_name AS couponName,uc.coupon_content AS couponContent,
+		CAST(uc.date_from AS CHAR) AS dateFrom,CAST(uc.date_to AS CHAR) AS dateTo 
+		FROM user_coupon AS uc WHERE uc.uid = #{uid} AND uc.course_id = #{courseTypeId} AND uc.date_to &gt;= NOW() AND uc.state = 0
+    </select>
+    
+    <!-- APP- 获取抵扣卷列表 -->
+    <select id="findCouponInfo" resultType="java.util.Map">
+    	SELECT c.coupon_name AS couponName,c.coupon_content AS couponContent,CAST(c.create_time AS CHAR) AS createTime,
+		CONCAT(CAST(c.date_from AS CHAR),'-',CAST(c.date_to AS CHAR)) AS useDate
+		FROM user_coupon c
+		WHERE c.uid = #{param.uid} AND c.state = #{param.state}
+		ORDER BY c.create_time DESC LIMIT #{page},#{rows}
+    </select>
+    
+    <!-- 详情 -->
+    <select id="findDetailById" resultType="java.util.Map">
+		SELECT uc.id,uc.coupon_content AS couponContent,uc.coupon_name AS couponName,uc.state,
+		uc.course_id AS courseId,CAST(uc.date_from AS CHAR) as dateFrom,CAST(uc.date_to AS CHAR) as dateTo
+		FROM user_coupon uc 
+		where uc.id=#{id}  
+    </select>
+    
+    <!-- 课程抵扣卷 -->
+    <select id="findList" resultType="java.util.Map">
+    	SELECT uc.id,uc.coupon_content AS couponContent,uc.coupon_name AS couponName,uc.state,CAST(uc.create_time AS CHAR) AS createTime,
+		c.item_name AS itemName,CONCAT(CAST(uc.date_from AS CHAR),'-',CAST(uc.date_to AS CHAR)) AS dateFromdateTo,
+		u.user_name AS userName,u.nick_name AS nickName,u.real_name AS realName
+		FROM user_coupon uc 
+		INNER JOIN app_course_type c ON c.id=uc.course_id
+		INNER JOIN sys_user u ON u.id=uc.uid
+		where uc.uid=#{param.uid}
+		ORDER BY uc.create_time DESC LIMIT #{page},#{rows}
+    </select>
+    
+     <!-- 课程抵扣卷总数 -->
+    <select id="findCount" resultType="java.lang.Integer">
+    	SELECT COUNT(1)
+		FROM user_coupon uc 
+		where uc.uid=#{param.uid}
+    </select>
+    
+    <sql id="Base_Column_List" >
+        <!--  自动生成 2016年09月22日 表字段名称 -->
+        id, uid, course_id, coupon_name, coupon_content, date_from, date_to, state, create_time
+    </sql>
+    
+    <sql id="findByPageSql" >
+        <!-- WARNING -  自动生成 2016-09-22  分页查询SQL -->
+        select a.* from user_coupon a
+        <where >
+            <if test="param.id != null " >
+                and a.id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.uid != null " >
+                and a.uid = #{param.uid,jdbcType=BIGINT}
+            </if>
+            <if test="param.courseId != null " >
+                and a.course_id = #{param.courseId,jdbcType=BIGINT}
+            </if>
+            <if test="param.couponName != null and param.couponName != ''" >
+                and a.coupon_name = #{param.couponName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.couponContent != null and param.couponContent != ''" >
+                and a.coupon_content = #{param.couponContent,jdbcType=VARCHAR}
+            </if>
+            <if test="param.dateFrom != null " >
+                and a.date_from = #{param.dateFrom,jdbcType=DATE}
+            </if>
+            <if test="param.dateTo != null " >
+                and a.date_to = #{param.dateTo,jdbcType=DATE}
+            </if>
+            <if test="param.state != null " >
+                and a.state = #{param.state,jdbcType=INTEGER}
+            </if>
+        </where>
+        order by a.id desc
+    </sql>
+    
+    <select id="findByPage" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-09-22  分页查询 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit #{offset}, #{pageSize}
+    </select>
+    
+    <select id="findByPageCount" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-09-22  分页查询总条数 -->
+        select count(1) from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findById" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年09月22日 根据ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from user_coupon
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    
+    <select id="load" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-09-22  根据多个ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from user_coupon where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </select>
+    
+    <select id="all" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-09-22  查询所有 -->
+        select 
+        <include refid="Base_Column_List" />
+        from user_coupon
+    </select>
+    
+    <select id="count" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-09-22 查询总条数 -->
+        select count(1) from user_coupon
+    </select>
+    
+    <update id="update" parameterType="com.kapphk.web.bean.course.BeanUserCoupon" >
+        <!--  自动生成 2016年09月22日 更新数据 -->
+        update user_coupon
+        <set >
+            <if test="uid != null" >
+                uid = #{uid,jdbcType=BIGINT},
+            </if>
+            <if test="courseId != null" >
+                course_id = #{courseId,jdbcType=BIGINT},
+            </if>
+            <if test="couponName != null" >
+                coupon_name = #{couponName,jdbcType=VARCHAR},
+            </if>
+            <if test="couponContent != null" >
+                coupon_content = #{couponContent,jdbcType=VARCHAR},
+            </if>
+            <if test="dateFrom != null" >
+                date_from = #{dateFrom,jdbcType=DATE},
+            </if>
+            <if test="dateTo != null" >
+                date_to = #{dateTo,jdbcType=DATE},
+            </if>
+            <if test="state != null" >
+                state = #{state,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null" >
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    
+    <insert id="insert" parameterType="com.kapphk.web.bean.course.BeanUserCoupon" useGeneratedKeys="true" keyProperty="id" >
+        <!--  自动生成 2016年09月22日 添加数据 -->
+        insert into user_coupon
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="uid != null" >
+                uid,
+            </if>
+            <if test="courseId != null" >
+                course_id,
+            </if>
+            <if test="couponName != null" >
+                coupon_name,
+            </if>
+            <if test="couponContent != null" >
+                coupon_content,
+            </if>
+            <if test="dateFrom != null" >
+                date_from,
+            </if>
+            <if test="dateTo != null" >
+                date_to,
+            </if>
+            <if test="state != null" >
+                state,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="uid != null" >
+                #{uid,jdbcType=BIGINT},
+            </if>
+            <if test="courseId != null" >
+                #{courseId,jdbcType=BIGINT},
+            </if>
+            <if test="couponName != null" >
+                #{couponName,jdbcType=VARCHAR},
+            </if>
+            <if test="couponContent != null" >
+                #{couponContent,jdbcType=VARCHAR},
+            </if>
+            <if test="dateFrom != null" >
+                #{dateFrom,jdbcType=DATE},
+            </if>
+            <if test="dateTo != null" >
+                #{dateTo,jdbcType=DATE},
+            </if>
+            <if test="state != null" >
+                #{state,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    
+    <insert id="inserts" parameterType="java.util.List" >
+        <!-- WARNING -  自动生成 2016-09-22 添加多条数据 -->
+        insert into user_coupon (uid, course_id, coupon_name, coupon_content, date_from, date_to, state, create_time)
+        values
+        <foreach collection="list" item="item" separator="," >
+            (#{item.uid,jdbcType=BIGINT}, #{item.courseId,jdbcType=BIGINT}, #{item.couponName,jdbcType=VARCHAR}, #{item.couponContent,jdbcType=VARCHAR}, #{item.dateFrom,jdbcType=DATE}, #{item.dateTo,jdbcType=DATE}, #{item.state,jdbcType=INTEGER}, #{item.createTime,jdbcType=TIMESTAMP})
+        </foreach>
+    </insert>
+    
+    <delete id="delete" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年09月22日 删除数据 -->
+        delete from user_coupon
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    
+    <delete id="deletes" >
+        <!-- WARNING -  自动生成 2016-09-22 删除多条数据 -->
+        delete from user_coupon where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteByEntity" >
+        <!-- WARNING -  自动生成 2016-09-22 通过实体类中的条件删除数据 -->
+        delete from user_coupon
+        <where >
+            <if test="param.id != null " >
+                and id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.uid != null " >
+                and uid = #{param.uid,jdbcType=BIGINT}
+            </if>
+            <if test="param.courseId != null " >
+                and course_id = #{param.courseId,jdbcType=BIGINT}
+            </if>
+            <if test="param.couponName != null and param.couponName != ''" >
+                and coupon_name = #{param.couponName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.couponContent != null and param.couponContent != ''" >
+                and coupon_content = #{param.couponContent,jdbcType=VARCHAR}
+            </if>
+            <if test="param.dateFrom != null " >
+                and date_from = #{param.dateFrom,jdbcType=DATE}
+            </if>
+            <if test="param.dateTo != null " >
+                and date_to = #{param.dateTo,jdbcType=DATE}
+            </if>
+            <if test="param.state != null " >
+                and state = #{param.state,jdbcType=INTEGER}
+            </if>
+        </where>
+    </delete>
+    
+    <select id="findAll" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-09-22  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findEntityByCondition" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-14  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit 0,1
+    </select>
+    
+</mapper>

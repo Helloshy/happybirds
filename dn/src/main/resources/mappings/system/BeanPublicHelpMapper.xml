@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kapphk.web.dao.mapper.system.BeanPublicHelpMapper" >
+    <resultMap id="BaseResultMap" type="com.kapphk.web.bean.system.BeanPublicHelp" >
+        <!--  自动生成 2016年05月23日 表与实体类字段对应 -->
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="title" property="title" jdbcType="VARCHAR" />
+        <result column="create_time" property="createTime" jdbcType="DATE" />
+        <result column="msg_type" property="msgType" jdbcType="INTEGER" />
+    </resultMap>
+    
+    <resultMap id="ResultMapWithBLOBs" type="com.kapphk.web.bean.system.BeanPublicHelp" extends="BaseResultMap" >
+        <!--  自动生成 2016年05月23日 表与实体类字段对应 -->
+        <result column="memo" property="memo" jdbcType="LONGVARCHAR" />
+    </resultMap>
+    
+    <sql id="Base_Column_List" >
+        <!--  自动生成 2016年05月23日 表字段名称 -->
+        id, title, create_time,msg_type
+    </sql>
+    
+    <sql id="Blob_Column_List" >
+        <!--  自动生成 2016年05月23日 表字段名称 -->
+        memo
+    </sql>
+    
+    <sql id="findByPageSql" >
+        <!-- WARNING -  自动生成 2016-05-23  分页查询SQL -->
+        select a.* from sys_public_help a
+        <where >
+            <if test="param.id != null " >
+                and a.id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.title != null and param.title != ''" >
+                and a.title = #{param.title,jdbcType=VARCHAR}
+            </if>
+            <if test="param.memo != null " >
+                and a.memo = #{param.memo,jdbcType=LONGVARCHAR}
+            </if>
+            <if test="param.msgType != null " >
+                and a.msg_type = #{param.msgType,jdbcType=INTEGER}
+            </if>
+        </where>
+        order by a.id desc
+    </sql>
+    
+    <select id="findByPage" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-05-23  分页查询 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit #{offset}, #{pageSize}
+    </select>
+    
+    <select id="findByPageCount" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-05-23  分页查询总条数 -->
+        select count(1) from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findById" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年05月23日 根据ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        ,
+        <include refid="Blob_Column_List" />
+        from sys_public_help
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    
+    <select id="load" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-05-23  根据多个ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from sys_public_help where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </select>
+    
+    <select id="all" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-05-23  查询所有 -->
+        select 
+        <include refid="Base_Column_List" />
+        from sys_public_help
+    </select>
+    
+    <select id="count" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-05-23 查询总条数 -->
+        select count(1) from sys_public_help
+    </select>
+    
+    <update id="update" parameterType="com.kapphk.web.bean.system.BeanPublicHelp" >
+        <!--  自动生成 2016年05月23日 更新数据 -->
+        update sys_public_help
+        <set >
+            <if test="title != null" >
+                title = #{title,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null" >
+                create_time = #{createTime,jdbcType=DATE},
+            </if>
+            <if test="memo != null" >
+                memo = #{memo,jdbcType=LONGVARCHAR},
+            </if>
+            <if test="msgType != null" >
+                msg_type = #{msgType,jdbcType=INTEGER},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    
+    <insert id="insert" parameterType="com.kapphk.web.bean.system.BeanPublicHelp" useGeneratedKeys="true" keyProperty="id" >
+        <!--  自动生成 2016年05月23日 添加数据 -->
+        insert into sys_public_help
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="title != null" >
+                title,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+            <if test="memo != null" >
+                memo,
+            </if>
+            <if test="msgType != null">
+            	msg_type,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="title != null" >
+                #{title,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=DATE},
+            </if>
+            <if test="memo != null" >
+                #{memo,jdbcType=LONGVARCHAR},
+            </if>
+            <if test="msgType != null" >
+                #{msgType,jdbcType=INTEGER},
+            </if>
+        </trim>
+    </insert>
+    
+    <delete id="delete" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年05月23日 删除数据 -->
+        delete from sys_public_help
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    
+    <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.kapphk.web.bean.system.BeanPublicHelp" >
+        <!--  自动生成 2016年05月23日 更新数据 -->
+        update sys_public_help
+        set title = #{title,jdbcType=VARCHAR},
+            create_time = #{createTime,jdbcType=DATE},
+            memo = #{memo,jdbcType=LONGVARCHAR}
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    
+    <insert id="inserts" parameterType="java.util.List" >
+        <!-- WARNING -  自动生成 2016-05-23 添加多条数据 -->
+        insert into sys_public_help (title, create_time, memo,msg_type)
+        values
+        <foreach collection="list" item="item" separator="," >
+            (#{item.title,jdbcType=VARCHAR}, #{item.createTime,jdbcType=DATE}, #{item.memo,jdbcType=LONGVARCHAR},#{item.msgType,jdbcType=INTEGER})
+        </foreach>
+    </insert>
+    
+    <delete id="deletes" >
+        <!-- WARNING -  自动生成 2016-05-23 删除多条数据 -->
+        delete from sys_public_help where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteByEntity" >
+        <!-- WARNING -  自动生成 2016-05-23 通过实体类中的条件删除数据 -->
+        delete from sys_public_help
+        <where >
+            <if test="param.id != null " >
+                and id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.title != null and param.title != ''" >
+                and title = #{param.title,jdbcType=VARCHAR}
+            </if>
+            <if test="param.memo != null " >
+                and memo = #{param.memo,jdbcType=LONGVARCHAR}
+            </if>
+            <if test="param.msgType != null " >
+                and msg_type = #{param.msgType,jdbcType=INTEGER}
+            </if>
+        </where>
+    </delete>
+    
+    <select id="findAll" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-05-23  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findEntityByCondition" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-05-23  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit 0,1
+    </select>
+</mapper>

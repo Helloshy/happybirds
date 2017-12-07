@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kapphk.web.dao.mapper.user.BeanUserCurrencyMapper" >
+    <resultMap id="BaseResultMap" type="com.kapphk.web.bean.user.BeanUserCurrency" >
+        <!--  自动生成 2016年10月14日 表与实体类字段对应 -->
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="uid" property="uid" jdbcType="BIGINT" />
+        <result column="content" property="content" jdbcType="VARCHAR" />
+        <result column="currency" property="currency" jdbcType="DECIMAL" />
+        <result column="currency_type" property="currencyType" jdbcType="INTEGER" />
+        <result column="record_type" property="recordType" jdbcType="INTEGER" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+    
+    <!-- 验证是否已签到 -->
+    <select id="findSignIn" resultType="java.lang.Integer">
+    	SELECT COUNT(1) FROM user_currency c 
+    	WHERE c.currency_type=1 AND c.record_type=5 AND c.uid=#{id} AND c.create_time LIKE '${date}%'
+    </select>
+    
+    <!-- APP-获取蓝币明细 -->
+    <select id="getUserCurrencyList" resultType="java.util.Map">
+		SELECT c.content,
+		SUBSTRING(CAST(c.create_time AS CHAR),1,<if test="param.recordType==5">10</if><if test="param.recordType!=5">19</if>) AS createTime,
+		CAST((CASE WHEN c.currency > 0 THEN CONCAT('+',c.currency) ELSE c.currency END) AS CHAR) AS currency
+		FROM user_currency c
+		<where>
+			and c.uid = #{param.uid} AND c.currency_type = 1
+			<if test="param.recordType != null">
+				and c.record_type = #{param.recordType}
+			</if>
+		</where>
+		ORDER BY c.create_time DESC LIMIT #{page},#{rows}    
+    </select>
+    
+    <sql id="Base_Column_List" >
+        <!--  自动生成 2016年10月14日 表字段名称 -->
+        id, uid, content, currency, currency_type, record_type, create_time
+    </sql>
+    
+    <sql id="findByPageSql" >
+        <!-- WARNING -  自动生成 2016-10-14  分页查询SQL -->
+        select a.* from user_currency a
+        <where >
+            <if test="param.id != null " >
+                and a.id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.uid != null " >
+                and a.uid = #{param.uid,jdbcType=BIGINT}
+            </if>
+            <if test="param.content != null and param.content != ''" >
+                and a.content = #{param.content,jdbcType=VARCHAR}
+            </if>
+            <if test="param.currency != null " >
+                and a.currency = #{param.currency,jdbcType=DECIMAL}
+            </if>
+            <if test="param.currencyType != null " >
+                and a.currency_type = #{param.currencyType,jdbcType=INTEGER}
+            </if>
+            <if test="param.recordType != null " >
+                and a.record_type = #{param.recordType,jdbcType=INTEGER}
+            </if>
+        </where>
+        order by a.id desc
+    </sql>
+    
+    <select id="findByPage" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-14  分页查询 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit #{offset}, #{pageSize}
+    </select>
+    
+    <select id="findByPageCount" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-10-14  分页查询总条数 -->
+        select count(1) from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findById" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年10月14日 根据ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from user_currency
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    
+    <select id="load" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-14  根据多个ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from user_currency where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </select>
+    
+    <select id="all" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-14  查询所有 -->
+        select 
+        <include refid="Base_Column_List" />
+        from user_currency
+    </select>
+    
+    <select id="count" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-10-14 查询总条数 -->
+        select count(1) from user_currency
+    </select>
+    
+    <update id="update" parameterType="com.kapphk.web.bean.user.BeanUserCurrency" >
+        <!--  自动生成 2016年10月14日 更新数据 -->
+        update user_currency
+        <set >
+            <if test="uid != null" >
+                uid = #{uid,jdbcType=BIGINT},
+            </if>
+            <if test="content != null" >
+                content = #{content,jdbcType=VARCHAR},
+            </if>
+            <if test="currency != null" >
+                currency = #{currency,jdbcType=DECIMAL},
+            </if>
+            <if test="currencyType != null" >
+                currency_type = #{currencyType,jdbcType=INTEGER},
+            </if>
+            <if test="recordType != null" >
+                record_type = #{recordType,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null" >
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    
+    <insert id="insert" parameterType="com.kapphk.web.bean.user.BeanUserCurrency" useGeneratedKeys="true" keyProperty="id" >
+        <!--  自动生成 2016年10月14日 添加数据 -->
+        insert into user_currency
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="uid != null" >
+                uid,
+            </if>
+            <if test="content != null" >
+                content,
+            </if>
+            <if test="currency != null" >
+                currency,
+            </if>
+            <if test="currencyType != null" >
+                currency_type,
+            </if>
+            <if test="recordType != null" >
+                record_type,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="uid != null" >
+                #{uid,jdbcType=BIGINT},
+            </if>
+            <if test="content != null" >
+                #{content,jdbcType=VARCHAR},
+            </if>
+            <if test="currency != null" >
+                #{currency,jdbcType=DECIMAL},
+            </if>
+            <if test="currencyType != null" >
+                #{currencyType,jdbcType=INTEGER},
+            </if>
+            <if test="recordType != null" >
+                #{recordType,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    
+    <insert id="inserts" parameterType="java.util.List" >
+        <!-- WARNING -  自动生成 2016-10-14 添加多条数据 -->
+        insert into user_currency (uid, content, currency, currency_type, record_type, create_time)
+        values
+        <foreach collection="list" item="item" separator="," >
+            (#{item.uid,jdbcType=BIGINT}, #{item.content,jdbcType=VARCHAR}, #{item.currency,jdbcType=DECIMAL}, #{item.currencyType,jdbcType=INTEGER}, #{item.recordType,jdbcType=INTEGER}, #{item.createTime,jdbcType=TIMESTAMP})
+        </foreach>
+    </insert>
+    
+    <delete id="delete" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年10月14日 删除数据 -->
+        delete from user_currency
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    
+    <delete id="deletes" >
+        <!-- WARNING -  自动生成 2016-10-14 删除多条数据 -->
+        delete from user_currency where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteByEntity" >
+        <!-- WARNING -  自动生成 2016-10-14 通过实体类中的条件删除数据 -->
+        delete from user_currency
+        <where >
+            <if test="param.id != null " >
+                and id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.uid != null " >
+                and uid = #{param.uid,jdbcType=BIGINT}
+            </if>
+            <if test="param.content != null and param.content != ''" >
+                and content = #{param.content,jdbcType=VARCHAR}
+            </if>
+            <if test="param.currency != null " >
+                and currency = #{param.currency,jdbcType=DECIMAL}
+            </if>
+            <if test="param.currencyType != null " >
+                and currency_type = #{param.currencyType,jdbcType=INTEGER}
+            </if>
+            <if test="param.recordType != null " >
+                and record_type = #{param.recordType,jdbcType=INTEGER}
+            </if>
+        </where>
+    </delete>
+    
+    <select id="findAll" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-14  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+</mapper>

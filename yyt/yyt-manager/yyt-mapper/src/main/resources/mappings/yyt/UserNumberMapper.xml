@@ -1,0 +1,617 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kapphk.yyt.mapper.UserNumberMapper" >
+    <resultMap id="BaseResultMap" type="com.kapphk.yyt.bean.UserNumber" >
+        <!--  自动生成 2016年12月06日 表与实体类字段对应 -->
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="company_id" property="companyId" jdbcType="BIGINT" />
+        <result column="record_tag" property="recordTag" jdbcType="VARCHAR" />
+        <result column="record_tag_type" property="recordTagType" jdbcType="VARCHAR" />
+        <result column="real_name" property="realName" jdbcType="VARCHAR" />
+        <result column="tel" property="tel" jdbcType="VARCHAR" />
+        <result column="province" property="province" jdbcType="VARCHAR" />
+        <result column="city" property="city" jdbcType="VARCHAR" />
+        <result column="district" property="district" jdbcType="VARCHAR" />
+        <result column="community_id" property="communityId" jdbcType="BIGINT" />
+        <result column="unit" property="unit" jdbcType="VARCHAR" />
+        <result column="state" property="state" jdbcType="INTEGER" />
+        <result column="meter_type" property="meterType" jdbcType="INTEGER" />
+        <result column="meter_no" property="meterNo" jdbcType="BIGINT" />
+        <result column="balance_amount" property="balanceAmount" jdbcType="DECIMAL" />
+        <result column="update_by" property="updateBy" jdbcType="BIGINT" />
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+        <result column="status" property="status" jdbcType="TINYINT"/>
+    </resultMap>
+    <resultMap id="EntityResultMap" type="com.kapphk.entity.UserNumberEntity" extends="BaseResultMap" >
+        <result column="uid" property="uid" jdbcType="BIGINT"/>
+        <result column="community_name" property="communityName" jdbcType="VARCHAR"/>
+        <result column="address" property="address" jdbcType="VARCHAR"/>
+    </resultMap>
+    
+    <sql id="Base_Column_List" >
+        <!--  自动生成 2016年12月06日 表字段名称 -->
+        id, company_id, record_tag, record_tag_type, real_name, tel, province, city, district, 
+        community_id, unit, state, meter_type, meter_no, balance_amount, update_by, update_time, 
+        create_time,status
+    </sql>
+    
+    <sql id="findByPageSql" >
+        <!-- WARNING -  自动生成 2016-12-06  分页查询SQL -->
+        select a.* from user_number a
+        <where >
+            <if test="param.id != null " >
+                and a.id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.companyId != null " >
+                and a.company_id = #{param.companyId,jdbcType=BIGINT}
+            </if>
+            <if test="param.recordTag != null and param.recordTag != ''" >
+                and a.record_tag = #{param.recordTag,jdbcType=VARCHAR}
+            </if>
+            <if test="param.recordTagType != null and param.recordTagType != ''" >
+                and a.record_tag_type = #{param.recordTagType,jdbcType=VARCHAR}
+            </if>
+            <if test="param.realName != null and param.realName != ''" >
+                and a.real_name = #{param.realName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.tel != null and param.tel != ''" >
+                and a.tel = #{param.tel,jdbcType=VARCHAR}
+            </if>
+            <if test="param.province != null and param.province != ''" >
+                and a.province = #{param.province,jdbcType=VARCHAR}
+            </if>
+            <if test="param.city != null and param.city != ''" >
+                and a.city = #{param.city,jdbcType=VARCHAR}
+            </if>
+            <if test="param.district != null and param.district != ''" >
+                and a.district = #{param.district,jdbcType=VARCHAR}
+            </if>
+            <if test="param.communityId != null " >
+                and a.community_id = #{param.communityId,jdbcType=BIGINT}
+            </if>
+            <if test="param.unit != null and param.unit != ''" >
+                and a.unit = #{param.unit,jdbcType=VARCHAR}
+            </if>
+            <if test="param.state != null " >
+                and a.state = #{param.state,jdbcType=INTEGER}
+            </if>
+            <if test="param.meterType != null " >
+                and a.meter_type = #{param.meterType,jdbcType=INTEGER}
+            </if>
+            <if test="param.meterNo != null " >
+                and a.meter_no = #{param.meterNo,jdbcType=BIGINT}
+            </if>
+            <if test="param.balanceAmount != null " >
+                and a.balance_amount = #{param.balanceAmount,jdbcType=DECIMAL}
+            </if>
+            <if test="param.updateBy != null " >
+                and a.update_by = #{param.updateBy,jdbcType=BIGINT}
+            </if>
+            <if test="param.updateTime != null " >
+                and a.update_time = #{param.updateTime,jdbcType=TIMESTAMP}
+            </if>
+            <if test="param.status != null " >
+                and a.status = #{param.status,jdbcType=TINYINT}
+            </if>
+        </where>
+        order by a.id desc
+    </sql>
+
+    <select id="findAllByCompanyId" resultType="java.util.Map">
+      select
+        n.*,
+        nm.uid,
+        su.`real_name` as  sname,
+        su.`id` aS sid
+        from user_number n
+          INNER JOIN user_number_map nm ON n.`id`=nm.`unid`
+          INNER JOIN app_community c ON n.`community_id`=c.`id`
+          INNER JOIN sys_system_user su ON su.`id`=c.`sid`
+      <where>
+          <if test="param.companyId != null " >
+              and n.company_id = #{param.companyId,jdbcType=BIGINT}
+          </if>
+          <if test="param.state != null " >
+              and n.company_id = #{param.companyId,jdbcType=INTEGER}
+          </if>
+      </where>
+        GROUP BY n.`id`
+    </select>
+
+    <!--条件分页查询客户信息列表-->
+    <select id="findListByParam" resultType="java.util.Map">
+        SELECT
+        DISTINCT (un.id),
+        c.`company_name`,
+        un.company_id,
+        un.`record_tag`,
+        un.`real_name`,
+        un.`tel`,
+        CONCAT(un.`province`,un.`district`,un.`unit`) address,
+        un.state,
+        un.meter_type,
+        un.meter_no,
+        un.`balance_amount`,
+        un.`update_time`,
+        un.community_id,
+        un.unit,
+        ( CASE WHEN un.`status`=0 then 0 when un.`status`=1 THEN 1 END)`status`,
+        su.`user_name`
+        FROM user_number un LEFT JOIN app_company c ON un.`company_id` = c.`id`
+        LEFT JOIN sys_system_user su ON un.`update_by`=su.`id`
+        <where>
+            <if test="param.id !=null">
+              and un.id =#{param.id,jdbcType=BIGINT}
+            </if>
+
+            <if test="param.companyId != null " >
+                and un.company_id= #{param.companyId,jdbcType=BIGINT}
+            </if>
+            <if test="param.state != null" >
+                and un.state = #{param.state,jdbcType=TINYINT}
+            </if>
+            <if test="param.queryParam != null and param.queryParam !='' " >
+                and un.id like CONCAT('%',#{param.queryParam,jdbcType=VARCHAR},'%')
+                or un.real_name like CONCAT('%',#{param.queryParam,jdbcType=VARCHAR},'%')
+                or  CONCAT(un.`province`,un.`district`,un.`unit`) like CONCAT('%',#{param.queryParam,jdbcType=VARCHAR},'%')
+            </if>
+        </where>
+    </select>
+
+    <select id="findByPage" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-06  分页查询 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit #{offset}, #{pageSize}
+    </select>
+    
+    <select id="findByPageCount" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-12-06  分页查询总条数 -->
+        select count(1) from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findById" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年12月06日 根据ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from user_number
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    
+    <select id="load" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-06  根据多个ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from user_number where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </select>
+    
+    <select id="all" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-06  查询所有 -->
+        select 
+        <include refid="Base_Column_List" />
+        from user_number
+    </select>
+    
+    <select id="count" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-12-06 查询总条数 -->
+        select count(1) from user_number
+    </select>
+    
+    <update id="update" parameterType="com.kapphk.yyt.bean.UserNumber" >
+        <!--  自动生成 2016年12月06日 更新数据 -->
+        update user_number
+        <set >
+            <if test="companyId != null" >
+                company_id = #{companyId,jdbcType=BIGINT},
+            </if>
+            <if test="recordTag != null" >
+                record_tag = #{recordTag,jdbcType=VARCHAR},
+            </if>
+            <if test="recordTagType != null" >
+                record_tag_type = #{recordTagType,jdbcType=VARCHAR},
+            </if>
+            <if test="realName != null" >
+                real_name = #{realName,jdbcType=VARCHAR},
+            </if>
+            <if test="tel != null" >
+                tel = #{tel,jdbcType=VARCHAR},
+            </if>
+            <if test="province != null" >
+                province = #{province,jdbcType=VARCHAR},
+            </if>
+            <if test="city != null" >
+                city = #{city,jdbcType=VARCHAR},
+            </if>
+            <if test="district != null" >
+                district = #{district,jdbcType=VARCHAR},
+            </if>
+            <if test="communityId != null" >
+                community_id = #{communityId,jdbcType=BIGINT},
+            </if>
+            <if test="unit != null" >
+                unit = #{unit,jdbcType=VARCHAR},
+            </if>
+            <if test="state != null" >
+                state = #{state,jdbcType=INTEGER},
+            </if>
+            <if test="meterType != null" >
+                meter_type = #{meterType,jdbcType=INTEGER},
+            </if>
+            <if test="meterNo != null" >
+                meter_no = #{meterNo,jdbcType=BIGINT},
+            </if>
+            <if test="balanceAmount != null" >
+                balance_amount = #{balanceAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="updateBy != null" >
+                update_by = #{updateBy,jdbcType=BIGINT},
+            </if>
+            <if test="updateTime != null" >
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="createTime != null" >
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="status != null " >
+                and status = #{status,jdbcType=TINYINT}
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <update id="updateBlanceAmount" parameterType="com.kapphk.yyt.bean.UserNumber">
+        UPDATE user_number
+        <set>
+            <if test="updateBy != null" >
+                update_by = #{updateBy,jdbcType=BIGINT},
+            </if>
+            <if test="updateTime != null" >
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="balanceAmount != null" >
+                balance_amount = #{balanceAmount,jdbcType=DECIMAL},
+            </if>
+        </set>
+        <where>
+             id = #{id,jdbcType=BIGINT}
+        </where>
+    </update>
+    
+    <insert id="insert" parameterType="com.kapphk.yyt.bean.UserNumber" useGeneratedKeys="true" keyProperty="id" >
+        <!--  自动生成 2016年12月06日 添加数据 -->
+        insert into user_number
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="companyId != null" >
+                company_id,
+            </if>
+            <if test="recordTag != null" >
+                record_tag,
+            </if>
+            <if test="recordTagType != null" >
+                record_tag_type,
+            </if>
+            <if test="realName != null" >
+                real_name,
+            </if>
+            <if test="tel != null" >
+                tel,
+            </if>
+            <if test="province != null" >
+                province,
+            </if>
+            <if test="city != null" >
+                city,
+            </if>
+            <if test="district != null" >
+                district,
+            </if>
+            <if test="communityId != null" >
+                community_id,
+            </if>
+            <if test="unit != null" >
+                unit,
+            </if>
+            <if test="state != null" >
+                state,
+            </if>
+            <if test="meterType != null" >
+                meter_type,
+            </if>
+            <if test="meterNo != null" >
+                meter_no,
+            </if>
+            <if test="balanceAmount != null" >
+                balance_amount,
+            </if>
+            <if test="updateBy != null" >
+                update_by,
+            </if>
+            <if test="updateTime != null" >
+                update_time,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+            <if test="status != null " >
+                and status = #{status,jdbcType=TINYINT}
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="companyId != null" >
+                #{companyId,jdbcType=BIGINT},
+            </if>
+            <if test="recordTag != null" >
+                #{recordTag,jdbcType=VARCHAR},
+            </if>
+            <if test="recordTagType != null" >
+                #{recordTagType,jdbcType=VARCHAR},
+            </if>
+            <if test="realName != null" >
+                #{realName,jdbcType=VARCHAR},
+            </if>
+            <if test="tel != null" >
+                #{tel,jdbcType=VARCHAR},
+            </if>
+            <if test="province != null" >
+                #{province,jdbcType=VARCHAR},
+            </if>
+            <if test="city != null" >
+                #{city,jdbcType=VARCHAR},
+            </if>
+            <if test="district != null" >
+                #{district,jdbcType=VARCHAR},
+            </if>
+            <if test="communityId != null" >
+                #{communityId,jdbcType=BIGINT},
+            </if>
+            <if test="unit != null" >
+                #{unit,jdbcType=VARCHAR},
+            </if>
+            <if test="state != null" >
+                #{state,jdbcType=INTEGER},
+            </if>
+            <if test="meterType != null" >
+                #{meterType,jdbcType=INTEGER},
+            </if>
+            <if test="meterNo != null" >
+                #{meterNo,jdbcType=BIGINT},
+            </if>
+            <if test="balanceAmount != null" >
+                #{balanceAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="updateBy != null" >
+                #{updateBy,jdbcType=BIGINT},
+            </if>
+            <if test="updateTime != null" >
+                #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="status != null " >
+                and status = #{status,jdbcType=TINYINT}
+            </if>
+        </trim>
+    </insert>
+    
+    <insert id="inserts" parameterType="java.util.List" >
+        <!-- WARNING -  自动生成 2016-12-06 添加多条数据 -->
+        insert into user_number (company_id, record_tag, record_tag_type, real_name, tel, province, city, district, community_id, unit, state, meter_type, meter_no, balance_amount, update_by, update_time, create_time)
+        values
+        <foreach collection="list" item="item" separator="," >
+            (#{item.companyId,jdbcType=BIGINT}, #{item.recordTag,jdbcType=VARCHAR}, #{item.recordTagType,jdbcType=VARCHAR}, #{item.realName,jdbcType=VARCHAR}, #{item.tel,jdbcType=VARCHAR}, #{item.province,jdbcType=VARCHAR}, #{item.city,jdbcType=VARCHAR}, #{item.district,jdbcType=VARCHAR}, #{item.communityId,jdbcType=BIGINT}, #{item.unit,jdbcType=VARCHAR}, #{item.state,jdbcType=INTEGER}, #{item.meterType,jdbcType=INTEGER}, #{item.meterNo,jdbcType=BIGINT}, #{item.balanceAmount,jdbcType=DECIMAL}, #{item.updateBy,jdbcType=BIGINT}, #{item.updateTime,jdbcType=TIMESTAMP}, #{item.createTime,jdbcType=TIMESTAMP})
+        </foreach>
+    </insert>
+    
+    <delete id="delete" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年12月06日 删除数据 -->
+        delete from user_number
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    
+    <delete id="deletes" >
+        <!-- WARNING -  自动生成 2016-12-06 删除多条数据 -->
+        delete from user_number where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </delete>
+
+    <!-- 更新地址状态 -->
+    <update id="updateUserNumberState" >
+        update user_number set state = #{state,jdbcType=INTEGER} where id in
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </update>
+
+    <delete id="deleteByEntity" >
+        <!-- WARNING -  自动生成 2016-12-06 通过实体类中的条件删除数据 -->
+        delete from user_number
+        <where >
+            <if test="param.id != null " >
+                and id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.companyId != null " >
+                and company_id = #{param.companyId,jdbcType=BIGINT}
+            </if>
+            <if test="param.recordTag != null and param.recordTag != ''" >
+                and record_tag = #{param.recordTag,jdbcType=VARCHAR}
+            </if>
+            <if test="param.recordTagType != null and param.recordTagType != ''" >
+                and record_tag_type = #{param.recordTagType,jdbcType=VARCHAR}
+            </if>
+            <if test="param.realName != null and param.realName != ''" >
+                and real_name = #{param.realName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.tel != null and param.tel != ''" >
+                and tel = #{param.tel,jdbcType=VARCHAR}
+            </if>
+            <if test="param.province != null and param.province != ''" >
+                and province = #{param.province,jdbcType=VARCHAR}
+            </if>
+            <if test="param.city != null and param.city != ''" >
+                and city = #{param.city,jdbcType=VARCHAR}
+            </if>
+            <if test="param.district != null and param.district != ''" >
+                and district = #{param.district,jdbcType=VARCHAR}
+            </if>
+            <if test="param.communityId != null " >
+                and community_id = #{param.communityId,jdbcType=BIGINT}
+            </if>
+            <if test="param.unit != null and param.unit != ''" >
+                and unit = #{param.unit,jdbcType=VARCHAR}
+            </if>
+            <if test="param.state != null " >
+                and state = #{param.state,jdbcType=INTEGER}
+            </if>
+            <if test="param.meterType != null " >
+                and meter_type = #{param.meterType,jdbcType=INTEGER}
+            </if>
+            <if test="param.meterNo != null " >
+                and meter_no = #{param.meterNo,jdbcType=BIGINT}
+            </if>
+            <if test="param.balanceAmount != null " >
+                and balance_amount = #{param.balanceAmount,jdbcType=DECIMAL}
+            </if>
+            <if test="param.updateBy != null " >
+                and update_by = #{param.updateBy,jdbcType=BIGINT}
+            </if>
+            <if test="param.updateTime != null " >
+                and update_time = #{param.updateTime,jdbcType=TIMESTAMP}
+            </if>
+            <if test="status != null " >
+                and status = #{status,jdbcType=TINYINT}
+            </if>
+        </where>
+    </delete>
+    
+    <select id="findAll" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-06  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+     <select id="queryUnit" resultMap="EntityResultMap" >
+       select un.*,ac.item_name as community_name from user_number  un 
+       LEFT JOIN app_community ac ON un.community_id = ac.id 
+       <where>
+       		<if test="param.unit != null and param.unit!='' " >
+              and un.unit like CONCAT('%',#{param.unit,jdbcType=VARCHAR},'%')
+        	</if>
+       		<if test="param.companyId != null " >
+              and un.company_id = #{param.companyId,jdbcType=BIGINT}
+        	</if>
+        	<if test="param.communityId != null " >
+              and un.community_id = #{param.communityId,jdbcType=BIGINT}
+        	</if>
+       		<if test="param.city != null and param.city !='' " >
+              and un.city = #{param.city,jdbcType=VARCHAR}
+        	</if>
+        </where>
+    </select>
+    
+    <select id="queryByUid" resultMap="EntityResultMap" >
+       SELECT un.*,unm.uid,ac.address ,ac.item_name as community_name,
+		 	(SELECT CASE WHEN (DATE_FORMAT(umr.create_time,'%Y%m' ) = DATE_FORMAT(NOW(),'%Y%m')) THEN 
+			umr.last_count ELSE umr.current_count END
+	 		FROM user_meter_record umr WHERE un.`id` = umr.unid ORDER BY create_time DESC LIMIT 1 ) AS last_count
+       FROM user_number un 
+       LEFT JOIN user_number_map unm ON un.id = unm.unid 
+	   LEFT JOIN  app_community ac ON un.community_id = ac.id
+        <where>
+       	<if test="unid != null and unid !='' " >
+       		un.id = #{unid,jdbcType=BIGINT}
+        </if>
+        <if test="communityId != null and communityId !='' " >
+       		and un.community_id = #{communityId,jdbcType=BIGINT}
+        </if>
+       	<if test="uid != null and uid !='' " >
+       		and unm.uid = #{uid,jdbcType=BIGINT}
+        </if>
+        </where>
+        order by unm.create_time desc
+    </select>
+    <!--查询用户收费管理信息-->
+    <select id="findChargeListByParam" resultType="java.util.Map">
+
+      SELECT
+        n.`id`,
+        n.`company_id`,
+        n.`record_tag`,
+        n.`real_name`,
+        n.`tel`,
+        CONCAT(n.`province`,n.`city`,n.`district`,cn.`item_name`,n.`unit`) address,
+        n.`meter_type`,
+        n.`meter_no`,
+        n.`balance_amount`,
+        c.company_name
+      FROM user_number n LEFT JOIN app_company c ON n.`company_id`=c.`id`
+                         LEFT JOIN app_community cn ON n.`community_id`=cn.`id`
+        <where>
+            <if test="param.id!=null">
+                and n.id =#{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.companyId != null " >
+                and n.company_id= #{param.companyId,jdbcType=BIGINT}
+            </if>
+            <if test="param.state != null" >
+                and state = #{param.state,jdbcType=TINYINT}
+            </if>
+            <if test="param.queryParam != null and param.queryParam !='' " >
+                and n.id like CONCAT('%',#{param.queryParam,jdbcType=VARCHAR},'%')
+                or  n.real_name like CONCAT('%',#{param.queryParam,jdbcType=VARCHAR},'%')
+                or  CONCAT(n.`province`,n.`city`,n.`district`,cn.`item_name`,n.`unit`) like CONCAT('%',#{param.queryParam,jdbcType=VARCHAR},'%')
+            </if>
+        </where>
+
+    </select>
+
+    <!--查询用户缴费记录-->
+    <select id="findRecordListByParam" resultType="java.util.Map">
+
+    SELECT
+          o.`id`,
+          o.`company_id`,
+          o.`unid`,
+          o.`order_no`,
+          o.`amount`,
+          o.`is_pay`,
+          o.`sid`,
+          o.`uid`,
+          o.`pay_method`,
+          o.`create_time` as createTime,
+          n.`real_name`,
+          n.`record_tag`,
+          n.`meter_no`,
+          n.`balance_amount`,
+          n.tel,
+          c.company_name,
+          CONCAT(n.`province`,n.`city`,n.`district`,cn.`item_name`,n.`unit`) address,
+        (CASE WHEN o.`sid` IS NULL THEN "微信支付" ELSE  su.`real_name` END) AS operatorName
+        FROM user_order o LEFT JOIN  app_company c ON o.`company_id`=c.`id`
+                          LEFT JOIN user_number n ON o.`unid` = n.`id`
+                          LEFT JOIN app_community cn ON n.`community_id` = cn.`id`
+                          LEFT JOIN sys_system_user su ON o.`sid`=su.`id`
+        <where>
+            <if test="param.id!=null">
+                and o.id =#{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.companyId != null " >
+                and n.company_id= #{param.companyId,jdbcType=BIGINT}
+            </if>
+            <if test="param.queryParam != null and param.queryParam !='' " >
+                and o.unid like CONCAT('%',#{param.queryParam,jdbcType=VARCHAR},'%')
+                or  n.real_name like CONCAT('%',#{param.queryParam,jdbcType=VARCHAR},'%')
+                or  CONCAT(n.`province`,n.`city`,n.`district`,cn.`item_name`,n.`unit`) like CONCAT('%',#{param.queryParam,jdbcType=VARCHAR},'%')
+            </if>
+        </where>
+    </select>
+
+</mapper>

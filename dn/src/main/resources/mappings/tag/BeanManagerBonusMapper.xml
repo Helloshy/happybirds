@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kapphk.web.dao.mapper.tag.BeanManagerBonusMapper" >
+    <resultMap id="BaseResultMap" type="com.kapphk.web.bean.tag.BeanManagerBonus" >
+        <!--  自动生成 2016年11月21日 表与实体类字段对应 -->
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="month" property="month" jdbcType="VARCHAR" />
+        <result column="uid" property="uid" jdbcType="BIGINT" />
+        <result column="direct_amoun" property="directAmoun" jdbcType="BIGINT" />
+        <result column="indirect_amount" property="indirectAmount" jdbcType="BIGINT" />
+        <result column="direct_area" property="directArea" jdbcType="VARCHAR" />
+        <result column="direct_area_rate" property="directAreaRate" jdbcType="DECIMAL" />
+        <result column="indirect_area" property="indirectArea" jdbcType="VARCHAR" />
+        <result column="indirect_area_rate" property="indirectAreaRate" jdbcType="DECIMAL" />
+        <result column="record_type" property="recordType" jdbcType="INTEGER" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+    
+    <sql id="Base_Column_List" >
+        <!--  自动生成 2016年11月21日 表字段名称 -->
+        id, month, uid, direct_amoun, indirect_amount, direct_area, direct_area_rate, indirect_area, 
+        indirect_area_rate, record_type, create_time
+    </sql>
+    
+    <sql id="findByPageSql" >
+        <!-- WARNING -  自动生成 2016-11-21  分页查询SQL -->
+        select a.* from app_manager_bonus a
+        <where >
+            <if test="param.id != null " >
+                and a.id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.month != null and param.month != ''" >
+                and a.month = #{param.month,jdbcType=VARCHAR}
+            </if>
+            <if test="param.uid != null " >
+                and a.uid = #{param.uid,jdbcType=BIGINT}
+            </if>
+            <if test="param.directAmoun != null " >
+                and a.direct_amoun = #{param.directAmoun,jdbcType=BIGINT}
+            </if>
+            <if test="param.indirectAmount != null " >
+                and a.indirect_amount = #{param.indirectAmount,jdbcType=BIGINT}
+            </if>
+            <if test="param.directArea != null and param.directArea != ''" >
+                and a.direct_area = #{param.directArea,jdbcType=VARCHAR}
+            </if>
+            <if test="param.directAreaRate != null " >
+                and a.direct_area_rate = #{param.directAreaRate,jdbcType=DECIMAL}
+            </if>
+            <if test="param.indirectArea != null and param.indirectArea != ''" >
+                and a.indirect_area = #{param.indirectArea,jdbcType=VARCHAR}
+            </if>
+            <if test="param.indirectAreaRate != null " >
+                and a.indirect_area_rate = #{param.indirectAreaRate,jdbcType=DECIMAL}
+            </if>
+            <if test="param.recordType != null " >
+                and a.record_type = #{param.recordType,jdbcType=INTEGER}
+            </if>
+        </where>
+        order by a.id desc
+    </sql>
+    
+    <select id="findByPage" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-11-21  分页查询 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit #{offset}, #{pageSize}
+    </select>
+    
+    <select id="findByPageCount" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-11-21  分页查询总条数 -->
+        select count(1) from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findById" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年11月21日 根据ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_manager_bonus
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    
+    <select id="load" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-11-21  根据多个ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_manager_bonus where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </select>
+    
+    <select id="all" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-11-21  查询所有 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_manager_bonus
+    </select>
+    
+    <select id="count" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-11-21 查询总条数 -->
+        select count(1) from app_manager_bonus
+    </select>
+    
+    <update id="update" parameterType="com.kapphk.web.bean.tag.BeanManagerBonus" >
+        <!--  自动生成 2016年11月21日 更新数据 -->
+        update app_manager_bonus
+        <set >
+            <if test="month != null" >
+                month = #{month,jdbcType=VARCHAR},
+            </if>
+            <if test="uid != null" >
+                uid = #{uid,jdbcType=BIGINT},
+            </if>
+            <if test="directAmoun != null" >
+                direct_amoun = #{directAmoun,jdbcType=BIGINT},
+            </if>
+            <if test="indirectAmount != null" >
+                indirect_amount = #{indirectAmount,jdbcType=BIGINT},
+            </if>
+            <if test="directArea != null" >
+                direct_area = #{directArea,jdbcType=VARCHAR},
+            </if>
+            <if test="directAreaRate != null" >
+                direct_area_rate = #{directAreaRate,jdbcType=DECIMAL},
+            </if>
+            <if test="indirectArea != null" >
+                indirect_area = #{indirectArea,jdbcType=VARCHAR},
+            </if>
+            <if test="indirectAreaRate != null" >
+                indirect_area_rate = #{indirectAreaRate,jdbcType=DECIMAL},
+            </if>
+            <if test="recordType != null" >
+                record_type = #{recordType,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null" >
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    
+    <insert id="insert" parameterType="com.kapphk.web.bean.tag.BeanManagerBonus" useGeneratedKeys="true" keyProperty="id" >
+        <!--  自动生成 2016年11月21日 添加数据 -->
+        insert into app_manager_bonus
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="month != null" >
+                month,
+            </if>
+            <if test="uid != null" >
+                uid,
+            </if>
+            <if test="directAmoun != null" >
+                direct_amoun,
+            </if>
+            <if test="indirectAmount != null" >
+                indirect_amount,
+            </if>
+            <if test="directArea != null" >
+                direct_area,
+            </if>
+            <if test="directAreaRate != null" >
+                direct_area_rate,
+            </if>
+            <if test="indirectArea != null" >
+                indirect_area,
+            </if>
+            <if test="indirectAreaRate != null" >
+                indirect_area_rate,
+            </if>
+            <if test="recordType != null" >
+                record_type,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="month != null" >
+                #{month,jdbcType=VARCHAR},
+            </if>
+            <if test="uid != null" >
+                #{uid,jdbcType=BIGINT},
+            </if>
+            <if test="directAmoun != null" >
+                #{directAmoun,jdbcType=BIGINT},
+            </if>
+            <if test="indirectAmount != null" >
+                #{indirectAmount,jdbcType=BIGINT},
+            </if>
+            <if test="directArea != null" >
+                #{directArea,jdbcType=VARCHAR},
+            </if>
+            <if test="directAreaRate != null" >
+                #{directAreaRate,jdbcType=DECIMAL},
+            </if>
+            <if test="indirectArea != null" >
+                #{indirectArea,jdbcType=VARCHAR},
+            </if>
+            <if test="indirectAreaRate != null" >
+                #{indirectAreaRate,jdbcType=DECIMAL},
+            </if>
+            <if test="recordType != null" >
+                #{recordType,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    
+    <insert id="inserts" parameterType="java.util.List" >
+        <!-- WARNING -  自动生成 2016-11-21 添加多条数据 -->
+        insert into app_manager_bonus (month, uid, direct_amoun, indirect_amount, direct_area, direct_area_rate, indirect_area, indirect_area_rate, record_type, create_time)
+        values
+        <foreach collection="list" item="item" separator="," >
+            (#{item.month,jdbcType=VARCHAR}, #{item.uid,jdbcType=BIGINT}, #{item.directAmoun,jdbcType=BIGINT}, #{item.indirectAmount,jdbcType=BIGINT}, #{item.directArea,jdbcType=VARCHAR}, #{item.directAreaRate,jdbcType=DECIMAL}, #{item.indirectArea,jdbcType=VARCHAR}, #{item.indirectAreaRate,jdbcType=DECIMAL}, #{item.recordType,jdbcType=INTEGER}, #{item.createTime,jdbcType=TIMESTAMP})
+        </foreach>
+    </insert>
+    
+    <delete id="delete" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年11月21日 删除数据 -->
+        delete from app_manager_bonus
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    
+    <delete id="deletes" >
+        <!-- WARNING -  自动生成 2016-11-21 删除多条数据 -->
+        delete from app_manager_bonus where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteByEntity" >
+        <!-- WARNING -  自动生成 2016-11-21 通过实体类中的条件删除数据 -->
+        delete from app_manager_bonus
+        <where >
+            <if test="param.id != null " >
+                and id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.month != null and param.month != ''" >
+                and month = #{param.month,jdbcType=VARCHAR}
+            </if>
+            <if test="param.uid != null " >
+                and uid = #{param.uid,jdbcType=BIGINT}
+            </if>
+            <if test="param.directAmoun != null " >
+                and direct_amoun = #{param.directAmoun,jdbcType=BIGINT}
+            </if>
+            <if test="param.indirectAmount != null " >
+                and indirect_amount = #{param.indirectAmount,jdbcType=BIGINT}
+            </if>
+            <if test="param.directArea != null and param.directArea != ''" >
+                and direct_area = #{param.directArea,jdbcType=VARCHAR}
+            </if>
+            <if test="param.directAreaRate != null " >
+                and direct_area_rate = #{param.directAreaRate,jdbcType=DECIMAL}
+            </if>
+            <if test="param.indirectArea != null and param.indirectArea != ''" >
+                and indirect_area = #{param.indirectArea,jdbcType=VARCHAR}
+            </if>
+            <if test="param.indirectAreaRate != null " >
+                and indirect_area_rate = #{param.indirectAreaRate,jdbcType=DECIMAL}
+            </if>
+            <if test="param.recordType != null " >
+                and record_type = #{param.recordType,jdbcType=INTEGER}
+            </if>
+        </where>
+    </delete>
+    
+    <select id="findAll" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-11-21  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+</mapper>

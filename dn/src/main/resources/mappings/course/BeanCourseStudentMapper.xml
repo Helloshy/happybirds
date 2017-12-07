@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kapphk.web.dao.mapper.course.BeanCourseStudentMapper" >
+    <resultMap id="BaseResultMap" type="com.kapphk.web.bean.course.BeanCourseStudent" >
+        <!--  自动生成 2016年10月19日 表与实体类字段对应 -->
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="parent_name" property="parentName" jdbcType="VARCHAR" />
+        <result column="parent_relation" property="parentRelation" jdbcType="VARCHAR" />
+        <result column="parent_phone" property="parentPhone" jdbcType="VARCHAR" />
+        <result column="parent_name2" property="parentName2" jdbcType="VARCHAR" />
+        <result column="parent_relation2" property="parentRelation2" jdbcType="VARCHAR" />
+        <result column="parent_phone2" property="parentPhone2" jdbcType="VARCHAR" />
+        <result column="student_name" property="studentName" jdbcType="VARCHAR" />
+        <result column="sex" property="sex" jdbcType="INTEGER" />
+        <result column="student_id_card" property="studentIdCard" jdbcType="VARCHAR" />
+        <result column="body_status" property="bodyStatus" jdbcType="VARCHAR" />
+        <result column="case_history" property="caseHistory" jdbcType="VARCHAR" />
+        <result column="remark" property="remark" jdbcType="VARCHAR" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+    
+    <sql id="Base_Column_List" >
+        <!--  自动生成 2016年10月19日 表字段名称 -->
+        id, parent_name, parent_relation, parent_phone, parent_name2, parent_relation2, parent_phone2, 
+        student_name, sex, student_id_card, body_status, case_history, remark, create_time
+    </sql>
+    
+    <sql id="findByPageSql" >
+        <!-- WARNING -  自动生成 2016-10-19  分页查询SQL -->
+        select a.* from app_course_student a
+        <where >
+            <if test="param.id != null " >
+                and a.id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.parentName != null and param.parentName != ''" >
+                and a.parent_name = #{param.parentName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.parentRelation != null and param.parentRelation != ''" >
+                and a.parent_relation = #{param.parentRelation,jdbcType=VARCHAR}
+            </if>
+            <if test="param.parentPhone != null and param.parentPhone != ''" >
+                and a.parent_phone = #{param.parentPhone,jdbcType=VARCHAR}
+            </if>
+            <if test="param.parentName2 != null and param.parentName2 != ''" >
+                and a.parent_name2 = #{param.parentName2,jdbcType=VARCHAR}
+            </if>
+            <if test="param.parentRelation2 != null and param.parentRelation2 != ''" >
+                and a.parent_relation2 = #{param.parentRelation2,jdbcType=VARCHAR}
+            </if>
+            <if test="param.parentPhone2 != null and param.parentPhone2 != ''" >
+                and a.parent_phone2 = #{param.parentPhone2,jdbcType=VARCHAR}
+            </if>
+            <if test="param.studentName != null and param.studentName != ''" >
+                and a.student_name = #{param.studentName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.sex != null " >
+                and a.sex = #{param.sex,jdbcType=INTEGER}
+            </if>
+            <if test="param.studentIdCard != null and param.studentIdCard != ''" >
+                and a.student_id_card = #{param.studentIdCard,jdbcType=VARCHAR}
+            </if>
+            <if test="param.bodyStatus != null and param.bodyStatus != ''" >
+                and a.body_status = #{param.bodyStatus,jdbcType=VARCHAR}
+            </if>
+            <if test="param.caseHistory != null and param.caseHistory != ''" >
+                and a.case_history = #{param.caseHistory,jdbcType=VARCHAR}
+            </if>
+            <if test="param.remark != null and param.remark != ''" >
+                and a.remark = #{param.remark,jdbcType=VARCHAR}
+            </if>
+        </where>
+        order by a.id desc
+    </sql>
+    
+    <select id="findByPage" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-19  分页查询 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit #{offset}, #{pageSize}
+    </select>
+    
+    <select id="findByPageCount" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-10-19  分页查询总条数 -->
+        select count(1) from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findById" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年10月19日 根据ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_course_student
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    
+    <select id="load" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-19  根据多个ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_course_student where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </select>
+    
+    <select id="all" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-19  查询所有 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_course_student
+    </select>
+    
+    <select id="count" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-10-19 查询总条数 -->
+        select count(1) from app_course_student
+    </select>
+    
+    <update id="update" parameterType="com.kapphk.web.bean.course.BeanCourseStudent" >
+        <!--  自动生成 2016年10月19日 更新数据 -->
+        update app_course_student
+        <set >
+            <if test="parentName != null" >
+                parent_name = #{parentName,jdbcType=VARCHAR},
+            </if>
+            <if test="parentRelation != null" >
+                parent_relation = #{parentRelation,jdbcType=VARCHAR},
+            </if>
+            <if test="parentPhone != null" >
+                parent_phone = #{parentPhone,jdbcType=VARCHAR},
+            </if>
+            <if test="parentName2 != null" >
+                parent_name2 = #{parentName2,jdbcType=VARCHAR},
+            </if>
+            <if test="parentRelation2 != null" >
+                parent_relation2 = #{parentRelation2,jdbcType=VARCHAR},
+            </if>
+            <if test="parentPhone2 != null" >
+                parent_phone2 = #{parentPhone2,jdbcType=VARCHAR},
+            </if>
+            <if test="studentName != null" >
+                student_name = #{studentName,jdbcType=VARCHAR},
+            </if>
+            <if test="sex != null" >
+                sex = #{sex,jdbcType=INTEGER},
+            </if>
+            <if test="studentIdCard != null" >
+                student_id_card = #{studentIdCard,jdbcType=VARCHAR},
+            </if>
+            <if test="bodyStatus != null" >
+                body_status = #{bodyStatus,jdbcType=VARCHAR},
+            </if>
+            <if test="caseHistory != null" >
+                case_history = #{caseHistory,jdbcType=VARCHAR},
+            </if>
+            <if test="remark != null" >
+                remark = #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null" >
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    
+    <insert id="insert" parameterType="com.kapphk.web.bean.course.BeanCourseStudent" useGeneratedKeys="true" keyProperty="id" >
+        <!--  自动生成 2016年10月19日 添加数据 -->
+        insert into app_course_student
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                id,
+            </if>
+            <if test="parentName != null" >
+                parent_name,
+            </if>
+            <if test="parentRelation != null" >
+                parent_relation,
+            </if>
+            <if test="parentPhone != null" >
+                parent_phone,
+            </if>
+            <if test="parentName2 != null" >
+                parent_name2,
+            </if>
+            <if test="parentRelation2 != null" >
+                parent_relation2,
+            </if>
+            <if test="parentPhone2 != null" >
+                parent_phone2,
+            </if>
+            <if test="studentName != null" >
+                student_name,
+            </if>
+            <if test="sex != null" >
+                sex,
+            </if>
+            <if test="studentIdCard != null" >
+                student_id_card,
+            </if>
+            <if test="bodyStatus != null" >
+                body_status,
+            </if>
+            <if test="caseHistory != null" >
+                case_history,
+            </if>
+            <if test="remark != null" >
+                remark,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="parentName != null" >
+                #{parentName,jdbcType=VARCHAR},
+            </if>
+            <if test="parentRelation != null" >
+                #{parentRelation,jdbcType=VARCHAR},
+            </if>
+            <if test="parentPhone != null" >
+                #{parentPhone,jdbcType=VARCHAR},
+            </if>
+            <if test="parentName2 != null" >
+                #{parentName2,jdbcType=VARCHAR},
+            </if>
+            <if test="parentRelation2 != null" >
+                #{parentRelation2,jdbcType=VARCHAR},
+            </if>
+            <if test="parentPhone2 != null" >
+                #{parentPhone2,jdbcType=VARCHAR},
+            </if>
+            <if test="studentName != null" >
+                #{studentName,jdbcType=VARCHAR},
+            </if>
+            <if test="sex != null" >
+                #{sex,jdbcType=INTEGER},
+            </if>
+            <if test="studentIdCard != null" >
+                #{studentIdCard,jdbcType=VARCHAR},
+            </if>
+            <if test="bodyStatus != null" >
+                #{bodyStatus,jdbcType=VARCHAR},
+            </if>
+            <if test="caseHistory != null" >
+                #{caseHistory,jdbcType=VARCHAR},
+            </if>
+            <if test="remark != null" >
+                #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    
+    <insert id="inserts" parameterType="java.util.List" >
+        <!-- WARNING -  自动生成 2016-10-19 添加多条数据 -->
+        insert into app_course_student (id, parent_name, parent_relation, parent_phone, parent_name2, parent_relation2, parent_phone2, student_name, sex, student_id_card, body_status, case_history, remark, create_time)
+        values
+        <foreach collection="list" item="item" separator="," >
+            (#{item.id,jdbcType=BIGINT},#{item.parentName,jdbcType=VARCHAR}, #{item.parentRelation,jdbcType=VARCHAR}, #{item.parentPhone,jdbcType=VARCHAR}, #{item.parentName2,jdbcType=VARCHAR}, #{item.parentRelation2,jdbcType=VARCHAR}, #{item.parentPhone2,jdbcType=VARCHAR}, #{item.studentName,jdbcType=VARCHAR}, #{item.sex,jdbcType=INTEGER}, #{item.studentIdCard,jdbcType=VARCHAR}, #{item.bodyStatus,jdbcType=VARCHAR}, #{item.caseHistory,jdbcType=VARCHAR}, #{item.remark,jdbcType=VARCHAR}, #{item.createTime,jdbcType=TIMESTAMP})
+        </foreach>
+    </insert>
+    
+    <delete id="delete" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年10月19日 删除数据 -->
+        delete from app_course_student
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    
+    <delete id="deletes" >
+        <!-- WARNING -  自动生成 2016-10-19 删除多条数据 -->
+        delete from app_course_student where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteByEntity" >
+        <!-- WARNING -  自动生成 2016-10-19 通过实体类中的条件删除数据 -->
+        delete from app_course_student
+        <where >
+            <if test="param.id != null " >
+                and id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.parentName != null and param.parentName != ''" >
+                and parent_name = #{param.parentName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.parentRelation != null and param.parentRelation != ''" >
+                and parent_relation = #{param.parentRelation,jdbcType=VARCHAR}
+            </if>
+            <if test="param.parentPhone != null and param.parentPhone != ''" >
+                and parent_phone = #{param.parentPhone,jdbcType=VARCHAR}
+            </if>
+            <if test="param.parentName2 != null and param.parentName2 != ''" >
+                and parent_name2 = #{param.parentName2,jdbcType=VARCHAR}
+            </if>
+            <if test="param.parentRelation2 != null and param.parentRelation2 != ''" >
+                and parent_relation2 = #{param.parentRelation2,jdbcType=VARCHAR}
+            </if>
+            <if test="param.parentPhone2 != null and param.parentPhone2 != ''" >
+                and parent_phone2 = #{param.parentPhone2,jdbcType=VARCHAR}
+            </if>
+            <if test="param.studentName != null and param.studentName != ''" >
+                and student_name = #{param.studentName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.sex != null " >
+                and sex = #{param.sex,jdbcType=INTEGER}
+            </if>
+            <if test="param.studentIdCard != null and param.studentIdCard != ''" >
+                and student_id_card = #{param.studentIdCard,jdbcType=VARCHAR}
+            </if>
+            <if test="param.bodyStatus != null and param.bodyStatus != ''" >
+                and body_status = #{param.bodyStatus,jdbcType=VARCHAR}
+            </if>
+            <if test="param.caseHistory != null and param.caseHistory != ''" >
+                and case_history = #{param.caseHistory,jdbcType=VARCHAR}
+            </if>
+            <if test="param.remark != null and param.remark != ''" >
+                and remark = #{param.remark,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </delete>
+    
+    <select id="findAll" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-19  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findEntityByCondition" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-19  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit 0,1
+    </select>
+</mapper>

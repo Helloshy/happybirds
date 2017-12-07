@@ -1,0 +1,355 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kapphk.yyt.mapper.CommunityMapper" >
+    <resultMap id="BaseResultMap" type="com.kapphk.yyt.bean.Community" >
+        <!--  自动生成 2016年12月06日 表与实体类字段对应 -->
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="company_id" property="companyId" jdbcType="BIGINT" />
+        <result column="company_hall_id" property="companyHallId" jdbcType="BIGINT" />
+        <result column="item_name" property="itemName" jdbcType="VARCHAR" />
+        <result column="province" property="province" jdbcType="VARCHAR" />
+        <result column="city" property="city" jdbcType="VARCHAR" />
+        <result column="district" property="district" jdbcType="VARCHAR" />
+        <result column="address" property="address" jdbcType="VARCHAR" />
+        <result column="sid" property="sid" jdbcType="BIGINT" />
+        <result column="longitude" property="longitude" jdbcType="DECIMAL" />
+        <result column="latitude" property="latitude" jdbcType="DECIMAL" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+        <result column="distance" property="distance" jdbcType="DECIMAL" />
+    </resultMap>
+    
+    <resultMap id="EntityResultMap" type="com.kapphk.entity.CommunityEntity" extends="BaseResultMap">
+        <result column="company_name" property="companyName" jdbcType="VARCHAR" />
+        <result column="hall_name" property="hallName" jdbcType="VARCHAR" />
+        <result column="real_name" property="realName" jdbcType="VARCHAR" />
+    </resultMap>
+    
+    <sql id="Base_Column_List" >
+        <!--  自动生成 2016年12月06日 表字段名称 -->
+        id, company_id, company_hall_id, item_name, province, city, district, address, sid, 
+        longitude, latitude, create_time
+    </sql>
+    
+    <sql id="findByPageSql" >
+        <!-- WARNING -  自动生成 2016-12-06  分页查询SQL -->
+        select a.* from app_community a
+        <where >
+            <if test="param.id != null " >
+                and a.id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.companyId != null " >
+                and a.company_id = #{param.companyId,jdbcType=BIGINT}
+            </if>
+            <if test="param.companyHallId != null " >
+                and a.company_hall_id = #{param.companyHallId,jdbcType=BIGINT}
+            </if>
+            <if test="param.itemName != null and param.itemName != ''" >
+                and a.item_name = #{param.itemName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.province != null and param.province != ''" >
+                and a.province = #{param.province,jdbcType=VARCHAR}
+            </if>
+            <if test="param.city != null and param.city != ''" >
+                and a.city = #{param.city,jdbcType=VARCHAR}
+            </if>
+            <if test="param.district != null and param.district != ''" >
+                and a.district = #{param.district,jdbcType=VARCHAR}
+            </if>
+            <if test="param.address != null and param.address != ''" >
+                and a.address = #{param.address,jdbcType=VARCHAR}
+            </if>
+            <if test="param.sid != null " >
+                and a.sid = #{param.sid,jdbcType=BIGINT}
+            </if>
+            <if test="param.longitude != null " >
+                and a.longitude = #{param.longitude,jdbcType=DECIMAL}
+            </if>
+            <if test="param.latitude != null " >
+                and a.latitude = #{param.latitude,jdbcType=DECIMAL}
+            </if>
+        </where>
+        order by a.id desc
+    </sql>
+    
+    <select id="findByPage" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-06  分页查询 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit #{offset}, #{pageSize}
+    </select>
+    
+    <select id="findByPageCount" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-12-06  分页查询总条数 -->
+        select count(1) from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findById" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年12月06日 根据ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_community
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    
+    <select id="load" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-06  根据多个ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_community where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </select>
+    
+    <select id="all" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-06  查询所有 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_community
+    </select>
+    
+    <select id="count" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-12-06 查询总条数 -->
+        select count(1) from app_community
+    </select>
+    
+    <update id="update" parameterType="com.kapphk.yyt.bean.Community" >
+        <!--  自动生成 2016年12月06日 更新数据 -->
+        update app_community
+        <set >
+            <if test="companyId != null" >
+                company_id = #{companyId,jdbcType=BIGINT},
+            </if>
+            <if test="companyHallId != null" >
+                company_hall_id = #{companyHallId,jdbcType=BIGINT},
+            </if>
+            <if test="itemName != null" >
+                item_name = #{itemName,jdbcType=VARCHAR},
+            </if>
+            <if test="province != null" >
+                province = #{province,jdbcType=VARCHAR},
+            </if>
+            <if test="city != null" >
+                city = #{city,jdbcType=VARCHAR},
+            </if>
+            <if test="district != null" >
+                district = #{district,jdbcType=VARCHAR},
+            </if>
+            <if test="address != null" >
+                address = #{address,jdbcType=VARCHAR},
+            </if>
+            <if test="sid != null" >
+                sid = #{sid,jdbcType=BIGINT},
+            </if>
+            <if test="longitude != null" >
+                longitude = #{longitude,jdbcType=DECIMAL},
+            </if>
+            <if test="latitude != null" >
+                latitude = #{latitude,jdbcType=DECIMAL},
+            </if>
+            <if test="createTime != null" >
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    
+    <insert id="insert" parameterType="com.kapphk.yyt.bean.Community" useGeneratedKeys="true" keyProperty="id" >
+        <!--  自动生成 2016年12月06日 添加数据 -->
+        insert into app_community
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="companyId != null" >
+                company_id,
+            </if>
+            <if test="companyHallId != null" >
+                company_hall_id,
+            </if>
+            <if test="itemName != null" >
+                item_name,
+            </if>
+            <if test="province != null" >
+                province,
+            </if>
+            <if test="city != null" >
+                city,
+            </if>
+            <if test="district != null" >
+                district,
+            </if>
+            <if test="address != null" >
+                address,
+            </if>
+            <if test="sid != null" >
+                sid,
+            </if>
+            <if test="longitude != null" >
+                longitude,
+            </if>
+            <if test="latitude != null" >
+                latitude,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="companyId != null" >
+                #{companyId,jdbcType=BIGINT},
+            </if>
+            <if test="companyHallId != null" >
+                #{companyHallId,jdbcType=BIGINT},
+            </if>
+            <if test="itemName != null" >
+                #{itemName,jdbcType=VARCHAR},
+            </if>
+            <if test="province != null" >
+                #{province,jdbcType=VARCHAR},
+            </if>
+            <if test="city != null" >
+                #{city,jdbcType=VARCHAR},
+            </if>
+            <if test="district != null" >
+                #{district,jdbcType=VARCHAR},
+            </if>
+            <if test="address != null" >
+                #{address,jdbcType=VARCHAR},
+            </if>
+            <if test="sid != null" >
+                #{sid,jdbcType=BIGINT},
+            </if>
+            <if test="longitude != null" >
+                #{longitude,jdbcType=DECIMAL},
+            </if>
+            <if test="latitude != null" >
+                #{latitude,jdbcType=DECIMAL},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    
+    <insert id="inserts" parameterType="java.util.List" >
+        <!-- WARNING -  自动生成 2016-12-06 添加多条数据 -->
+        insert into app_community (company_id, company_hall_id, item_name, province, city, district, address, sid, longitude, latitude, create_time)
+        values
+        <foreach collection="list" item="item" separator="," >
+            (#{item.companyId,jdbcType=BIGINT}, #{item.companyHallId,jdbcType=BIGINT}, #{item.itemName,jdbcType=VARCHAR}, #{item.province,jdbcType=VARCHAR}, #{item.city,jdbcType=VARCHAR}, #{item.district,jdbcType=VARCHAR}, #{item.address,jdbcType=VARCHAR}, #{item.sid,jdbcType=BIGINT}, #{item.longitude,jdbcType=DECIMAL}, #{item.latitude,jdbcType=DECIMAL}, #{item.createTime,jdbcType=TIMESTAMP})
+        </foreach>
+    </insert>
+    
+    <delete id="delete" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年12月06日 删除数据 -->
+        delete from app_community
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    
+    <delete id="deletes" >
+        <!-- WARNING -  自动生成 2016-12-06 删除多条数据 -->
+        delete from app_community where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteByEntity" >
+        <!-- WARNING -  自动生成 2016-12-06 通过实体类中的条件删除数据 -->
+        delete from app_community
+        <where >
+            <if test="param.id != null " >
+                and id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.companyId != null " >
+                and company_id = #{param.companyId,jdbcType=BIGINT}
+            </if>
+            <if test="param.companyHallId != null " >
+                and company_hall_id = #{param.companyHallId,jdbcType=BIGINT}
+            </if>
+            <if test="param.itemName != null and param.itemName != ''" >
+                and item_name = #{param.itemName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.province != null and param.province != ''" >
+                and province = #{param.province,jdbcType=VARCHAR}
+            </if>
+            <if test="param.city != null and param.city != ''" >
+                and city = #{param.city,jdbcType=VARCHAR}
+            </if>
+            <if test="param.district != null and param.district != ''" >
+                and district = #{param.district,jdbcType=VARCHAR}
+            </if>
+            <if test="param.address != null and param.address != ''" >
+                and address = #{param.address,jdbcType=VARCHAR}
+            </if>
+            <if test="param.sid != null " >
+                and sid = #{param.sid,jdbcType=BIGINT}
+            </if>
+            <if test="param.longitude != null " >
+                and longitude = #{param.longitude,jdbcType=DECIMAL}
+            </if>
+            <if test="param.latitude != null " >
+                and latitude = #{param.latitude,jdbcType=DECIMAL}
+            </if>
+        </where>
+    </delete>
+    
+    <select id="findAll" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-06  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    <select id="findList" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-06  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    <!-- 附近的小区 -->
+    <select id="nearbyList" resultMap="BaseResultMap" >
+        select temp.*
+        from (
+        	select 
+        	<include refid="Base_Column_List" />
+        	, getDistance(longitude,latitude,#{param.longitude,jdbcType=DECIMAL},#{param.latitude,jdbcType=DECIMAL}) as distance
+        	from app_community
+        	<where>
+        	  	<if test="param.itemName != null and param.itemName != '' " >
+                	and item_name like CONCAT('%',#{param.itemName,jdbcType=VARCHAR},'%') 
+            	</if>
+            	<if test="param.city != null and param.city != '' " >
+                	and city =  #{param.city,jdbcType=VARCHAR}
+            	</if>
+        	</where>
+        ) temp order by temp.distance asc
+    </select>
+    
+    <!-- 小区列表 -->
+    <select id="findListByItemName" resultMap="BaseResultMap" >
+        select 
+        	<include refid="Base_Column_List" />
+        	from app_community
+        	<where>
+        	  <if test="itemName != null and itemName != '' " >
+                and item_name like CONCAT('%',#{itemName,jdbcType=VARCHAR},'%') 
+            </if>
+        	</where>
+    </select>
+    
+    <select id="findListByParam" resultMap="EntityResultMap" >
+        SELECT ac.*,aco.company_name ,su.real_name ,ach.hall_name
+        FROM app_community ac 
+        LEFT JOIN app_company aco ON ac.company_id = aco.id
+		LEFT JOIN sys_system_user su ON ac.sid = su.id
+		LEFT JOIN app_company_hall ach on ach.id = ac.company_hall_id
+		<where>
+       	  <if test="param.itemName != null and param.itemName != '' " >
+               and ac.item_name like CONCAT('%',#{param.itemName,jdbcType=VARCHAR},'%') 
+           </if>
+       	  <if test="param.companyId != null and param.companyId  != '' " >
+               and ac.company_id = #{param.companyId,jdbcType=BIGINT}
+           </if>
+       	</where>
+    </select>
+</mapper>

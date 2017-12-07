@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kapphk.web.dao.mapper.system.BeanSettingMapper" >
+    <resultMap id="BaseResultMap" type="com.kapphk.web.bean.system.BeanSetting" >
+        <!--  自动生成 2016年10月28日 表与实体类字段对应 -->
+        <id column="id" property="id" jdbcType="VARCHAR" />
+        <result column="item_name" property="itemName" jdbcType="VARCHAR" />
+        <result column="value" property="value" jdbcType="VARCHAR" />
+        <result column="remark" property="remark" jdbcType="VARCHAR" />
+        <result column="item_type" property="itemType" jdbcType="VARCHAR" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+    
+    <sql id="Base_Column_List" >
+        <!--  自动生成 2016年10月28日 表字段名称 -->
+        id, item_name, value, remark, item_type, create_time
+    </sql>
+    
+    <sql id="findByPageSql" >
+        <!-- WARNING -  自动生成 2016-10-28  分页查询SQL -->
+        select a.* from sys_setting a
+        <where >
+            <if test="param.id != null and param.id != ''" >
+                and a.id = #{param.id,jdbcType=VARCHAR}
+            </if>
+            <if test="param.itemName != null and param.itemName != ''" >
+                and a.item_name = #{param.itemName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.value != null and param.value != ''" >
+                and a.value = #{param.value,jdbcType=VARCHAR}
+            </if>
+            <if test="param.remark != null and param.remark != ''" >
+                and a.remark = #{param.remark,jdbcType=VARCHAR}
+            </if>
+            <if test="param.itemType != null and param.itemType != ''" >
+                and a.item_type = #{param.itemType,jdbcType=VARCHAR}
+            </if>
+        </where>
+        order by a.create_time desc
+    </sql>
+    
+    <select id="findByPage" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-28  分页查询 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit #{offset}, #{pageSize}
+    </select>
+    
+    <select id="findByPageCount" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-10-28  分页查询总条数 -->
+        select count(1) from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findById" resultMap="BaseResultMap" parameterType="java.lang.String" >
+        <!--  自动生成 2016年10月28日 根据ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from sys_setting
+        where id = #{id,jdbcType=VARCHAR}
+    </select>
+    
+    <select id="load" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-28  根据多个ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from sys_setting where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </select>
+    
+    <select id="all" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-28  查询所有 -->
+        select 
+        <include refid="Base_Column_List" />
+        from sys_setting
+    </select>
+    
+    <select id="count" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-10-28 查询总条数 -->
+        select count(1) from sys_setting
+    </select>
+    
+    <update id="update" parameterType="com.kapphk.web.bean.system.BeanSetting" >
+        <!--  自动生成 2016年10月28日 更新数据 -->
+        update sys_setting
+        <set >
+            <if test="itemName != null" >
+                item_name = #{itemName,jdbcType=VARCHAR},
+            </if>
+            <if test="value != null" >
+                value = #{value,jdbcType=VARCHAR},
+            </if>
+            <if test="remark != null" >
+                remark = #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="itemType != null" >
+                item_type = #{itemType,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null" >
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=VARCHAR}
+    </update>
+    
+    <insert id="insert" parameterType="com.kapphk.web.bean.system.BeanSetting" useGeneratedKeys="true" keyProperty="id" >
+        <!--  自动生成 2016年10月28日 添加数据 -->
+        insert into sys_setting
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="itemName != null" >
+                item_name,
+            </if>
+            <if test="value != null" >
+                value,
+            </if>
+            <if test="remark != null" >
+                remark,
+            </if>
+            <if test="itemType != null" >
+                item_type,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="itemName != null" >
+                #{itemName,jdbcType=VARCHAR},
+            </if>
+            <if test="value != null" >
+                #{value,jdbcType=VARCHAR},
+            </if>
+            <if test="remark != null" >
+                #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="itemType != null" >
+                #{itemType,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    
+    <insert id="inserts" parameterType="java.util.List" >
+        <!-- WARNING -  自动生成 2016-10-28 添加多条数据 -->
+        insert into sys_setting (item_name, value, remark, item_type, create_time)
+        values
+        <foreach collection="list" item="item" separator="," >
+            (#{item.itemName,jdbcType=VARCHAR}, #{item.value,jdbcType=VARCHAR}, #{item.remark,jdbcType=VARCHAR}, #{item.itemType,jdbcType=VARCHAR}, #{item.createTime,jdbcType=TIMESTAMP})
+        </foreach>
+    </insert>
+    
+    <delete id="delete" parameterType="java.lang.String" >
+        <!--  自动生成 2016年10月28日 删除数据 -->
+        delete from sys_setting
+        where id = #{id,jdbcType=VARCHAR}
+    </delete>
+    
+    <delete id="deletes" >
+        <!-- WARNING -  自动生成 2016-10-28 删除多条数据 -->
+        delete from sys_setting where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteByEntity" >
+        <!-- WARNING -  自动生成 2016-10-28 通过实体类中的条件删除数据 -->
+        delete from sys_setting
+        <where >
+            <if test="param.id != null and param.id != ''" >
+                and id = #{param.id,jdbcType=VARCHAR}
+            </if>
+            <if test="param.itemName != null and param.itemName != ''" >
+                and item_name = #{param.itemName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.value != null and param.value != ''" >
+                and value = #{param.value,jdbcType=VARCHAR}
+            </if>
+            <if test="param.remark != null and param.remark != ''" >
+                and remark = #{param.remark,jdbcType=VARCHAR}
+            </if>
+            <if test="param.itemType != null and param.itemType != ''" >
+                and item_type = #{param.itemType,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </delete>
+    
+    <select id="findAll" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-28  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+</mapper>

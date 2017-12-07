@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kapphk.web.dao.mapper.user.BeanUserBankInfoMapper" >
+    <resultMap id="BaseResultMap" type="com.kapphk.web.bean.user.BeanUserBankInfo" >
+        <!--  自动生成 2016年11月17日 表与实体类字段对应 -->
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="uid" property="uid" jdbcType="BIGINT" />
+        <result column="bank_name" property="bankName" jdbcType="VARCHAR" />
+        <result column="bank_address" property="bankAddress" jdbcType="VARCHAR" />
+        <result column="card_no" property="cardNo" jdbcType="VARCHAR" />
+        <result column="acount_name" property="acountName" jdbcType="VARCHAR" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+    
+    <sql id="Base_Column_List" >
+        <!--  自动生成 2016年11月17日 表字段名称 -->
+        id, uid, bank_name, bank_address, card_no, acount_name, create_time
+    </sql>
+    
+    <sql id="findByPageSql" >
+        <!-- WARNING -  自动生成 2016-11-17  分页查询SQL -->
+        select a.* from user_bank_info a
+        <where >
+            <if test="param.id != null " >
+                and a.id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.uid != null " >
+                and a.uid = #{param.uid,jdbcType=BIGINT}
+            </if>
+            <if test="param.bankName != null and param.bankName != ''" >
+                and a.bank_name = #{param.bankName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.bankAddress != null and param.bankAddress != ''" >
+                and a.bank_address = #{param.bankAddress,jdbcType=VARCHAR}
+            </if>
+            <if test="param.cardNo != null and param.cardNo != ''" >
+                and a.card_no = #{param.cardNo,jdbcType=VARCHAR}
+            </if>
+            <if test="param.acountName != null and param.acountName != ''" >
+                and a.acount_name = #{param.acountName,jdbcType=VARCHAR}
+            </if>
+        </where>
+        order by a.id desc
+    </sql>
+    
+    <select id="findByPage" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-11-17  分页查询 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit #{offset}, #{pageSize}
+    </select>
+    
+    <select id="findByPageCount" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-11-17  分页查询总条数 -->
+        select count(1) from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findById" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年11月17日 根据ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from user_bank_info
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    
+    <select id="load" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-11-17  根据多个ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from user_bank_info where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </select>
+    
+    <select id="all" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-11-17  查询所有 -->
+        select 
+        <include refid="Base_Column_List" />
+        from user_bank_info
+    </select>
+    
+    <select id="count" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-11-17 查询总条数 -->
+        select count(1) from user_bank_info
+    </select>
+    
+    <update id="update" parameterType="com.kapphk.web.bean.user.BeanUserBankInfo" >
+        <!--  自动生成 2016年11月17日 更新数据 -->
+        update user_bank_info
+        <set >
+            <if test="uid != null" >
+                uid = #{uid,jdbcType=BIGINT},
+            </if>
+            <if test="bankName != null" >
+                bank_name = #{bankName,jdbcType=VARCHAR},
+            </if>
+            <if test="bankAddress != null" >
+                bank_address = #{bankAddress,jdbcType=VARCHAR},
+            </if>
+            <if test="cardNo != null" >
+                card_no = #{cardNo,jdbcType=VARCHAR},
+            </if>
+            <if test="acountName != null" >
+                acount_name = #{acountName,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null" >
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    
+    <insert id="insert" parameterType="com.kapphk.web.bean.user.BeanUserBankInfo" useGeneratedKeys="true" keyProperty="id" >
+        <!--  自动生成 2016年11月17日 添加数据 -->
+        insert into user_bank_info
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="uid != null" >
+                uid,
+            </if>
+            <if test="bankName != null" >
+                bank_name,
+            </if>
+            <if test="bankAddress != null" >
+                bank_address,
+            </if>
+            <if test="cardNo != null" >
+                card_no,
+            </if>
+            <if test="acountName != null" >
+                acount_name,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="uid != null" >
+                #{uid,jdbcType=BIGINT},
+            </if>
+            <if test="bankName != null" >
+                #{bankName,jdbcType=VARCHAR},
+            </if>
+            <if test="bankAddress != null" >
+                #{bankAddress,jdbcType=VARCHAR},
+            </if>
+            <if test="cardNo != null" >
+                #{cardNo,jdbcType=VARCHAR},
+            </if>
+            <if test="acountName != null" >
+                #{acountName,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    
+    <insert id="inserts" parameterType="java.util.List" >
+        <!-- WARNING -  自动生成 2016-11-17 添加多条数据 -->
+        insert into user_bank_info (uid, bank_name, bank_address, card_no, acount_name, create_time)
+        values
+        <foreach collection="list" item="item" separator="," >
+            (#{item.uid,jdbcType=BIGINT}, #{item.bankName,jdbcType=VARCHAR}, #{item.bankAddress,jdbcType=VARCHAR}, #{item.cardNo,jdbcType=VARCHAR}, #{item.acountName,jdbcType=VARCHAR}, #{item.createTime,jdbcType=TIMESTAMP})
+        </foreach>
+    </insert>
+    
+    <delete id="delete" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年11月17日 删除数据 -->
+        delete from user_bank_info
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    
+    <delete id="deletes" >
+        <!-- WARNING -  自动生成 2016-11-17 删除多条数据 -->
+        delete from user_bank_info where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteByEntity" >
+        <!-- WARNING -  自动生成 2016-11-17 通过实体类中的条件删除数据 -->
+        delete from user_bank_info
+        <where >
+            <if test="param.id != null " >
+                and id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.uid != null " >
+                and uid = #{param.uid,jdbcType=BIGINT}
+            </if>
+            <if test="param.bankName != null and param.bankName != ''" >
+                and bank_name = #{param.bankName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.bankAddress != null and param.bankAddress != ''" >
+                and bank_address = #{param.bankAddress,jdbcType=VARCHAR}
+            </if>
+            <if test="param.cardNo != null and param.cardNo != ''" >
+                and card_no = #{param.cardNo,jdbcType=VARCHAR}
+            </if>
+            <if test="param.acountName != null and param.acountName != ''" >
+                and acount_name = #{param.acountName,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </delete>
+    
+    <select id="findAll" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-11-17  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findEntityByCondition" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-11-17  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit 0,1
+    </select>
+</mapper>

@@ -1,0 +1,40 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=gbk">
+    <script type="text/javascript" src="../static/js/LodopFuncs.js"></script>
+
+    <object  id="LODOP_OB" classid="clsid:2105C259-1E0C-4534-8141-A753534CB4CA" width=0 height=0>
+        <embed id="LODOP_EM" type="application/x-print-lodop" width=0 height=0></embed>
+    </object>
+    <script type="text/javascript">
+        if (needCLodop()) {
+            window.On_CLodop_Opened=function(){
+                OpenPreview();	//调用打印方法打印，详见样例22
+                window.On_CLodop_Opened=null;
+            };
+        } else
+            window.onload = function(){OpenPreview();};
+    </script>
+</head>
+<body >
+
+</body>
+<script type="text/javascript">
+    var LODOP=getLodop();
+    var strHtml = '<table border="1" width="360" height="220" style="border-collapse:collapse;border:solid 1px" bordercolor="#000000">'
+            +'<tr>'+'<td width="100%" height="240">'+'<p align="center"> '+'<font face="隶书" size="5" style="letter-spacing: 10px">郭德强</font>'
+            +'<p align="center"><font face="宋体" size="3">科学家</font></p>'+' <p align="left"><font face="宋体" size="3">　地址：中国北京社会科学院附近东大街西胡同</font></p>'+
+                    '<p align="left"><font face="宋体" size="3">　电话：010-88811888</font></p><p><br></p></td></tr></table>'
+
+    LODOP.PRINT_INIT("打印任务名");               //首先一个初始化语句
+    LODOP.ADD_PRINT_RECT(10,55,360,220,0,1);
+    LODOP.SET_PRINT_STYLE("FontSize",11);
+    LODOP.ADD_PRINT_TEXT(20,180,100,25,"郭德强");
+    LODOP.SET_PRINT_STYLEA(2,"FontName","隶书");
+    LODOP.SET_PRINT_STYLEA(2,"FontSize",15);
+    LODOP.ADD_PRINT_TEXT(53,187,75,20,"科学家");
+    LODOP.ADD_PRINT_TEXT(100,131,272,20,"地址：中国北京社会科学院附近东大街西胡同");
+    LODOP.ADD_PRINT_TEXT(138,132,166,20,"电话：010-88811888");
+    LODOP.PRINT_INIT("打印插件功能演示_代码功能_名片");
+    LODOP.ADD_PRINT_HTM(10,55,"100%","100%", strHtml);
+    LODOP.PRINT();
+</script>
+</html>

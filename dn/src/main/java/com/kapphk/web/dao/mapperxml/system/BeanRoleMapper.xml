@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kapphk.web.dao.mapper.system.BeanRoleMapper" >
+    <resultMap id="BaseResultMap" type="com.kapphk.web.bean.system.BeanRole" >
+        <!--  自动生成 2016年05月23日 表与实体类字段对应 -->
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="role_name" property="roleName" jdbcType="VARCHAR" />
+        <result column="state" property="state" jdbcType="SMALLINT" />
+        <result column="role_value" property="roleValue" jdbcType="VARCHAR" />
+        <result column="create_time" property="createTime" jdbcType="DATE" />
+    </resultMap>
+    
+    <!-- 查询父级  zoneyu 16-8-3 -->
+    <select id="findParentResource" resultType="java.util.Map">
+    	SELECT sr2.id AS twoId,sr3.id AS threeId FROM sys_resource AS sr 
+		LEFT JOIN sys_resource AS sr2 ON sr.parent_id = sr2.id 
+		LEFT JOIN sys_resource AS sr3 ON sr2.parent_id = sr3.id 
+		WHERE sr.id = #{id}
+    </select>
+    
+     <!-- 修改  zoneyu 16-8-3 -->
+    <select id="findData" resultType="java.util.Map">
+    	SELECT sr.id,sr.role_name AS roleName,sr.create_time AS createTime,
+    	GROUP_CONCAT(CAST(srr.resource_id AS CHAR)) AS resourceId 
+		FROM sys_role AS sr LEFT JOIN sys_role_resource AS srr ON sr.id = srr.role_id 
+		WHERE sr.id = #{id}
+		GROUP BY sr.id 
+    </select>
+    
+    
+    <sql id="Base_Column_List" >
+        <!--  自动生成 2016年05月23日 表字段名称 -->
+        id, role_name, state, role_value, create_time
+    </sql>
+    
+    <sql id="findByPageSql" >
+        <!-- WARNING -  自动生成 2016-05-23  分页查询SQL -->
+        select a.* from sys_role a
+        <where >
+            <if test="param.id != null " >
+                and a.id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.roleName != null and param.roleName != ''" >
+                and a.role_name like '%${param.roleName}%'
+            </if>
+            <if test="param.state != null " >
+                and a.state = #{param.state,jdbcType=SMALLINT}
+            </if>
+            <if test="param.roleValue != null and param.roleValue != ''" >
+                and a.role_value = #{param.roleValue,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </sql>
+    
+    <select id="findByPage" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-05-23  分页查询 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit #{offset}, #{pageSize}
+    </select>
+    
+    <select id="findByPageCount" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-05-23  分页查询总条数 -->
+        select count(1) from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findById" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年05月23日 根据ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from sys_role
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    
+    <select id="load" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-05-23  根据多个ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from sys_role where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </select>
+    
+    <select id="all" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-05-23  查询所有 -->
+        select 
+        <include refid="Base_Column_List" />
+        from sys_role
+    </select>
+    
+    <select id="count" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-05-23 查询总条数 -->
+        select count(1) from sys_role
+    </select>
+    
+    <update id="update" parameterType="com.kapphk.web.bean.system.BeanRole" >
+        <!--  自动生成 2016年05月23日 更新数据 -->
+        update sys_role
+        <set >
+            <if test="roleName != null" >
+                role_name = #{roleName,jdbcType=VARCHAR},
+            </if>
+            <if test="state != null" >
+                state = #{state,jdbcType=SMALLINT},
+            </if>
+            <if test="roleValue != null" >
+                role_value = #{roleValue,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null" >
+                create_time = #{createTime,jdbcType=DATE},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    
+    <insert id="insert" parameterType="com.kapphk.web.bean.system.BeanRole" useGeneratedKeys="true" keyProperty="id" >
+        <!--  自动生成 2016年05月23日 添加数据 -->
+        insert into sys_role
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="roleName != null" >
+                role_name,
+            </if>
+            <if test="state != null" >
+                state,
+            </if>
+            <if test="roleValue != null" >
+                role_value,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="roleName != null" >
+                #{roleName,jdbcType=VARCHAR},
+            </if>
+            <if test="state != null" >
+                #{state,jdbcType=SMALLINT},
+            </if>
+            <if test="roleValue != null" >
+                #{roleValue,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=DATE},
+            </if>
+        </trim>
+    </insert>
+    
+    <insert id="inserts" parameterType="java.util.List" >
+        <!-- WARNING -  自动生成 2016-05-23 添加多条数据 -->
+        insert into sys_role (role_name, state, role_value, create_time)
+        values
+        <foreach collection="list" item="item" separator="," >
+            (#{item.roleName,jdbcType=VARCHAR}, #{item.state,jdbcType=SMALLINT}, #{item.roleValue,jdbcType=VARCHAR}, #{item.createTime,jdbcType=DATE})
+        </foreach>
+    </insert>
+    
+    <delete id="delete" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年05月23日 删除数据 -->
+        delete from sys_role
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    
+    <delete id="deletes" >
+        <!-- WARNING -  自动生成 2016-05-23 删除多条数据 -->
+        delete from sys_role where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteByEntity" >
+        <!-- WARNING -  自动生成 2016-05-23 通过实体类中的条件删除数据 -->
+        delete from sys_role
+        <where >
+            <if test="param.id != null " >
+                and id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.roleName != null and param.roleName != ''" >
+                and role_name = #{param.roleName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.state != null " >
+                and state = #{param.state,jdbcType=SMALLINT}
+            </if>
+            <if test="param.roleValue != null and param.roleValue != ''" >
+                and role_value = #{param.roleValue,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </delete>
+    
+    <select id="findAll" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-05-23  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findEntityByCondition" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-05-23  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit 0,1
+    </select>
+</mapper>

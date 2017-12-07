@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kapphk.web.dao.mapper.course.BeanCourseCollectionMapper" >
+    <resultMap id="BaseResultMap" type="com.kapphk.web.bean.course.BeanCourseCollection" >
+        <!--  自动生成 2016年10月12日 表与实体类字段对应 -->
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="uid" property="uid" jdbcType="BIGINT" />
+        <result column="course_id" property="courseId" jdbcType="BIGINT" />
+        <result column="collection_type" property="collectionType" jdbcType="INTEGER" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+    
+    <!-- APP-获取课程收藏列表 -->
+    <select id="getCollectionList" resultType="java.util.Map">
+    	SELECT c.item_name AS itemName,c.logo_path AS logoPath,GROUP_CONCAT(t.user_name) AS teacherName,cc.id,
+		o.phone,CONCAT(o.province,o.city,o.district,o.address) AS address,ct.course_group AS courseGroup,
+		FLOOR(c.amount) AS amount,o.register_date AS registerDate,c.is_public AS isPublic,
+		c.record_type AS recordType,c.id AS courseId
+		FROM app_course_collection cc
+		INNER JOIN app_course c ON c.id=cc.course_id
+		INNER JOIN app_course_offline o ON c.id=o.id
+		LEFT JOIN app_course_teacher t ON t.course_id=c.id
+		LEFT JOIN app_course_type ct ON ct.id=o.course_type_id
+		WHERE cc.uid= #{uid} AND cc.data_type=1
+		GROUP BY cc.course_id
+		ORDER BY cc.create_time DESC LIMIT #{page},#{rows}
+    </select>
+    
+    <sql id="Base_Column_List" >
+        <!--  自动生成 2016年10月12日 表字段名称 -->
+        id, uid, course_id, collection_type, create_time
+    </sql>
+    
+    <sql id="findByPageSql" >
+        <!-- WARNING -  自动生成 2016-10-12  分页查询SQL -->
+        select a.* from app_course_collection a
+        <where >
+            <if test="param.id != null " >
+                and a.id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.uid != null " >
+                and a.uid = #{param.uid,jdbcType=BIGINT}
+            </if>
+            <if test="param.courseId != null " >
+                and a.course_id = #{param.courseId,jdbcType=BIGINT}
+            </if>
+            <if test="param.collectionType != null " >
+                and a.collection_type = #{param.collectionType,jdbcType=INTEGER}
+            </if>
+        </where>
+        order by a.id desc
+    </sql>
+    
+    <select id="findByPage" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-12  分页查询 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit #{offset}, #{pageSize}
+    </select>
+    
+    <select id="findByPageCount" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-10-12  分页查询总条数 -->
+        select count(1) from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findById" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年10月12日 根据ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_course_collection
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    
+    <select id="load" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-12  根据多个ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_course_collection where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </select>
+    
+    <select id="all" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-12  查询所有 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_course_collection
+    </select>
+    
+    <select id="count" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-10-12 查询总条数 -->
+        select count(1) from app_course_collection
+    </select>
+    
+    <update id="update" parameterType="com.kapphk.web.bean.course.BeanCourseCollection" >
+        <!--  自动生成 2016年10月12日 更新数据 -->
+        update app_course_collection
+        <set >
+            <if test="uid != null" >
+                uid = #{uid,jdbcType=BIGINT},
+            </if>
+            <if test="courseId != null" >
+                course_id = #{courseId,jdbcType=BIGINT},
+            </if>
+            <if test="collectionType != null" >
+                collection_type = #{collectionType,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null" >
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    
+    <insert id="insert" parameterType="com.kapphk.web.bean.course.BeanCourseCollection" useGeneratedKeys="true" keyProperty="id" >
+        <!--  自动生成 2016年10月12日 添加数据 -->
+        insert into app_course_collection
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="uid != null" >
+                uid,
+            </if>
+            <if test="courseId != null" >
+                course_id,
+            </if>
+            <if test="collectionType != null" >
+                collection_type,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="uid != null" >
+                #{uid,jdbcType=BIGINT},
+            </if>
+            <if test="courseId != null" >
+                #{courseId,jdbcType=BIGINT},
+            </if>
+            <if test="collectionType != null" >
+                #{collectionType,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    
+    <insert id="inserts" parameterType="java.util.List" >
+        <!-- WARNING -  自动生成 2016-10-12 添加多条数据 -->
+        insert into app_course_collection (uid, course_id, collection_type, create_time)
+        values
+        <foreach collection="list" item="item" separator="," >
+            (#{item.uid,jdbcType=BIGINT}, #{item.courseId,jdbcType=BIGINT}, #{item.collectionType,jdbcType=INTEGER}, #{item.createTime,jdbcType=TIMESTAMP})
+        </foreach>
+    </insert>
+    
+    <delete id="delete" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年10月12日 删除数据 -->
+        delete from app_course_collection
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    
+    <delete id="deletes" >
+        <!-- WARNING -  自动生成 2016-10-12 删除多条数据 -->
+        delete from app_course_collection where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteByEntity" >
+        <!-- WARNING -  自动生成 2016-10-12 通过实体类中的条件删除数据 -->
+        delete from app_course_collection
+        <where >
+            <if test="param.id != null " >
+                and id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.uid != null " >
+                and uid = #{param.uid,jdbcType=BIGINT}
+            </if>
+            <if test="param.courseId != null " >
+                and course_id = #{param.courseId,jdbcType=BIGINT}
+            </if>
+            <if test="param.collectionType != null " >
+                and collection_type = #{param.collectionType,jdbcType=INTEGER}
+            </if>
+        </where>
+    </delete>
+    
+    <select id="findAll" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-12  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findEntityByCondition" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-12  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit 0,1
+    </select>
+</mapper>

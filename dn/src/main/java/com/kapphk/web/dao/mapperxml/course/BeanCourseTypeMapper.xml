@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kapphk.web.dao.mapper.course.BeanCourseTypeMapper" >
+    <resultMap id="BaseResultMap" type="com.kapphk.web.bean.course.BeanCourseType" >
+        <!--  自动生成 2016年10月13日 表与实体类字段对应 -->
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="item_name" property="itemName" jdbcType="VARCHAR" />
+        <result column="course_tag" property="courseTag" jdbcType="VARCHAR" />
+        <result column="course_tag_type" property="courseTagType" jdbcType="VARCHAR" />
+        <result column="course_group" property="courseGroup" jdbcType="VARCHAR" />
+        <result column="course_group_type" property="courseGroupType" jdbcType="VARCHAR" />
+        <result column="blue_currency_rate" property="blueCurrencyRate" jdbcType="DECIMAL" />
+        <result column="retrain_amount" property="retrainAmount" jdbcType="DECIMAL" />
+        <result column="course_month" property="courseMonth" jdbcType="VARCHAR" />
+        <result column="course_month_type" property="courseMonthType" jdbcType="VARCHAR" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+    
+    <!-- 获取全部课程系列 -->
+    <select id="searchCourseTypeList" resultType="java.util.Map">
+    	SELECT ct.id,ct.item_name AS `text` FROM app_course_type ct
+    </select>
+    
+    <!-- 查询列表 -->
+    <select id="findList" resultType="java.util.Map">
+    	SELECT ct.id,ct.item_name AS itemName,ct.course_tag AS courseTag,ct.course_group AS courseGroup,
+		ct.blue_currency_rate AS blueCurrencyRate,ct.retrain_amount AS retrainAmount,
+		ct.course_month AS courseMonth,CAST(ct.create_time AS CHAR) AS createTime,
+		(SELECT GROUP_CONCAT(ctt.tag_identity) FROM app_course_type_tag ctt WHERE ctt.course_type_id = ct.id) AS ctt
+		FROM app_course_type ct
+		<where>
+			<if test="param.itemName != null and param.itemName != ''">
+				and ct.item_name like '%${param.itemName}%'
+			</if>
+			<if test="param.id != null and param.id != ''">
+				and ct.id like '%${param.id}%'
+			</if>
+		</where> 
+		order by ct.create_time DESC LIMIT #{page},#{rows}
+    </select>
+    
+    <!-- 查询总数 -->
+    <select id="findCount" resultType="java.lang.Integer">
+		SELECT COUNT(1) FROM app_course_type ct
+		<where>
+			<if test="param.itemName != null and param.itemName != ''">
+				and ct.item_name like '%${param.itemName}%'
+			</if>
+			<if test="param.id != null and param.id != ''">
+				and ct.id like '%${param.id}%'
+			</if>
+		</where> 
+    </select>
+    
+    <!-- 详情 -->
+    <select id="findDetailById" resultType="java.util.Map">
+    	SELECT ct.id,ct.item_name AS itemName,ct.course_tag AS courseTag,ct.course_group AS courseGroup,
+		ct.blue_currency_rate AS blueCurrencyRate,ct.retrain_amount AS retrainAmount,
+		ct.course_month AS courseMonth,CAST(ct.create_time AS CHAR) AS createTime,
+		(SELECT GROUP_CONCAT(ctt.tag_identity) FROM app_course_type_tag ctt WHERE ctt.course_type_id = ct.id) AS ctt
+		FROM app_course_type ct where ct.id=#{id}
+    </select>
+    
+    <sql id="Base_Column_List" >
+        <!--  自动生成 2016年10月13日 表字段名称 -->
+        id, item_name, course_tag, course_tag_type, course_group, course_group_type, blue_currency_rate, 
+        retrain_amount, course_month, course_month_type, create_time
+    </sql>
+    
+    <sql id="findByPageSql" >
+        <!-- WARNING -  自动生成 2016-10-13  分页查询SQL -->
+        select a.* from app_course_type a
+        <where >
+            <if test="param.id != null " >
+                and a.id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.itemName != null and param.itemName != ''" >
+                and a.item_name = #{param.itemName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.courseTag != null and param.courseTag != ''" >
+                and a.course_tag = #{param.courseTag,jdbcType=VARCHAR}
+            </if>
+            <if test="param.courseTagType != null and param.courseTagType != ''" >
+                and a.course_tag_type = #{param.courseTagType,jdbcType=VARCHAR}
+            </if>
+            <if test="param.courseGroup != null and param.courseGroup != ''" >
+                and a.course_group = #{param.courseGroup,jdbcType=VARCHAR}
+            </if>
+            <if test="param.courseGroupType != null and param.courseGroupType != ''" >
+                and a.course_group_type = #{param.courseGroupType,jdbcType=VARCHAR}
+            </if>
+            <if test="param.blueCurrencyRate != null " >
+                and a.blue_currency_rate = #{param.blueCurrencyRate,jdbcType=DECIMAL}
+            </if>
+            <if test="param.retrainAmount != null " >
+                and a.retrain_amount = #{param.retrainAmount,jdbcType=DECIMAL}
+            </if>
+            <if test="param.courseMonth != null and param.courseMonth != ''" >
+                and a.course_month = #{param.courseMonth,jdbcType=VARCHAR}
+            </if>
+            <if test="param.courseMonthType != null and param.courseMonthType != ''" >
+                and a.course_month_type = #{param.courseMonthType,jdbcType=VARCHAR}
+            </if>
+        </where>
+        order by a.id desc
+    </sql>
+    
+    <select id="findByPage" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-13  分页查询 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit #{offset}, #{pageSize}
+    </select>
+    
+    <select id="findByPageCount" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-10-13  分页查询总条数 -->
+        select count(1) from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findById" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年10月13日 根据ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_course_type
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    
+    <select id="load" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-13  根据多个ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_course_type where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </select>
+    
+    <select id="all" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-13  查询所有 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_course_type
+    </select>
+    
+    <select id="count" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-10-13 查询总条数 -->
+        select count(1) from app_course_type
+    </select>
+    
+    <update id="update" parameterType="com.kapphk.web.bean.course.BeanCourseType" >
+        <!--  自动生成 2016年10月13日 更新数据 -->
+        update app_course_type
+        <set >
+            <if test="itemName != null" >
+                item_name = #{itemName,jdbcType=VARCHAR},
+            </if>
+            <if test="courseTag != null" >
+                course_tag = #{courseTag,jdbcType=VARCHAR},
+            </if>
+            <if test="courseTagType != null" >
+                course_tag_type = #{courseTagType,jdbcType=VARCHAR},
+            </if>
+            <if test="courseGroup != null" >
+                course_group = #{courseGroup,jdbcType=VARCHAR},
+            </if>
+            <if test="courseGroupType != null" >
+                course_group_type = #{courseGroupType,jdbcType=VARCHAR},
+            </if>
+            <if test="blueCurrencyRate != null" >
+                blue_currency_rate = #{blueCurrencyRate,jdbcType=DECIMAL},
+            </if>
+            <if test="retrainAmount != null" >
+                retrain_amount = #{retrainAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="courseMonth != null" >
+                course_month = #{courseMonth,jdbcType=VARCHAR},
+            </if>
+            <if test="courseMonthType != null" >
+                course_month_type = #{courseMonthType,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null" >
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    
+    <insert id="insert" parameterType="com.kapphk.web.bean.course.BeanCourseType" useGeneratedKeys="true" keyProperty="id" >
+        <!--  自动生成 2016年10月13日 添加数据 -->
+        insert into app_course_type
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="itemName != null" >
+                item_name,
+            </if>
+            <if test="courseTag != null" >
+                course_tag,
+            </if>
+            <if test="courseTagType != null" >
+                course_tag_type,
+            </if>
+            <if test="courseGroup != null" >
+                course_group,
+            </if>
+            <if test="courseGroupType != null" >
+                course_group_type,
+            </if>
+            <if test="blueCurrencyRate != null" >
+                blue_currency_rate,
+            </if>
+            <if test="retrainAmount != null" >
+                retrain_amount,
+            </if>
+            <if test="courseMonth != null" >
+                course_month,
+            </if>
+            <if test="courseMonthType != null" >
+                course_month_type,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="itemName != null" >
+                #{itemName,jdbcType=VARCHAR},
+            </if>
+            <if test="courseTag != null" >
+                #{courseTag,jdbcType=VARCHAR},
+            </if>
+            <if test="courseTagType != null" >
+                #{courseTagType,jdbcType=VARCHAR},
+            </if>
+            <if test="courseGroup != null" >
+                #{courseGroup,jdbcType=VARCHAR},
+            </if>
+            <if test="courseGroupType != null" >
+                #{courseGroupType,jdbcType=VARCHAR},
+            </if>
+            <if test="blueCurrencyRate != null" >
+                #{blueCurrencyRate,jdbcType=DECIMAL},
+            </if>
+            <if test="retrainAmount != null" >
+                #{retrainAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="courseMonth != null" >
+                #{courseMonth,jdbcType=VARCHAR},
+            </if>
+            <if test="courseMonthType != null" >
+                #{courseMonthType,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    
+    <insert id="inserts" parameterType="java.util.List" >
+        <!-- WARNING -  自动生成 2016-10-13 添加多条数据 -->
+        insert into app_course_type (item_name, course_tag, course_tag_type, course_group, course_group_type, blue_currency_rate, retrain_amount, course_month, course_month_type, create_time)
+        values
+        <foreach collection="list" item="item" separator="," >
+            (#{item.itemName,jdbcType=VARCHAR}, #{item.courseTag,jdbcType=VARCHAR}, #{item.courseTagType,jdbcType=VARCHAR}, #{item.courseGroup,jdbcType=VARCHAR}, #{item.courseGroupType,jdbcType=VARCHAR}, #{item.blueCurrencyRate,jdbcType=DECIMAL}, #{item.retrainAmount,jdbcType=DECIMAL}, #{item.courseMonth,jdbcType=VARCHAR}, #{item.courseMonthType,jdbcType=VARCHAR}, #{item.createTime,jdbcType=TIMESTAMP})
+        </foreach>
+    </insert>
+    
+    <delete id="delete" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年10月13日 删除数据 -->
+        delete from app_course_type
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    
+    <delete id="deletes" >
+        <!-- WARNING -  自动生成 2016-10-13 删除多条数据 -->
+        delete from app_course_type where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteByEntity" >
+        <!-- WARNING -  自动生成 2016-10-13 通过实体类中的条件删除数据 -->
+        delete from app_course_type
+        <where >
+            <if test="param.id != null " >
+                and id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.itemName != null and param.itemName != ''" >
+                and item_name = #{param.itemName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.courseTag != null and param.courseTag != ''" >
+                and course_tag = #{param.courseTag,jdbcType=VARCHAR}
+            </if>
+            <if test="param.courseTagType != null and param.courseTagType != ''" >
+                and course_tag_type = #{param.courseTagType,jdbcType=VARCHAR}
+            </if>
+            <if test="param.courseGroup != null and param.courseGroup != ''" >
+                and course_group = #{param.courseGroup,jdbcType=VARCHAR}
+            </if>
+            <if test="param.courseGroupType != null and param.courseGroupType != ''" >
+                and course_group_type = #{param.courseGroupType,jdbcType=VARCHAR}
+            </if>
+            <if test="param.blueCurrencyRate != null " >
+                and blue_currency_rate = #{param.blueCurrencyRate,jdbcType=DECIMAL}
+            </if>
+            <if test="param.retrainAmount != null " >
+                and retrain_amount = #{param.retrainAmount,jdbcType=DECIMAL}
+            </if>
+            <if test="param.courseMonth != null and param.courseMonth != ''" >
+                and course_month = #{param.courseMonth,jdbcType=VARCHAR}
+            </if>
+            <if test="param.courseMonthType != null and param.courseMonthType != ''" >
+                and course_month_type = #{param.courseMonthType,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </delete>
+    
+    <select id="findAll" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-13  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+</mapper>

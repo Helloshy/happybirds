@@ -1,0 +1,473 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kapphk.web.dao.mapper.community.BeanCommunityMapper" >
+    <resultMap id="BaseResultMap" type="com.kapphk.web.bean.community.BeanCommunity" >
+        <!--  自动生成 2016年11月04日 表与实体类字段对应 -->
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="record_type" property="recordType" jdbcType="INTEGER" />
+        <result column="logo_path" property="logoPath" jdbcType="VARCHAR" />
+        <result column="item_name" property="itemName" jdbcType="VARCHAR" />
+        <result column="uid" property="uid" jdbcType="BIGINT" />
+        <result column="photo_path1" property="photoPath1" jdbcType="VARCHAR" />
+        <result column="photo_path2" property="photoPath2" jdbcType="VARCHAR" />
+        <result column="photo_path3" property="photoPath3" jdbcType="VARCHAR" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+    
+    <!-- 社区红点  zoneyu 16-12-24 -->
+    <select id="getCommunityPoint" resultType="java.lang.Integer">
+    	select (case when count(k.id) > 0 then 1 else 0 end) as counts from (
+		select acc.id from app_community_content as acc 
+		inner join app_community as ac on acc.community_id = ac.id 
+		where ac.uid = #{uid} and acc.create_time &gt; #{dateTime}
+		union all 
+		select acc.id from app_community_content as acc 
+		inner join user_community as uc on acc.community_id = uc.community_id 
+		where uc.uid = #{uid} and acc.create_time &gt; #{dateTime} ) k 
+    </select>
+    
+    <!-- 社区动态、公告红点 -->
+    <select id="getPoint" resultType="java.util.Map">
+		select (case when count(1) > 0 then 1 else 0 end) as counts,record_type as recordType
+		from app_community_content where community_id = #{communityId} and create_time &gt; #{dateTime}
+		group by record_type order by record_type
+    </select>
+    
+    <!-- 获取当前客户的一级客户数 -->
+    <select id="findUsersById" resultType="java.lang.Long">
+    	SELECT u.id FROM sys_user u WHERE u.uid_from=#{uid} AND u.position != '动能集团合作伙伴'
+    </select>
+    
+    <!-- 判断该用户是否是管理人员 -->
+    <select id="findCountByUid" resultType="java.lang.Integer">
+    	SELECT COUNT(1)
+		FROM user_community uc 
+		INNER JOIN app_community c ON c.id=uc.community_id AND c.record_type != 2
+		WHERE uc.uid=#{uid}
+    </select>
+    
+    <!-- 获取客户当地社区 -->
+    <select id="findCommunityByUid" resultType="java.lang.Long">
+    	SELECT d.community_id
+		FROM app_community_district d
+		INNER JOIN app_community c ON c.id=d.community_id AND c.record_type=2
+		WHERE d.city=#{city} ORDER BY d.create_time DESC LIMIT 1
+    </select>
+    
+    <!-- 未加入的社区  zoenyu 16-11-5 -->
+    <select id="searchCommunityListByProvince" resultType="java.util.Map">
+    	SELECT ac.id,ac.record_type AS recordType,ac.logo_path AS logoPath,
+		ac.item_name AS itemName,su.nick_name AS nickName,su.real_name AS realName,
+		ac.remark,ac.photo_path1 AS photoPath1,ac.photo_path2 AS photoPath2,ac.photo_path3 AS photoPath3,
+		COUNT(DISTINCT acc.id) AS counts,COUNT(DISTINCT uc.id) AS members 
+		FROM app_community AS ac 
+		INNER JOIN sys_user AS su ON ac.uid = su.id 
+		LEFT JOIN app_community_content AS acc ON ac.id = acc.community_id 
+		LEFT JOIN user_community AS uc ON ac.id = uc.community_id 
+		LEFT JOIN app_community_district AS acd ON ac.id = acd.community_id 
+		WHERE (acd.province = #{province} AND ac.record_type = 1) OR ac.record_type = 2 
+		GROUP BY ac.id ORDER BY ac.record_type DESC,ac.id DESC limit #{page},#{rows}
+    </select>
+    
+    <!-- 区长信息  zoenyu 16-11-4 -->
+    <select id="getMainInfo" resultType="java.util.Map">
+    	SELECT su.id,su.logo_path AS logoPath,su.nick_name AS nickName,su.real_name AS realName,su.invite_code as inviteCode 
+		FROM sys_user AS su 
+		INNER JOIN app_community AS ac ON su.id = ac.uid 
+		WHERE ac.id = #{id}
+    </select>
+    
+    <!-- 服务人员信息  zoenyu 16-11-4 -->
+    <select id="getServiceInfo" resultType="java.util.Map">
+    	SELECT su.id,su.logo_path AS logoPath,su.nick_name AS nickName,su.real_name AS realName,
+		acs.tag_value AS tagValue 
+		FROM sys_user AS su 
+		INNER JOIN app_community_staff AS acs ON su.id = acs.uid AND acs.community_id = #{id} 
+    </select>
+    
+    <!-- 普通成员信息  zoenyu 16-11-4 -->
+    <select id="getMemberInfo" resultType="java.util.Map">
+    	SELECT su.id,su.logo_path AS logoPath,su.nick_name AS nickName,su.real_name AS realName,su.invite_code as inviteCode,
+		CAST(uc.create_time AS CHAR) AS createTime 
+		FROM sys_user AS su 
+		INNER JOIN user_community AS uc ON su.id = uc.uid AND uc.community_id = #{id} 
+		ORDER BY uc.id DESC 
+    </select>
+    
+    <!-- 进入社区必须购买的课程  zoenyu 16-11-3 -->
+    <select id="getCourseInfo" resultType="java.util.Map">
+    	SELECT ac.id AS courseId,ac.item_name AS itemName 
+		FROM app_course AS ac 
+		INNER JOIN sys_setting AS ss ON ac.id = ss.value AND ss.id = 'community_condition' 
+		LIMIT 0,1
+    </select>
+    
+    <!-- 社区列表  zoenyu 16-11-3 -->
+    <select id="searchCommunityList" resultType="java.util.Map">
+    	SELECT ac.id,ac.logo_path AS logoPath,ac.item_name AS itemName,
+		(CASE WHEN COUNT(acc2.id) > 0 THEN 1 ELSE 0 END) AS redCounts,
+		CAST(ac.create_time AS CHAR) AS createTime,su.nick_name AS nickName,ac.uid,
+		COUNT(DISTINCT acc.id) AS counts,COUNT(DISTINCT ucy.id) AS members 
+		FROM app_community AS ac 
+		INNER JOIN sys_user AS su ON ac.uid = su.id 
+		LEFT JOIN app_community_content AS acc ON ac.id = acc.community_id 
+		LEFT JOIN app_community_content AS acc2 ON ac.id = acc.community_id AND acc2.create_time &gt; #{dateTime} 
+		LEFT JOIN user_community AS ucy ON ac.id = ucy.community_id 
+		WHERE ac.uid = #{uid} or ucy.uid = #{uid} 
+		GROUP BY ac.id ORDER BY ucy.id DESC 
+    </select>
+    
+    <!-- 社区信息  zoenyu 16-11-2 -->
+    <select id="searchCommunityInfo" resultType="java.util.Map">
+    	SELECT ac.id,ac.logo_path AS logoPath,ac.item_name AS itemName,ac.remark,
+		ac.create_time AS createTime,su.nick_name AS nickName,ac.uid,
+		ac.photo_path1 as photoPath1,ac.photo_path2 as photoPath2,ac.photo_path3 as photoPath3,
+		COUNT(DISTINCT acc.id) AS counts,COUNT(DISTINCT ucy.id) AS members 
+		FROM app_community AS ac 
+		INNER JOIN sys_user AS su ON ac.uid = su.id  
+		LEFT JOIN app_community_content AS acc ON ac.id = acc.community_id 
+		LEFT JOIN user_community AS ucy ON ac.id = ucy.community_id 
+		WHERE ac.id = #{id}
+    </select>
+    
+    <!-- 获取全部小组 -->
+    <select id="findCommunityList" resultType="java.util.Map">
+    	SELECT id,item_name AS `text` FROM app_community
+    </select>
+    
+    <!-- 详情 -->
+    <select id="findDetailById" resultType="java.util.Map">
+    	SELECT c.id,c.logo_path AS logoPath,c.item_name AS itemName,c.remark,u.real_name AS realName,
+		u.user_name AS userName,c.record_type AS recordType,c.photo_path1 as photoPath1,c.photo_path2 as photoPath2,
+		GROUP_CONCAT(d.province) AS province,GROUP_CONCAT(d.city) AS city,c.photo_path3 as photoPath3
+		FROM app_community c
+		INNER JOIN  sys_user u ON u.id=c.uid
+		LEFT JOIN app_community_district d ON d.community_id=c.id
+		WHERE c.id= #{id}
+		GROUP BY c.id
+    </select>
+    
+    <!-- 查询列表 -->
+    <select id="findList" resultType="java.util.Map">
+    	SELECT c.id,c.logo_path AS logoPath,c.item_name AS itemName,c.remark,u.real_name AS realName,
+		u.user_name AS userName,(CASE c.record_type WHEN 1 THEN '个人社区' ELSE '官方社区' END) AS recordType,
+		CAST(c.create_time AS CHAR) AS createTime,
+		(CASE c.record_type WHEN 2 THEN GROUP_CONCAT(d.province) ELSE CONCAT(d.province,',',d.city) END) AS district,
+		(SELECT COUNT(1) FROM app_community_content WHERE community_id=c.id) AS contents,
+		((SELECT COUNT(1) FROM user_community WHERE community_id=c.id)+(SELECT COUNT(1) FROM app_community_staff WHERE community_id=c.id)) members
+		FROM app_community c
+		INNER JOIN sys_user u ON u.id=c.uid 
+		LEFT JOIN app_community_district d ON d.community_id=c.id
+		<where>
+			<if test="province != null and province != ''">
+				AND d.province=#{province}
+			</if>
+			<if test="itemName != null and itemName != ''">
+				AND c.item_name like '%${itemName}%'
+			</if>
+			<if test="userName != null and userName != ''">
+				AND u.user_name like '%${userName}%'
+			</if>
+			<if test="realName != null and realName != ''">
+				AND u.real_name like '%${realName}%'
+			</if>
+		</where>
+		GROUP BY c.id ORDER BY c.create_time DESC LIMIT #{page},#{rows}
+    </select>
+    
+    <select id="findCount" resultType="java.lang.Integer">
+    	SELECT COUNT(1)
+		FROM app_community c 
+		INNER JOIN sys_user u ON u.id=c.uid 
+		LEFT JOIN app_community_district d ON d.community_id=c.id
+		<where>
+			<if test="province != null and province != ''">
+				AND d.province=#{province}
+			</if>
+			<if test="itemName != null and itemName != ''">
+				AND c.item_name like '%${itemName}%'
+			</if>
+			<if test="userName != null and userName != ''">
+				AND u.user_name like '%${userName}%'
+			</if>
+			<if test="realName != null and realName != ''">
+				AND u.real_name like '%${realName}%'
+			</if>
+		</where>
+    </select>
+    
+    <resultMap id="ResultMapWithBLOBs" type="com.kapphk.web.bean.community.BeanCommunity" extends="BaseResultMap" >
+        <!--  自动生成 2016年11月04日 表与实体类字段对应 -->
+        <result column="remark" property="remark" jdbcType="LONGVARCHAR" />
+    </resultMap>
+    
+    <sql id="Base_Column_List" >
+        <!--  自动生成 2016年11月04日 表字段名称 -->
+        id, record_type, logo_path, item_name, uid, photo_path1, photo_path2, photo_path3, 
+        create_time
+    </sql>
+    
+    <sql id="Blob_Column_List" >
+        <!--  自动生成 2016年11月04日 表字段名称 -->
+        remark
+    </sql>
+    
+    <sql id="findByPageSql" >
+        <!-- WARNING -  自动生成 2016-11-04  分页查询SQL -->
+        select a.* from app_community a
+        <where >
+            <if test="param.id != null " >
+                and a.id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.recordType != null " >
+                and a.record_type = #{param.recordType,jdbcType=INTEGER}
+            </if>
+            <if test="param.logoPath != null and param.logoPath != ''" >
+                and a.logo_path = #{param.logoPath,jdbcType=VARCHAR}
+            </if>
+            <if test="param.itemName != null and param.itemName != ''" >
+                and a.item_name = #{param.itemName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.uid != null " >
+                and a.uid = #{param.uid,jdbcType=BIGINT}
+            </if>
+            <if test="param.photoPath1 != null and param.photoPath1 != ''" >
+                and a.photo_path1 = #{param.photoPath1,jdbcType=VARCHAR}
+            </if>
+            <if test="param.photoPath2 != null and param.photoPath2 != ''" >
+                and a.photo_path2 = #{param.photoPath2,jdbcType=VARCHAR}
+            </if>
+            <if test="param.photoPath3 != null and param.photoPath3 != ''" >
+                and a.photo_path3 = #{param.photoPath3,jdbcType=VARCHAR}
+            </if>
+            <if test="param.remark != null " >
+                and a.remark = #{param.remark,jdbcType=LONGVARCHAR}
+            </if>
+        </where>
+        order by a.id desc
+    </sql>
+    
+    <select id="findByPage" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-11-04  分页查询 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit #{offset}, #{pageSize}
+    </select>
+    
+    <select id="findByPageCount" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-11-04  分页查询总条数 -->
+        select count(1) from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findById" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年11月04日 根据ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        ,
+        <include refid="Blob_Column_List" />
+        from app_community
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    
+    <select id="load" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-11-04  根据多个ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_community where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </select>
+    
+    <select id="all" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-11-04  查询所有 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_community
+    </select>
+    
+    <select id="count" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-11-04 查询总条数 -->
+        select count(1) from app_community
+    </select>
+    
+    <update id="update" parameterType="com.kapphk.web.bean.community.BeanCommunity" >
+        <!--  自动生成 2016年11月04日 更新数据 -->
+        update app_community
+        <set >
+            <if test="recordType != null" >
+                record_type = #{recordType,jdbcType=INTEGER},
+            </if>
+            <if test="logoPath != null" >
+                logo_path = #{logoPath,jdbcType=VARCHAR},
+            </if>
+            <if test="itemName != null" >
+                item_name = #{itemName,jdbcType=VARCHAR},
+            </if>
+            <if test="uid != null" >
+                uid = #{uid,jdbcType=BIGINT},
+            </if>
+                photo_path1 = #{photoPath1,jdbcType=VARCHAR},
+                photo_path2 = #{photoPath2,jdbcType=VARCHAR},
+                photo_path3 = #{photoPath3,jdbcType=VARCHAR},
+            <if test="createTime != null" >
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="remark != null" >
+                remark = #{remark,jdbcType=LONGVARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    
+    <insert id="insert" parameterType="com.kapphk.web.bean.community.BeanCommunity" useGeneratedKeys="true" keyProperty="id" >
+        <!--  自动生成 2016年11月04日 添加数据 -->
+        insert into app_community
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="recordType != null" >
+                record_type,
+            </if>
+            <if test="logoPath != null" >
+                logo_path,
+            </if>
+            <if test="itemName != null" >
+                item_name,
+            </if>
+            <if test="uid != null" >
+                uid,
+            </if>
+            <if test="photoPath1 != null" >
+                photo_path1,
+            </if>
+            <if test="photoPath2 != null" >
+                photo_path2,
+            </if>
+            <if test="photoPath3 != null" >
+                photo_path3,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+            <if test="remark != null" >
+                remark,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="recordType != null" >
+                #{recordType,jdbcType=INTEGER},
+            </if>
+            <if test="logoPath != null" >
+                #{logoPath,jdbcType=VARCHAR},
+            </if>
+            <if test="itemName != null" >
+                #{itemName,jdbcType=VARCHAR},
+            </if>
+            <if test="uid != null" >
+                #{uid,jdbcType=BIGINT},
+            </if>
+            <if test="photoPath1 != null" >
+                #{photoPath1,jdbcType=VARCHAR},
+            </if>
+            <if test="photoPath2 != null" >
+                #{photoPath2,jdbcType=VARCHAR},
+            </if>
+            <if test="photoPath3 != null" >
+                #{photoPath3,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="remark != null" >
+                #{remark,jdbcType=LONGVARCHAR},
+            </if>
+        </trim>
+    </insert>
+    
+    <delete id="delete" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年11月04日 删除数据 -->
+        delete from app_community
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    
+    <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.kapphk.web.bean.community.BeanCommunity" >
+        <!--  自动生成 2016年11月04日 更新数据 -->
+        update app_community
+        set record_type = #{recordType,jdbcType=INTEGER},
+            logo_path = #{logoPath,jdbcType=VARCHAR},
+            item_name = #{itemName,jdbcType=VARCHAR},
+            uid = #{uid,jdbcType=BIGINT},
+            photo_path1 = #{photoPath1,jdbcType=VARCHAR},
+            photo_path2 = #{photoPath2,jdbcType=VARCHAR},
+            photo_path3 = #{photoPath3,jdbcType=VARCHAR},
+            create_time = #{createTime,jdbcType=TIMESTAMP},
+            remark = #{remark,jdbcType=LONGVARCHAR}
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    
+    <insert id="inserts" parameterType="java.util.List" >
+        <!-- WARNING -  自动生成 2016-11-04 添加多条数据 -->
+        insert into app_community (record_type, logo_path, item_name, uid, photo_path1, photo_path2, photo_path3, create_time, remark)
+        values
+        <foreach collection="list" item="item" separator="," >
+            (#{item.recordType,jdbcType=INTEGER}, #{item.logoPath,jdbcType=VARCHAR}, #{item.itemName,jdbcType=VARCHAR}, #{item.uid,jdbcType=BIGINT}, #{item.photoPath1,jdbcType=VARCHAR}, #{item.photoPath2,jdbcType=VARCHAR}, #{item.photoPath3,jdbcType=VARCHAR}, #{item.createTime,jdbcType=TIMESTAMP}, #{item.remark,jdbcType=LONGVARCHAR})
+        </foreach>
+    </insert>
+    
+    <delete id="deletes" >
+        <!-- WARNING -  自动生成 2016-11-04 删除多条数据 -->
+        delete from app_community where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteByEntity" >
+        <!-- WARNING -  自动生成 2016-11-04 通过实体类中的条件删除数据 -->
+        delete from app_community
+        <where >
+            <if test="param.id != null " >
+                and id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.recordType != null " >
+                and record_type = #{param.recordType,jdbcType=INTEGER}
+            </if>
+            <if test="param.logoPath != null and param.logoPath != ''" >
+                and logo_path = #{param.logoPath,jdbcType=VARCHAR}
+            </if>
+            <if test="param.itemName != null and param.itemName != ''" >
+                and item_name = #{param.itemName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.uid != null " >
+                and uid = #{param.uid,jdbcType=BIGINT}
+            </if>
+            <if test="param.photoPath1 != null and param.photoPath1 != ''" >
+                and photo_path1 = #{param.photoPath1,jdbcType=VARCHAR}
+            </if>
+            <if test="param.photoPath2 != null and param.photoPath2 != ''" >
+                and photo_path2 = #{param.photoPath2,jdbcType=VARCHAR}
+            </if>
+            <if test="param.photoPath3 != null and param.photoPath3 != ''" >
+                and photo_path3 = #{param.photoPath3,jdbcType=VARCHAR}
+            </if>
+            <if test="param.remark != null " >
+                and remark = #{param.remark,jdbcType=LONGVARCHAR}
+            </if>
+        </where>
+    </delete>
+    
+    <select id="findAll" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-11-04  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findEntityByCondition" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-11-04  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit 0,1
+    </select>
+</mapper>

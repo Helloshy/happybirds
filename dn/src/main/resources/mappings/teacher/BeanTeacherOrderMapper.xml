@@ -1,0 +1,774 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kapphk.web.dao.mapper.teacher.BeanTeacherOrderMapper" >
+    <resultMap id="BaseResultMap" type="com.kapphk.web.bean.teacher.BeanTeacherOrder" >
+        <!--  自动生成 2016年10月08日 表与实体类字段对应 -->
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="teacher_id" property="teacherId" jdbcType="BIGINT" />
+        <result column="uid" property="uid" jdbcType="BIGINT" />
+        <result column="nick_name" property="nickName" jdbcType="VARCHAR" />
+        <result column="phone" property="phone" jdbcType="VARCHAR" />
+        <result column="address" property="address" jdbcType="VARCHAR" />
+        <result column="company_name" property="companyName" jdbcType="VARCHAR" />
+        <result column="company_remark" property="companyRemark" jdbcType="VARCHAR" />
+        <result column="teach_theme" property="teachTheme" jdbcType="VARCHAR" />
+        <result column="teach_start" property="teachStart" jdbcType="DATE" />
+        <result column="teach_end" property="teachEnd" jdbcType="DATE" />
+        <result column="teach_times" property="teachTimes" jdbcType="INTEGER" />
+        <result column="remark" property="remark" jdbcType="VARCHAR" />
+        <result column="order_amount" property="orderAmount" jdbcType="DECIMAL" />
+        <result column="discount_amount" property="discountAmount" jdbcType="DECIMAL" />
+        <result column="discount_remark" property="discountRemark" jdbcType="VARCHAR" />
+        <result column="actual_amount" property="actualAmount" jdbcType="DECIMAL" />
+        <result column="pay_date" property="payDate" jdbcType="DATE" />
+        <result column="state" property="state" jdbcType="INTEGER" />
+        <result column="record_type" property="recordType" jdbcType="INTEGER" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+        <result column="discount_blue" property="discountBlue" jdbcType="DECIMAL" />
+        <result column="discount_red" property="discountRed" jdbcType="DECIMAL" />
+        <result column="free_times" property="freeTimes" jdbcType="INTEGER" />
+        <result column="personnel" property="personnel" jdbcType="VARCHAR" />
+        <result column="transportation" property="transportation" jdbcType="INTEGER" />
+        <result column="reason" property="reason" jdbcType="VARCHAR" />
+    </resultMap>
+    
+    <!-- 定时更新订单状态 -->
+    <update id="upTeacherOrder">
+    	<if test="type == 1">
+    		UPDATE app_teacher_order SET state=5 WHERE state=4 AND teach_start &gt;= #{date}
+    	</if>
+    	<if test="type == 2">
+    		UPDATE app_teacher_order SET state=6 WHERE state=5 AND teach_end &gt;= #{date}
+    	</if>
+    </update>
+    
+    <!-- 预约详情  zoneyu 16-11-22 -->
+    <select id="searchTeacherOrderDetail" resultType="java.util.Map">
+    	SELECT atr.id,atr.logo_path AS teacherLogoPath,atr.item_name AS teacherName,
+		(CASE WHEN atr.teacher_level='预备级' THEN 0.5 WHEN atr.teacher_level='1 星级' THEN 1 
+			WHEN atr.teacher_level='2 星级' THEN 2 WHEN atr.teacher_level='3 星级' THEN 3
+			WHEN atr.teacher_level='4 星级' THEN 4 WHEN atr.teacher_level='5 星级' THEN 5
+			WHEN atr.teacher_level='6 星级' THEN 6 END) AS teacherLevel,atr.tag_value AS itemTheme,
+		(SELECT COUNT(1) FROM app_teacher_order AS ator WHERE ato.teacher_id = ator.teacher_id AND ator.state > 3) AS counts,
+		su.sex,
+		ato.state,CAST(ato.teach_start AS CHAR) AS teachStart,ato.order_amount AS orderAmount,
+		ato.teach_theme AS teachTheme,CAST(ato.teach_end AS CHAR) AS teachEnd,
+		CAST(ato.create_time AS CHAR) AS createTime,ato.address,ato.nick_name AS nickName,ato.phone 
+		FROM app_teacher_order AS ato 
+		INNER JOIN app_teacher AS atr ON ato.teacher_id = atr.id 
+		INNER JOIN sys_user AS su ON ato.uid = su.id 
+		WHERE ato.id = #{id}
+    </select>
+    
+    <!-- APP订单详情 -->
+    <select id="findOrderDetail" resultType="java.util.Map">
+    	SELECT o.id,o.address,o.teach_theme AS teachTheme,CAST(o.teach_start AS CHAR) AS teachStart,CAST(o.teach_end AS CHAR) AS teachEnd,
+		CONCAT(CAST(o.teach_times as char),CAST('场' as char)) AS teachTimes,o.order_amount AS orderAmount,o.actual_amount AS actualAmount,o.state,SUBSTRING(CAST(o.create_time AS CHAR),1,16) AS createTime,
+		t.logo_path AS logoPath,t.item_name AS itemName,t.item_remark AS itemRemark,t.id AS teacherId,t.teacher_level AS teacherLevel,o.remark,
+		o.nick_name AS nickName,o.phone,o.company_name AS companyName,o.company_remark companyRemark,CAST(o.pay_date AS CHAR) AS payDate
+		FROM app_teacher_order o
+		LEFT JOIN app_teacher t ON t.id=o.teacher_id
+		WHERE o.id=#{id}
+    	
+    </select>
+    
+    <!-- APP获取订单列表 -->
+    <select id="findTeacherOrderList" resultType="java.util.Map">
+    	SELECT o.id,o.address,o.teach_theme AS teachTheme,CAST(o.teach_start AS CHAR) AS teachStart,CAST(o.teach_end AS CHAR) AS teachEnd,
+		CONCAT(CAST(o.teach_times as char),CAST('场' as char)) AS teachTimes,o.order_amount AS orderAmount,o.actual_amount AS actualAmount,
+		(CASE WHEN o.state = 1 AND o.actual_amount >= 0 THEN 7 ELSE o.state END) AS state,SUBSTRING(CAST(o.create_time AS CHAR),1,16) AS createTime,
+		FLOOR(COALESCE(c.star,0)) AS star,COUNT(c.id) AS commtents,t.logo_path AS logoPath,t.item_name AS itemName,o.teacher_id as teacherId,
+		(CASE o.record_type WHEN 1 THEN ss1.value ELSE ss.value END) AS phone 
+		FROM app_teacher_order o 
+		LEFT JOIN sys_setting AS ss ON ss.id = 'tel_accompany' 
+		LEFT JOIN sys_setting AS ss1 ON ss1.id = 'tel_teacher' 
+		LEFT JOIN app_teacher_comment c ON c.order_id=o.id
+		LEFT JOIN app_teacher t ON t.id=o.teacher_id
+		<where>
+			and o.record_type = #{param.recordType}
+			and o.uid = #{param.uid}
+			<if test="param.state == 2">
+				and o.state = 1
+			</if>
+			<if test="param.state == 1">
+				and o.state in (0,2)
+			</if>
+			<if test="param.state == 3">
+				and o.state in (4,5)
+			</if>
+			<if test="param.state == 4">
+				and o.state = 6
+			</if>
+		</where>
+		GROUP BY o.id ORDER BY o.create_time DESC LIMIT #{page},#{rows}
+    </select>
+    
+    <!-- 导出数据 -->
+    <select id="findExcel" resultType="java.util.Map">
+    	SELECT o.id,o.nick_name AS nickName,o.phone,o.address,o.company_name AS companyName,o.company_remark AS companyRemark,
+		o.teach_theme AS teachTheme,o.remark,o.order_amount AS orderAmount,CAST(o.create_time AS CHAR) AS createTime,
+		o.discount_remark AS discountRemark,o.actual_amount AS actualAmount,CAST(o.pay_date AS CHAR) AS payDate,o.teach_times as teachTimes,
+		t.item_name AS itemName,u.real_name AS realName,CONCAT(CAST(o.teach_start AS CHAR),'-',CAST(o.teach_end AS CHAR)) AS teachStart_teachEnd,
+		(CASE o.state WHEN 4 THEN '未开始' WHEN 5 THEN '进行中' WHEN 6 THEN '已完成' END) AS state
+		FROM app_teacher_order o
+		INNER JOIN app_teacher t ON t.id=o.teacher_id
+		INNER JOIN sys_user u ON u.id=o.uid
+		<where>
+			<if test="type == 1">
+				and o.state in (4,5)
+			</if>
+			<if test="type == 2">
+				and o.state in (6)
+			</if>
+		</where>
+		ORDER BY o.create_time
+    </select>
+    
+    <!-- 列表 -->
+    <select id="findList" resultType="java.util.Map">
+    	SELECT o.id,o.nick_name AS nickName,o.phone,o.address,o.company_name AS companyName,o.company_remark AS companyRemark,
+		o.teach_theme AS teachTheme,o.remark,o.order_amount AS orderAmount,CAST(o.create_time AS CHAR) AS createTime,
+		o.discount_remark AS discountRemark,o.actual_amount AS actualAmount,CAST(o.pay_date AS CHAR) AS payDate,o.state,o.teach_times as teachTimes,
+		t.item_name AS itemName,u.real_name AS realName,CONCAT(CAST(o.teach_start AS CHAR),'-',CAST(o.teach_end AS CHAR)) AS teachStart_teachEnd,
+		(SELECT COUNT(1) FROM app_teacher_comment WHERE order_id=o.id) AS `comment`
+		FROM app_teacher_order o
+		INNER JOIN app_teacher t ON t.id=o.teacher_id
+		INNER JOIN sys_user u ON u.id=o.uid
+		<where>
+			o.record_type = #{param.recordType}
+			<if test="param.recordType == 1">
+				<if test="type == 0">
+					and o.state in (0,1,2,3)
+				</if>
+				<if test="type == 1">
+					and o.state in (1,4)
+				</if>
+				<if test="type == 2">
+					and o.state in (4,5)
+				</if>
+				<if test="type == 3">
+					and o.state in (6)
+				</if>
+			</if>
+			<if test="param.recordType == 2">
+				<if test="type == 0">
+					and o.state in (0,2)
+				</if>
+				<if test="type == 1">
+					and o.state in (1,3,4)
+				</if>
+				<if test="type == 2">
+					and o.state in (4,5)
+				</if>
+				<if test="type == 3">
+					and o.state in (6)
+				</if>
+			</if>
+			<if test="param.uid != null">
+				and u.id = #{param.uid}
+			</if>
+			<if test="param.uid != null">
+				and o.id LIKE '%${param.id}%'
+			</if>
+			<if test="itemName != null and itemName !=''">
+				and t.item_name like '%${itemName}%'
+			</if>
+			<if test="param.state != null and param.state != ''">
+				and o.state = #{param.state}
+			</if>
+			<if test="realName != null and realName !=''">
+				and u.real_name like '%${realName}%'
+			</if>
+		</where>
+		ORDER BY o.create_time DESC LIMIT #{page},#{rows}
+    </select>
+    
+    <!-- 列表总数 -->
+    <select id="findCount" resultType="java.lang.Integer">
+    	SELECT COUNT(1)
+		FROM app_teacher_order o
+		INNER JOIN app_teacher t ON t.id=o.teacher_id
+		INNER JOIN sys_user u ON u.id=o.uid
+		<where>
+			o.record_type = #{param.recordType}
+			<if test="param.recordType == 1">
+				<if test="type == 0">
+					and o.state in (0,1,2,3)
+				</if>
+				<if test="type == 1">
+					and o.state in (1,4)
+				</if>
+				<if test="type == 2">
+					and o.state in (4,5)
+				</if>
+				<if test="type == 3">
+					and o.state in (6)
+				</if>
+			</if>
+			<if test="param.recordType == 2">
+				<if test="type == 0">
+					and o.state in (0,2)
+				</if>
+				<if test="type == 1">
+					and o.state in (1,3,4)
+				</if>
+				<if test="type == 2">
+					and o.state in (4,5)
+				</if>
+				<if test="type == 3">
+					and o.state in (6)
+				</if>
+			</if>
+			<if test="param.uid != null">
+				and o.id LIKE '%${param.id}%'
+			</if>
+			<if test="param.uid != null">
+				and u.id = #{param.uid}
+			</if>
+			<if test="itemName != null and itemName !=''">
+				and t.item_name like '%${itemName}%'
+			</if>
+			<if test="param.state != null and param.state != ''">
+				and o.state = #{param.state}
+			</if>
+			<if test="realName != null and realName !=''">
+				and u.real_name like '%${realName}%'
+			</if>
+		</where>
+    </select>
+    
+    <!-- 详情 -->
+    <select id="findDetailById" resultType="java.util.Map">
+    	SELECT o.id,o.nick_name AS nickName,o.phone,o.address,o.company_name AS companyName,o.company_remark AS companyRemark,
+		o.teach_theme AS teachTheme,CAST(o.teach_start AS CHAR) AS teachStart,CAST(o.teach_end AS CHAR) AS teachEnd,o.remark,
+		o.discount_remark AS discountRemark,o.actual_amount AS actualAmount,CAST(o.pay_date AS CHAR) AS payDate,o.state,
+		CAST(o.create_time AS CHAR) AS createTime,t.item_name AS itemName,u.real_name AS realName,
+		o.order_amount AS orderAmount,o.personnel,o.transportation,o.reason,o.free_times as freeTimes
+		FROM app_teacher_order o
+		INNER JOIN app_teacher t ON t.id=o.teacher_id
+		INNER JOIN sys_user u ON u.id=o.uid
+		where o.id=#{id}
+    </select>
+    
+    <!-- 更新状态 -->
+    <update id="upstate">
+    	update app_teacher_order
+        <set >
+            <if test="param.orderAmount != null" >
+                order_amount = #{param.orderAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="param.actualAmount != null" >
+                actual_amount = #{param.actualAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="param.payDate != null" >
+                pay_date = #{param.payDate,jdbcType=DATE},
+            </if>
+            <if test="param.state != null" >
+                state = #{param.state,jdbcType=INTEGER},
+            </if>
+            <if test="param.teachStart != null " >
+                teach_start = #{param.teachStart,jdbcType=DATE},
+            </if>
+            <if test="param.teachEnd != null " >
+                teach_end = #{param.teachEnd,jdbcType=DATE},
+            </if>
+        </set>
+    	where id in 
+    	<foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </update>
+    
+    <sql id="Base_Column_List" >
+        <!--  自动生成 2016年10月08日 表字段名称 -->
+        id, teacher_id, uid, nick_name, phone, address, company_name, company_remark, teach_theme, 
+        teach_start, teach_end, teach_times, remark, order_amount, discount_amount, discount_remark, 
+        actual_amount, pay_date, state, record_type, create_time,discount_blue,discount_red,
+        free_times, personnel, transportation,  reason
+    </sql>
+    
+    <sql id="findByPageSql" >
+        <!-- WARNING -  自动生成 2016-10-08  分页查询SQL -->
+        select a.* from app_teacher_order a
+        <where >
+            <if test="param.id != null " >
+                and a.id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.teacherId != null " >
+                and a.teacher_id = #{param.teacherId,jdbcType=BIGINT}
+            </if>
+            <if test="param.uid != null " >
+                and a.uid = #{param.uid,jdbcType=BIGINT}
+            </if>
+            <if test="param.nickName != null and param.nickName != ''" >
+                and a.nick_name = #{param.nickName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.phone != null and param.phone != ''" >
+                and a.phone = #{param.phone,jdbcType=VARCHAR}
+            </if>
+            <if test="param.address != null and param.address != ''" >
+                and a.address = #{param.address,jdbcType=VARCHAR}
+            </if>
+            <if test="param.companyName != null and param.companyName != ''" >
+                and a.company_name = #{param.companyName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.companyRemark != null and param.companyRemark != ''" >
+                and a.company_remark = #{param.companyRemark,jdbcType=VARCHAR}
+            </if>
+            <if test="param.teachTheme != null and param.teachTheme != ''" >
+                and a.teach_theme = #{param.teachTheme,jdbcType=VARCHAR}
+            </if>
+            <if test="param.teachStart != null " >
+                and a.teach_start = #{param.teachStart,jdbcType=DATE}
+            </if>
+            <if test="param.teachEnd != null " >
+                and a.teach_end = #{param.teachEnd,jdbcType=DATE}
+            </if>
+            <if test="param.teachTimes != null " >
+                and a.teach_times = #{param.teachTimes,jdbcType=INTEGER}
+            </if>
+            <if test="param.remark != null and param.remark != ''" >
+                and a.remark = #{param.remark,jdbcType=VARCHAR}
+            </if>
+            <if test="param.orderAmount != null " >
+                and a.order_amount = #{param.orderAmount,jdbcType=DECIMAL}
+            </if>
+            <if test="param.discountAmount != null " >
+                and a.discount_amount = #{param.discountAmount,jdbcType=DECIMAL}
+            </if>
+            <if test="param.discountRemark != null and param.discountRemark != ''" >
+                and a.discount_remark = #{param.discountRemark,jdbcType=VARCHAR}
+            </if>
+            <if test="param.actualAmount != null " >
+                and a.actual_amount = #{param.actualAmount,jdbcType=DECIMAL}
+            </if>
+            <if test="param.payDate != null " >
+                and a.pay_date = #{param.payDate,jdbcType=DATE}
+            </if>
+            <if test="param.state != null " >
+                and a.state = #{param.state,jdbcType=INTEGER}
+            </if>
+            <if test="param.recordType != null " >
+                and a.record_type = #{param.recordType,jdbcType=INTEGER}
+            </if>
+             <if test="param.freeTimes != null " >
+                and a.free_times = #{param.freeTimes,jdbcType=INTEGER}
+            </if>
+             <if test="param.personnel != null " >
+                and a.personnel = #{param.personnel,jdbcType=VARCHAR}
+            </if>
+             <if test="param.transportation != null " >
+                and a.transportation = #{param.transportation,jdbcType=INTEGER}
+            </if>
+             <if test="param.reason != null " >
+                and a.reason = #{param.reason,jdbcType=INTEGER}
+            </if>
+        </where>
+        order by a.id desc
+    </sql>
+    
+    <select id="findByPage" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-08  分页查询 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit #{offset}, #{pageSize}
+    </select>
+    
+    <select id="findByPageCount" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-10-08  分页查询总条数 -->
+        select count(1) from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findById" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年10月08日 根据ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_teacher_order
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    
+    <select id="load" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-08  根据多个ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_teacher_order where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </select>
+    
+    <select id="all" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-08  查询所有 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_teacher_order
+    </select>
+    
+    <select id="count" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-10-08 查询总条数 -->
+        select count(1) from app_teacher_order
+    </select>
+    
+    <update id="update" parameterType="com.kapphk.web.bean.teacher.BeanTeacherOrder" >
+        <!--  自动生成 2016年10月08日 更新数据 -->
+        update app_teacher_order
+        <set >
+        	<if test="discountBlue != null" >
+                discount_blue = #{discountBlue,jdbcType=DECIMAL},
+            </if>
+            <if test="discountRed != null" >
+                discount_red = #{discountRed,jdbcType=DECIMAL},
+            </if>
+            <if test="teacherId != null" >
+                teacher_id = #{teacherId,jdbcType=BIGINT},
+            </if>
+            <if test="uid != null" >
+                uid = #{uid,jdbcType=BIGINT},
+            </if>
+            <if test="nickName != null" >
+                nick_name = #{nickName,jdbcType=VARCHAR},
+            </if>
+            <if test="phone != null" >
+                phone = #{phone,jdbcType=VARCHAR},
+            </if>
+            <if test="address != null" >
+                address = #{address,jdbcType=VARCHAR},
+            </if>
+            <if test="companyName != null" >
+                company_name = #{companyName,jdbcType=VARCHAR},
+            </if>
+            <if test="companyRemark != null" >
+                company_remark = #{companyRemark,jdbcType=VARCHAR},
+            </if>
+            <if test="teachTheme != null" >
+                teach_theme = #{teachTheme,jdbcType=VARCHAR},
+            </if>
+            <if test="teachStart != null" >
+                teach_start = #{teachStart,jdbcType=DATE},
+            </if>
+            <if test="teachEnd != null" >
+                teach_end = #{teachEnd,jdbcType=DATE},
+            </if>
+            <if test="teachTimes != null" >
+                teach_times = #{teachTimes,jdbcType=INTEGER},
+            </if>
+            <if test="remark != null" >
+                remark = #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="orderAmount != null" >
+                order_amount = #{orderAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="discountAmount != null" >
+                discount_amount = #{discountAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="discountRemark != null" >
+                discount_remark = #{discountRemark,jdbcType=VARCHAR},
+            </if>
+            <if test="actualAmount != null" >
+                actual_amount = #{actualAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="payDate != null" >
+                pay_date = #{payDate,jdbcType=DATE},
+            </if>
+            <if test="state != null" >
+                state = #{state,jdbcType=INTEGER},
+            </if>
+            <if test="recordType != null" >
+                record_type = #{recordType,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null" >
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="freeTimes != null" >
+                free_times = #{freeTimes,jdbcType=INTEGER},
+            </if>
+            <if test="personnel != null" >
+                personnel = #{personnel,jdbcType=VARCHAR},
+            </if>
+            <if test="transportation != null" >
+                transportation = #{transportation,jdbcType=INTEGER},
+            </if>
+            <if test="reason != null" >
+                reason = #{reason,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    
+    <insert id="insert" parameterType="com.kapphk.web.bean.teacher.BeanTeacherOrder" useGeneratedKeys="true" keyProperty="id" >
+        <!--  自动生成 2016年10月08日 添加数据 -->
+        insert into app_teacher_order
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+        
+        	<if test="discountBlue != null" >
+                discount_blue,
+            </if>
+            <if test="discountRed != null" >
+                discount_red,
+            </if>
+            <if test="teacherId != null" >
+                teacher_id,
+            </if>
+            <if test="uid != null" >
+                uid,
+            </if>
+            <if test="nickName != null" >
+                nick_name,
+            </if>
+            <if test="phone != null" >
+                phone,
+            </if>
+            <if test="address != null" >
+                address,
+            </if>
+            <if test="companyName != null" >
+                company_name,
+            </if>
+            <if test="companyRemark != null" >
+                company_remark,
+            </if>
+            <if test="teachTheme != null" >
+                teach_theme,
+            </if>
+            <if test="teachStart != null" >
+                teach_start,
+            </if>
+            <if test="teachEnd != null" >
+                teach_end,
+            </if>
+            <if test="teachTimes != null" >
+                teach_times,
+            </if>
+            <if test="remark != null" >
+                remark,
+            </if>
+            <if test="orderAmount != null" >
+                order_amount,
+            </if>
+            <if test="discountAmount != null" >
+                discount_amount,
+            </if>
+            <if test="discountRemark != null" >
+                discount_remark,
+            </if>
+            <if test="actualAmount != null" >
+                actual_amount,
+            </if>
+            <if test="payDate != null" >
+                pay_date,
+            </if>
+            <if test="state != null" >
+                state,
+            </if>
+            <if test="recordType != null" >
+                record_type,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+            <if test="freeTimes != null" >
+                free_times,
+            </if>
+            <if test="personnel != null" >
+                personnel,
+            </if>
+            <if test="transportation != null" >
+                transportation,
+            </if>
+            <if test="reason != null" >
+                reason,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="discountBlue != null" >
+                #{discountBlue,jdbcType=DECIMAL},
+            </if>
+            <if test="discountRed != null" >
+                #{discountRed,jdbcType=DECIMAL},
+            </if>
+            <if test="teacherId != null" >
+                #{teacherId,jdbcType=BIGINT},
+            </if>
+            <if test="uid != null" >
+                #{uid,jdbcType=BIGINT},
+            </if>
+            <if test="nickName != null" >
+                #{nickName,jdbcType=VARCHAR},
+            </if>
+            <if test="phone != null" >
+                #{phone,jdbcType=VARCHAR},
+            </if>
+            <if test="address != null" >
+                #{address,jdbcType=VARCHAR},
+            </if>
+            <if test="companyName != null" >
+                #{companyName,jdbcType=VARCHAR},
+            </if>
+            <if test="companyRemark != null" >
+                #{companyRemark,jdbcType=VARCHAR},
+            </if>
+            <if test="teachTheme != null" >
+                #{teachTheme,jdbcType=VARCHAR},
+            </if>
+            <if test="teachStart != null" >
+                #{teachStart,jdbcType=DATE},
+            </if>
+            <if test="teachEnd != null" >
+                #{teachEnd,jdbcType=DATE},
+            </if>
+            <if test="teachTimes != null" >
+                #{teachTimes,jdbcType=INTEGER},
+            </if>
+            <if test="remark != null" >
+                #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="orderAmount != null" >
+                #{orderAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="discountAmount != null" >
+                #{discountAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="discountRemark != null" >
+                #{discountRemark,jdbcType=VARCHAR},
+            </if>
+            <if test="actualAmount != null" >
+                #{actualAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="payDate != null" >
+                #{payDate,jdbcType=DATE},
+            </if>
+            <if test="state != null" >
+                #{state,jdbcType=INTEGER},
+            </if>
+            <if test="recordType != null" >
+                #{recordType,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="freeTimes != null" >
+                #{freeTimes,jdbcType=INTEGER},
+            </if>
+            <if test="personnel != null" >
+                #{personnel,jdbcType=VARCHAR},
+            </if>
+            <if test="transportation != null" >
+                #{transportation,jdbcType=INTEGER},
+            </if>
+            <if test="reason != null" >
+                #{reason,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+    
+    <insert id="inserts" parameterType="java.util.List" >
+        <!-- WARNING -  自动生成 2016-10-08 添加多条数据 -->
+        insert into app_teacher_order (free_times, personnel, transportation, reason, discount_blue,discount_red,teacher_id, uid, nick_name, phone, address, company_name, company_remark, teach_theme, teach_start, teach_end, teach_times, remark, order_amount, discount_amount, discount_remark, actual_amount, pay_date, state, record_type, create_time)
+        values
+        <foreach collection="list" item="item" separator="," >
+            (#{item.freeTimes,jdbcType=INTEGER},#{item.personnel,jdbcType=VARCHAR},#{item.transportation,jdbcType=INTEGER}, #{item.reason,jdbcType=VARCHAR},#{item.discountBlue,jdbcType=DECIMAL},#{item.discountRed,jdbcType=DECIMAL},#{item.teacherId,jdbcType=BIGINT}, #{item.uid,jdbcType=BIGINT}, #{item.nickName,jdbcType=VARCHAR}, #{item.phone,jdbcType=VARCHAR}, #{item.address,jdbcType=VARCHAR}, #{item.companyName,jdbcType=VARCHAR}, #{item.companyRemark,jdbcType=VARCHAR}, #{item.teachTheme,jdbcType=VARCHAR}, #{item.teachStart,jdbcType=DATE}, #{item.teachEnd,jdbcType=DATE}, #{item.teachTimes,jdbcType=INTEGER}, #{item.remark,jdbcType=VARCHAR}, #{item.orderAmount,jdbcType=DECIMAL}, #{item.discountAmount,jdbcType=DECIMAL}, #{item.discountRemark,jdbcType=VARCHAR}, #{item.actualAmount,jdbcType=DECIMAL}, #{item.payDate,jdbcType=DATE}, #{item.state,jdbcType=INTEGER}, #{item.recordType,jdbcType=INTEGER}, #{item.createTime,jdbcType=TIMESTAMP})
+        </foreach>
+    </insert>
+    
+    <delete id="delete" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年10月08日 删除数据 -->
+        delete from app_teacher_order
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    
+    <delete id="deletes" >
+        <!-- WARNING -  自动生成 2016-10-08 删除多条数据 -->
+        delete from app_teacher_order where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteByEntity" >
+        <!-- WARNING -  自动生成 2016-10-08 通过实体类中的条件删除数据 -->
+        delete from app_teacher_order
+        <where >
+            <if test="param.id != null " >
+                and id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.teacherId != null " >
+                and teacher_id = #{param.teacherId,jdbcType=BIGINT}
+            </if>
+            <if test="param.uid != null " >
+                and uid = #{param.uid,jdbcType=BIGINT}
+            </if>
+            <if test="param.nickName != null and param.nickName != ''" >
+                and nick_name = #{param.nickName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.phone != null and param.phone != ''" >
+                and phone = #{param.phone,jdbcType=VARCHAR}
+            </if>
+            <if test="param.address != null and param.address != ''" >
+                and address = #{param.address,jdbcType=VARCHAR}
+            </if>
+            <if test="param.companyName != null and param.companyName != ''" >
+                and company_name = #{param.companyName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.companyRemark != null and param.companyRemark != ''" >
+                and company_remark = #{param.companyRemark,jdbcType=VARCHAR}
+            </if>
+            <if test="param.teachTheme != null and param.teachTheme != ''" >
+                and teach_theme = #{param.teachTheme,jdbcType=VARCHAR}
+            </if>
+            <if test="param.teachStart != null " >
+                and teach_start = #{param.teachStart,jdbcType=DATE}
+            </if>
+            <if test="param.teachEnd != null " >
+                and teach_end = #{param.teachEnd,jdbcType=DATE}
+            </if>
+            <if test="param.teachTimes != null " >
+                and teach_times = #{param.teachTimes,jdbcType=INTEGER}
+            </if>
+            <if test="param.remark != null and param.remark != ''" >
+                and remark = #{param.remark,jdbcType=VARCHAR}
+            </if>
+            <if test="param.orderAmount != null " >
+                and order_amount = #{param.orderAmount,jdbcType=DECIMAL}
+            </if>
+            <if test="param.discountAmount != null " >
+                and discount_amount = #{param.discountAmount,jdbcType=DECIMAL}
+            </if>
+            <if test="param.discountRemark != null and param.discountRemark != ''" >
+                and discount_remark = #{param.discountRemark,jdbcType=VARCHAR}
+            </if>
+            <if test="param.actualAmount != null " >
+                and actual_amount = #{param.actualAmount,jdbcType=DECIMAL}
+            </if>
+            <if test="param.payDate != null " >
+                and pay_date = #{param.payDate,jdbcType=DATE}
+            </if>
+            <if test="param.state != null " >
+                and state = #{param.state,jdbcType=INTEGER}
+            </if>
+            <if test="param.recordType != null " >
+                and record_type = #{param.recordType,jdbcType=INTEGER}
+            </if>
+            <if test="param.freeTimes != null" >
+                and free_times = #{param.freeTimes,jdbcType=INTEGER},
+            </if>
+            <if test="param.personnel != null" >
+                and personnel = #{param.personnel,jdbcType=VARCHAR},
+            </if>
+            <if test="param.transportation != null" >
+                and transportation = #{param.transportation,jdbcType=INTEGER},
+            </if>
+            <if test="param.reason != null" >
+                and reason = #{param.reason,jdbcType=VARCHAR},
+            </if>
+        </where>
+    </delete>
+    
+    <select id="findAll" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-08  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+</mapper>

@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kapphk.web.dao.mapper.teacher.BeanTeacherCommentMapper" >
+    <resultMap id="BaseResultMap" type="com.kapphk.web.bean.teacher.BeanTeacherComment" >
+        <!--  自动生成 2016年10月08日 表与实体类字段对应 -->
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="teacher_id" property="teacherId" jdbcType="BIGINT" />
+        <result column="uid" property="uid" jdbcType="BIGINT" />
+        <result column="order_id" property="orderId" jdbcType="BIGINT" />
+        <result column="star" property="star" jdbcType="DECIMAL" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+    
+    <!-- APP获取陪伴师评价列表 -->
+    <select id="getCommentList" resultType="java.util.Map">
+    	SELECT u.logo_path AS logoPath,u.nick_name AS nickName,c.content,
+		SUBSTRING(CAST(c.star AS CHAR),1,1) AS star,SUBSTRING(CAST(c.create_time AS CHAR),1,10) AS createTime
+		FROM app_teacher_comment c
+		INNER JOIN sys_user u ON u.id=c.uid
+		WHERE c.teacher_id = #{tid}
+		ORDER BY c.create_time DESC LIMIT #{page},#{rows}
+    </select>
+    
+    <!-- 获取评价列表 -->
+    <select id="findList" resultType="java.util.Map">
+    	SELECT c.id,c.order_id AS orderId,CONCAT(CAST(c.star AS CHAR),CAST('星级' AS CHAR)),t.logo_path AS logoPath,t.item_name AS itemName,
+		c.content,CAST(c.create_time AS CHAR) AS createTime,u.user_name AS userName,u.real_name AS realName
+		FROM app_teacher_comment c
+		INNER JOIN app_teacher t ON t.id=c.teacher_id
+		INNER JOIN sys_user u ON u.id=c.uid 
+		WHERE c.teacher_id=#{param.teacherId}
+    </select>
+    
+    <resultMap id="ResultMapWithBLOBs" type="com.kapphk.web.bean.teacher.BeanTeacherComment" extends="BaseResultMap" >
+        <!--  自动生成 2016年10月08日 表与实体类字段对应 -->
+        <result column="content" property="content" jdbcType="LONGVARCHAR" />
+    </resultMap>
+    
+    <sql id="Base_Column_List" >
+        <!--  自动生成 2016年10月08日 表字段名称 -->
+        id, teacher_id, uid, order_id, star, create_time
+    </sql>
+    
+    <sql id="Blob_Column_List" >
+        <!--  自动生成 2016年10月08日 表字段名称 -->
+        content
+    </sql>
+    
+    <sql id="findByPageSql" >
+        <!-- WARNING -  自动生成 2016-10-08  分页查询SQL -->
+        select a.* from app_teacher_comment a
+        <where >
+            <if test="param.id != null " >
+                and a.id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.teacherId != null " >
+                and a.teacher_id = #{param.teacherId,jdbcType=BIGINT}
+            </if>
+            <if test="param.uid != null " >
+                and a.uid = #{param.uid,jdbcType=BIGINT}
+            </if>
+            <if test="param.orderId != null " >
+                and a.order_id = #{param.orderId,jdbcType=BIGINT}
+            </if>
+            <if test="param.star != null " >
+                and a.star = #{param.star,jdbcType=DECIMAL}
+            </if>
+            <if test="param.content != null " >
+                and a.content = #{param.content,jdbcType=LONGVARCHAR}
+            </if>
+        </where>
+        order by a.id desc
+    </sql>
+    
+    <select id="findByPage" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-08  分页查询 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit #{offset}, #{pageSize}
+    </select>
+    
+    <select id="findByPageCount" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-10-08  分页查询总条数 -->
+        select count(1) from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findById" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年10月08日 根据ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        ,
+        <include refid="Blob_Column_List" />
+        from app_teacher_comment
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    
+    <select id="load" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-08  根据多个ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_teacher_comment where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </select>
+    
+    <select id="all" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-08  查询所有 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_teacher_comment
+    </select>
+    
+    <select id="count" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-10-08 查询总条数 -->
+        select count(1) from app_teacher_comment
+    </select>
+    
+    <update id="update" parameterType="com.kapphk.web.bean.teacher.BeanTeacherComment" >
+        <!--  自动生成 2016年10月08日 更新数据 -->
+        update app_teacher_comment
+        <set >
+            <if test="teacherId != null" >
+                teacher_id = #{teacherId,jdbcType=BIGINT},
+            </if>
+            <if test="uid != null" >
+                uid = #{uid,jdbcType=BIGINT},
+            </if>
+            <if test="orderId != null" >
+                order_id = #{orderId,jdbcType=BIGINT},
+            </if>
+            <if test="star != null" >
+                star = #{star,jdbcType=DECIMAL},
+            </if>
+            <if test="createTime != null" >
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="content != null" >
+                content = #{content,jdbcType=LONGVARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    
+    <insert id="insert" parameterType="com.kapphk.web.bean.teacher.BeanTeacherComment" useGeneratedKeys="true" keyProperty="id" >
+        <!--  自动生成 2016年10月08日 添加数据 -->
+        insert into app_teacher_comment
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="teacherId != null" >
+                teacher_id,
+            </if>
+            <if test="uid != null" >
+                uid,
+            </if>
+            <if test="orderId != null" >
+                order_id,
+            </if>
+            <if test="star != null" >
+                star,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+            <if test="content != null" >
+                content,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="teacherId != null" >
+                #{teacherId,jdbcType=BIGINT},
+            </if>
+            <if test="uid != null" >
+                #{uid,jdbcType=BIGINT},
+            </if>
+            <if test="orderId != null" >
+                #{orderId,jdbcType=BIGINT},
+            </if>
+            <if test="star != null" >
+                #{star,jdbcType=DECIMAL},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="content != null" >
+                #{content,jdbcType=LONGVARCHAR},
+            </if>
+        </trim>
+    </insert>
+    
+    <delete id="delete" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年10月08日 删除数据 -->
+        delete from app_teacher_comment
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    
+    <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.kapphk.web.bean.teacher.BeanTeacherComment" >
+        <!--  自动生成 2016年10月08日 更新数据 -->
+        update app_teacher_comment
+        set teacher_id = #{teacherId,jdbcType=BIGINT},
+            uid = #{uid,jdbcType=BIGINT},
+            order_id = #{orderId,jdbcType=BIGINT},
+            star = #{star,jdbcType=DECIMAL},
+            create_time = #{createTime,jdbcType=TIMESTAMP},
+            content = #{content,jdbcType=LONGVARCHAR}
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    
+    <insert id="inserts" parameterType="java.util.List" >
+        <!-- WARNING -  自动生成 2016-10-08 添加多条数据 -->
+        insert into app_teacher_comment (teacher_id, uid, order_id, star, create_time, content)
+        values
+        <foreach collection="list" item="item" separator="," >
+            (#{item.teacherId,jdbcType=BIGINT}, #{item.uid,jdbcType=BIGINT}, #{item.orderId,jdbcType=BIGINT}, #{item.star,jdbcType=DECIMAL}, #{item.createTime,jdbcType=TIMESTAMP}, #{item.content,jdbcType=LONGVARCHAR})
+        </foreach>
+    </insert>
+    
+    <delete id="deletes" >
+        <!-- WARNING -  自动生成 2016-10-08 删除多条数据 -->
+        delete from app_teacher_comment where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteByEntity" >
+        <!-- WARNING -  自动生成 2016-10-08 通过实体类中的条件删除数据 -->
+        delete from app_teacher_comment
+        <where >
+            <if test="param.id != null " >
+                and id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.teacherId != null " >
+                and teacher_id = #{param.teacherId,jdbcType=BIGINT}
+            </if>
+            <if test="param.uid != null " >
+                and uid = #{param.uid,jdbcType=BIGINT}
+            </if>
+            <if test="param.orderId != null " >
+                and order_id = #{param.orderId,jdbcType=BIGINT}
+            </if>
+            <if test="param.star != null " >
+                and star = #{param.star,jdbcType=DECIMAL}
+            </if>
+            <if test="param.content != null " >
+                and content = #{param.content,jdbcType=LONGVARCHAR}
+            </if>
+        </where>
+    </delete>
+    
+    <select id="findAll" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-08  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+</mapper>

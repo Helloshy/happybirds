@@ -1,0 +1,355 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kapphk.web.dao.mapper.user.BeanReportBorrowMapper" >
+    <resultMap id="BaseResultMap" type="com.kapphk.web.bean.user.BeanReportBorrow" >
+        <!--  自动生成 2016年11月16日 表与实体类字段对应 -->
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="phone" property="phone" jdbcType="VARCHAR" />
+        <result column="actual_name" property="actualName" jdbcType="VARCHAR" />
+        <result column="borrow_amount" property="borrowAmount" jdbcType="DECIMAL" />
+        <result column="use_remark" property="useRemark" jdbcType="VARCHAR" />
+        <result column="start_date" property="startDate" jdbcType="VARCHAR" />
+        <result column="end_date" property="endDate" jdbcType="VARCHAR" />
+        <result column="borrow_year" property="borrowYear" jdbcType="VARCHAR" />
+        <result column="year_rate" property="yearRate" jdbcType="DECIMAL" />
+        <result column="year_interest" property="yearInterest" jdbcType="DECIMAL" />
+        <result column="return_remark" property="returnRemark" jdbcType="VARCHAR" />
+        <result column="balance_amount" property="balanceAmount" jdbcType="DECIMAL" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+    
+    <!-- 查询列表 -->
+    <select id="findList" resultType="java.util.Map">
+    	SELECT b.id,b.phone,b.actual_name AS actualName,b.borrow_amount AS borrowAmount,b.use_remark AS useRemark,
+		b.start_date AS startDate,b.end_date AS endDate,b.borrow_year AS borrowYear,b.year_rate AS yearRate,b.year_interest AS yearInterest,
+		b.return_remark AS returnRemark,b.balance_amount AS balanceAmount,SUBSTRING(CAST(b.create_time AS CHAR),1,16) AS createTime
+		FROM app_report_borrow b
+		<where>
+			<if test="realName != null">
+				b.actual_name LIKE '%${realName}%'
+			</if>
+			<if test="startTime != null and endTime != null">
+				AND b.create_time &gt;= #{startTime} AND b.create_time &lt;= #{endTime}
+			</if>
+			<if test="startTime != null and endTime == null">
+				AND b.create_time &gt;= #{startTime}
+			</if>
+			<if test="startTime == null and endTime != null">
+				AND b.create_time &lt;= #{endTime}
+			</if>
+		</where>
+		ORDER BY b.create_time DESC LIMIT #{page},#{rows}
+    </select>
+    
+    <!-- 查询列表数 -->
+    <select id="findCount" resultType="java.lang.Integer">
+    	SELECT COUNT(1)
+		FROM app_report_borrow b
+		<where>
+			<if test="realName != null">
+				b.actual_name LIKE '%${realName}%'
+			</if>
+			<if test="startTime != null and endTime != null">
+				AND b.create_time &gt;= #{startTime} AND b.create_time &lt;= #{endTime}
+			</if>
+			<if test="startTime != null and endTime == null">
+				AND b.create_time &gt;= #{startTime}
+			</if>
+			<if test="startTime == null and endTime != null">
+				AND b.create_time &lt;= #{endTime}
+			</if>
+		</where>
+    </select>
+    
+    <sql id="Base_Column_List" >
+        <!--  自动生成 2016年11月16日 表字段名称 -->
+        id, phone, actual_name, borrow_amount, use_remark, start_date, end_date, borrow_year, 
+        year_rate, year_interest, return_remark, balance_amount, create_time
+    </sql>
+    
+    <sql id="findByPageSql" >
+        <!-- WARNING -  自动生成 2016-11-16  分页查询SQL -->
+        select a.* from app_report_borrow a
+        <where >
+            <if test="param.id != null " >
+                and a.id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.phone != null and param.phone != ''" >
+                and a.phone = #{param.phone,jdbcType=VARCHAR}
+            </if>
+            <if test="param.actualName != null and param.actualName != ''" >
+                and a.actual_name = #{param.actualName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.borrowAmount != null " >
+                and a.borrow_amount = #{param.borrowAmount,jdbcType=DECIMAL}
+            </if>
+            <if test="param.useRemark != null and param.useRemark != ''" >
+                and a.use_remark = #{param.useRemark,jdbcType=VARCHAR}
+            </if>
+            <if test="param.startDate != null and param.startDate != ''" >
+                and a.start_date = #{param.startDate,jdbcType=VARCHAR}
+            </if>
+            <if test="param.endDate != null and param.endDate != ''" >
+                and a.end_date = #{param.endDate,jdbcType=VARCHAR}
+            </if>
+            <if test="param.borrowYear != null and param.borrowYear != ''" >
+                and a.borrow_year = #{param.borrowYear,jdbcType=VARCHAR}
+            </if>
+            <if test="param.yearRate != null " >
+                and a.year_rate = #{param.yearRate,jdbcType=DECIMAL}
+            </if>
+            <if test="param.yearInterest != null " >
+                and a.year_interest = #{param.yearInterest,jdbcType=DECIMAL}
+            </if>
+            <if test="param.returnRemark != null and param.returnRemark != ''" >
+                and a.return_remark = #{param.returnRemark,jdbcType=VARCHAR}
+            </if>
+            <if test="param.balanceAmount != null " >
+                and a.balance_amount = #{param.balanceAmount,jdbcType=DECIMAL}
+            </if>
+        </where>
+        order by a.id desc
+    </sql>
+    
+    <select id="findByPage" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-11-16  分页查询 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit #{offset}, #{pageSize}
+    </select>
+    
+    <select id="findByPageCount" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-11-16  分页查询总条数 -->
+        select count(1) from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findById" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年11月16日 根据ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_report_borrow
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    
+    <select id="load" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-11-16  根据多个ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_report_borrow where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </select>
+    
+    <select id="all" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-11-16  查询所有 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_report_borrow
+    </select>
+    
+    <select id="count" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-11-16 查询总条数 -->
+        select count(1) from app_report_borrow
+    </select>
+    
+    <update id="update" parameterType="com.kapphk.web.bean.user.BeanReportBorrow" >
+        <!--  自动生成 2016年11月16日 更新数据 -->
+        update app_report_borrow
+        <set >
+            <if test="phone != null" >
+                phone = #{phone,jdbcType=VARCHAR},
+            </if>
+            <if test="actualName != null" >
+                actual_name = #{actualName,jdbcType=VARCHAR},
+            </if>
+            <if test="borrowAmount != null" >
+                borrow_amount = #{borrowAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="useRemark != null" >
+                use_remark = #{useRemark,jdbcType=VARCHAR},
+            </if>
+            <if test="startDate != null" >
+                start_date = #{startDate,jdbcType=VARCHAR},
+            </if>
+            <if test="endDate != null" >
+                end_date = #{endDate,jdbcType=VARCHAR},
+            </if>
+            <if test="borrowYear != null" >
+                borrow_year = #{borrowYear,jdbcType=VARCHAR},
+            </if>
+            <if test="yearRate != null" >
+                year_rate = #{yearRate,jdbcType=DECIMAL},
+            </if>
+            <if test="yearInterest != null" >
+                year_interest = #{yearInterest,jdbcType=DECIMAL},
+            </if>
+            <if test="returnRemark != null" >
+                return_remark = #{returnRemark,jdbcType=VARCHAR},
+            </if>
+            <if test="balanceAmount != null" >
+                balance_amount = #{balanceAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="createTime != null" >
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    
+    <insert id="insert" parameterType="com.kapphk.web.bean.user.BeanReportBorrow" useGeneratedKeys="true" keyProperty="id" >
+        <!--  自动生成 2016年11月16日 添加数据 -->
+        insert into app_report_borrow
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="phone != null" >
+                phone,
+            </if>
+            <if test="actualName != null" >
+                actual_name,
+            </if>
+            <if test="borrowAmount != null" >
+                borrow_amount,
+            </if>
+            <if test="useRemark != null" >
+                use_remark,
+            </if>
+            <if test="startDate != null" >
+                start_date,
+            </if>
+            <if test="endDate != null" >
+                end_date,
+            </if>
+            <if test="borrowYear != null" >
+                borrow_year,
+            </if>
+            <if test="yearRate != null" >
+                year_rate,
+            </if>
+            <if test="yearInterest != null" >
+                year_interest,
+            </if>
+            <if test="returnRemark != null" >
+                return_remark,
+            </if>
+            <if test="balanceAmount != null" >
+                balance_amount,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="phone != null" >
+                #{phone,jdbcType=VARCHAR},
+            </if>
+            <if test="actualName != null" >
+                #{actualName,jdbcType=VARCHAR},
+            </if>
+            <if test="borrowAmount != null" >
+                #{borrowAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="useRemark != null" >
+                #{useRemark,jdbcType=VARCHAR},
+            </if>
+            <if test="startDate != null" >
+                #{startDate,jdbcType=VARCHAR},
+            </if>
+            <if test="endDate != null" >
+                #{endDate,jdbcType=VARCHAR},
+            </if>
+            <if test="borrowYear != null" >
+                #{borrowYear,jdbcType=VARCHAR},
+            </if>
+            <if test="yearRate != null" >
+                #{yearRate,jdbcType=DECIMAL},
+            </if>
+            <if test="yearInterest != null" >
+                #{yearInterest,jdbcType=DECIMAL},
+            </if>
+            <if test="returnRemark != null" >
+                #{returnRemark,jdbcType=VARCHAR},
+            </if>
+            <if test="balanceAmount != null" >
+                #{balanceAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    
+    <insert id="inserts" parameterType="java.util.List" >
+        <!-- WARNING -  自动生成 2016-11-16 添加多条数据 -->
+        insert into app_report_borrow (phone, actual_name, borrow_amount, use_remark, start_date, end_date, borrow_year, year_rate, year_interest, return_remark, balance_amount, create_time)
+        values
+        <foreach collection="list" item="item" separator="," >
+            (#{item.phone,jdbcType=VARCHAR}, #{item.actualName,jdbcType=VARCHAR}, #{item.borrowAmount,jdbcType=DECIMAL}, #{item.useRemark,jdbcType=VARCHAR}, #{item.startDate,jdbcType=VARCHAR}, #{item.endDate,jdbcType=VARCHAR}, #{item.borrowYear,jdbcType=VARCHAR}, #{item.yearRate,jdbcType=DECIMAL}, #{item.yearInterest,jdbcType=DECIMAL}, #{item.returnRemark,jdbcType=VARCHAR}, #{item.balanceAmount,jdbcType=DECIMAL}, #{item.createTime,jdbcType=TIMESTAMP})
+        </foreach>
+    </insert>
+    
+    <delete id="delete" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年11月16日 删除数据 -->
+        delete from app_report_borrow
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    
+    <delete id="deletes" >
+        <!-- WARNING -  自动生成 2016-11-16 删除多条数据 -->
+        delete from app_report_borrow where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteByEntity" >
+        <!-- WARNING -  自动生成 2016-11-16 通过实体类中的条件删除数据 -->
+        delete from app_report_borrow
+        <where >
+            <if test="param.id != null " >
+                and id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.phone != null and param.phone != ''" >
+                and phone = #{param.phone,jdbcType=VARCHAR}
+            </if>
+            <if test="param.actualName != null and param.actualName != ''" >
+                and actual_name = #{param.actualName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.borrowAmount != null " >
+                and borrow_amount = #{param.borrowAmount,jdbcType=DECIMAL}
+            </if>
+            <if test="param.useRemark != null and param.useRemark != ''" >
+                and use_remark = #{param.useRemark,jdbcType=VARCHAR}
+            </if>
+            <if test="param.startDate != null and param.startDate != ''" >
+                and start_date = #{param.startDate,jdbcType=VARCHAR}
+            </if>
+            <if test="param.endDate != null and param.endDate != ''" >
+                and end_date = #{param.endDate,jdbcType=VARCHAR}
+            </if>
+            <if test="param.borrowYear != null and param.borrowYear != ''" >
+                and borrow_year = #{param.borrowYear,jdbcType=VARCHAR}
+            </if>
+            <if test="param.yearRate != null " >
+                and year_rate = #{param.yearRate,jdbcType=DECIMAL}
+            </if>
+            <if test="param.yearInterest != null " >
+                and year_interest = #{param.yearInterest,jdbcType=DECIMAL}
+            </if>
+            <if test="param.returnRemark != null and param.returnRemark != ''" >
+                and return_remark = #{param.returnRemark,jdbcType=VARCHAR}
+            </if>
+            <if test="param.balanceAmount != null " >
+                and balance_amount = #{param.balanceAmount,jdbcType=DECIMAL}
+            </if>
+        </where>
+    </delete>
+    
+    <select id="findAll" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-11-16  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+</mapper>

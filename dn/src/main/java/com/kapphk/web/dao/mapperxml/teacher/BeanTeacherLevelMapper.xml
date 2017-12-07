@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kapphk.web.dao.mapper.teacher.BeanTeacherLevelMapper" >
+    <resultMap id="BaseResultMap" type="com.kapphk.web.bean.teacher.BeanTeacherLevel" >
+        <!--  自动生成 2016年10月08日 表与实体类字段对应 -->
+        <id column="id" property="id" jdbcType="VARCHAR" />
+        <result column="rate" property="rate" jdbcType="DECIMAL" />
+        <result column="record_type" property="recordType" jdbcType="INTEGER" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+    
+    <!-- APP获取级别 -->
+    <select id="findTagIdList" resultType="java.lang.String">
+    	SELECT l.id FROM app_teacher_level l WHERE l.record_type = #{recordType} 
+    	order by l.create_time desc
+    </select>
+    
+    <!-- 获取全部级别 -->
+    <select id="findLevelList" resultType="java.util.Map">
+    	SELECT l.id,l.id AS `text` FROM app_teacher_level l WHERE l.record_type = #{recordType}
+    </select>
+    
+    <!-- 导出数据 -->
+    <select id="findList" resultType="java.util.Map">
+    	SELECT l.id,l.rate,l.create_time AS createTime FROM app_teacher_level l
+    </select>
+    
+    <sql id="Base_Column_List" >
+        <!--  自动生成 2016年10月08日 表字段名称 -->
+        id, rate, record_type, create_time
+    </sql>
+    
+    <sql id="findByPageSql" >
+        <!-- WARNING -  自动生成 2016-10-08  分页查询SQL -->
+        select a.* from app_teacher_level a
+        <where >
+            <if test="param.id != null and param.id != ''" >
+                and a.id = #{param.id,jdbcType=VARCHAR}
+            </if>
+            <if test="param.rate != null " >
+                and a.rate = #{param.rate,jdbcType=DECIMAL}
+            </if>
+            <if test="param.recordType != null " >
+                and a.record_type = #{param.recordType,jdbcType=INTEGER}
+            </if>
+        </where>
+        order by create_time desc
+    </sql>
+    
+    <select id="findByPage" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-08  分页查询 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit #{offset}, #{pageSize}
+    </select>
+    
+    <select id="findByPageCount" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-10-08  分页查询总条数 -->
+        select count(1) from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findById" resultMap="BaseResultMap" parameterType="java.lang.String" >
+        <!--  自动生成 2016年10月08日 根据ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_teacher_level
+        where id = #{id,jdbcType=VARCHAR}
+    </select>
+    
+    <select id="load" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-08  根据多个ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_teacher_level where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </select>
+    
+    <select id="all" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-08  查询所有 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_teacher_level
+    </select>
+    
+    <select id="count" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-10-08 查询总条数 -->
+        select count(1) from app_teacher_level
+    </select>
+    
+    <update id="update" parameterType="com.kapphk.web.bean.teacher.BeanTeacherLevel" >
+        <!--  自动生成 2016年10月08日 更新数据 -->
+        update app_teacher_level
+        <set >
+            <if test="rate != null" >
+                rate = #{rate,jdbcType=DECIMAL},
+            </if>
+            <if test="recordType != null" >
+                record_type = #{recordType,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null" >
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=VARCHAR}
+    </update>
+    
+    <insert id="insert" parameterType="com.kapphk.web.bean.teacher.BeanTeacherLevel" useGeneratedKeys="true" keyProperty="id" >
+        <!--  自动生成 2016年10月08日 添加数据 -->
+        insert into app_teacher_level
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="rate != null" >
+                rate,
+            </if>
+            <if test="recordType != null" >
+                record_type,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="rate != null" >
+                #{rate,jdbcType=DECIMAL},
+            </if>
+            <if test="recordType != null" >
+                #{recordType,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    
+    <insert id="inserts" parameterType="java.util.List" >
+        <!-- WARNING -  自动生成 2016-10-08 添加多条数据 -->
+        insert into app_teacher_level (rate, record_type, create_time)
+        values
+        <foreach collection="list" item="item" separator="," >
+            (#{item.rate,jdbcType=DECIMAL}, #{item.recordType,jdbcType=INTEGER}, #{item.createTime,jdbcType=TIMESTAMP})
+        </foreach>
+    </insert>
+    
+    <delete id="delete" parameterType="java.lang.String" >
+        <!--  自动生成 2016年10月08日 删除数据 -->
+        delete from app_teacher_level
+        where id = #{id,jdbcType=VARCHAR}
+    </delete>
+    
+    <delete id="deletes" >
+        <!-- WARNING -  自动生成 2016-10-08 删除多条数据 -->
+        delete from app_teacher_level where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteByEntity" >
+        <!-- WARNING -  自动生成 2016-10-08 通过实体类中的条件删除数据 -->
+        delete from app_teacher_level
+        <where >
+            <if test="param.id != null and param.id != ''" >
+                and id = #{param.id,jdbcType=VARCHAR}
+            </if>
+            <if test="param.rate != null " >
+                and rate = #{param.rate,jdbcType=DECIMAL}
+            </if>
+            <if test="param.recordType != null " >
+                and record_type = #{param.recordType,jdbcType=INTEGER}
+            </if>
+        </where>
+    </delete>
+    
+    <select id="findAll" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-08  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+</mapper>

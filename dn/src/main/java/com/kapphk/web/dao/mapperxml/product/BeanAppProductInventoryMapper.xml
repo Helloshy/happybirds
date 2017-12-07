@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kapphk.web.dao.mapper.product.BeanAppProductInventoryMapper" >
+    <resultMap id="BaseResultMap" type="com.kapphk.web.bean.product.BeanAppProductInventory" >
+        <!--  自动生成 2016年12月20日 表与实体类字段对应 -->
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="product_id" property="productId" jdbcType="BIGINT" />
+        <result column="color" property="color" jdbcType="VARCHAR" />
+        <result column="color_name" property="colorName" jdbcType="VARCHAR" />
+        <result column="size" property="size" jdbcType="VARCHAR" />
+        <result column="size_name" property="sizeName" jdbcType="VARCHAR" />
+        <result column="price" property="price" jdbcType="DECIMAL" />
+        <result column="stock_qty" property="stockQty" jdbcType="INTEGER" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+
+    <!-- 详情 -->
+    <select id="findDetailById" resultType="java.util.Map">
+    	SELECT i.id,i.price,i.stock_qty AS stockQty,p.item_name AS itemName,p.item_remark AS itemRemark,
+    	c.item_name AS categoryName,i.color_name as colorName,i.size_name as sizeName,i.color,i.size
+		FROM app_product_inventory i
+		INNER JOIN app_product p ON p.id=i.product_id
+		INNER JOIN app_product_category c ON c.id=p.category_id
+		WHERE i.id=#{id}
+    </select>
+
+    <sql id="Base_Column_List" >
+        <!--  自动生成 2016年12月20日 表字段名称 -->
+        id, product_id, color, color_name, size, size_name, price, stock_qty, create_time
+    </sql>
+
+    <sql id="findByPageSql" >
+        <!-- WARNING -  自动生成 2016-12-20  分页查询SQL -->
+        select a.* from app_product_inventory a
+        <where >
+            <if test="param.id != null " >
+                and a.id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.productId != null " >
+                and a.product_id = #{param.productId,jdbcType=BIGINT}
+            </if>
+            <if test="param.color != null" >
+                and a.color = #{param.color,jdbcType=VARCHAR}
+            </if>
+            <if test="param.size != null" >
+                and a.size = #{param.size,jdbcType=VARCHAR}
+            </if>
+            <if test="param.colorName != null" >
+                and a.color_name = #{param.colorName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.sizeName != null" >
+                and a.size_name = #{param.sizeName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.price != null " >
+                and a.price = #{param.price,jdbcType=DECIMAL}
+            </if>
+            <if test="param.stockQty != null " >
+                and a.stock_qty = #{param.stockQty,jdbcType=INTEGER}
+            </if>
+        </where>
+        order by a.id desc
+    </sql>
+
+    <select id="findByPage" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-20  分页查询 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit #{offset}, #{pageSize}
+    </select>
+
+    <select id="findByPageCount" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-12-20  分页查询总条数 -->
+        select count(1) from (
+        <include refid="findByPageSql" />
+        ) temp
+    </select>
+
+    <select id="findById" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年12月20日 根据ID查询 -->
+        select
+        <include refid="Base_Column_List" />
+        from app_product_inventory
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+
+    <select id="load" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-20  根据多个ID查询 -->
+        select
+        <include refid="Base_Column_List" />
+        from app_product_inventory where id in
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="all" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-20  查询所有 -->
+        select
+        <include refid="Base_Column_List" />
+        from app_product_inventory
+    </select>
+
+    <select id="count" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-12-20 查询总条数 -->
+        select count(1) from app_product_inventory
+    </select>
+
+    <update id="update" parameterType="com.kapphk.web.bean.product.BeanAppProductInventory" >
+        <!--  自动生成 2016年12月20日 更新数据 -->
+        update app_product_inventory
+        <set >
+            <if test="productId != null" >
+                product_id = #{productId,jdbcType=BIGINT},
+            </if>
+            <if test="color != null" >
+                color = #{color,jdbcType=VARCHAR},
+            </if>
+            <if test="size != null" >
+                size = #{size,jdbcType=VARCHAR},
+            </if>
+            <if test="colorName != null" >
+                color_name = #{colorName,jdbcType=VARCHAR},
+            </if>
+            <if test="sizeName != null" >
+                size_name = #{sizeName,jdbcType=VARCHAR},
+            </if>
+            <if test="price != null" >
+                price = #{price,jdbcType=DECIMAL},
+            </if>
+            <if test="stockQty != null" >
+                stock_qty = #{stockQty,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null" >
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <insert id="insert" parameterType="com.kapphk.web.bean.product.BeanAppProductInventory" useGeneratedKeys="true" keyProperty="id" >
+        <!--  自动生成 2016年12月20日 添加数据 -->
+        insert into app_product_inventory
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="productId != null" >
+                product_id,
+            </if>
+            <if test="color != null" >
+                color,
+            </if>
+            <if test="size != null" >
+                size,
+            </if>
+            <if test="colorName != null" >
+                color_name,
+            </if>
+            <if test="sizeName != null" >
+                size_name,
+            </if>
+            <if test="price != null" >
+                price,
+            </if>
+            <if test="stockQty != null" >
+                stock_qty,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="productId != null" >
+                #{productId,jdbcType=BIGINT},
+            </if>
+            <if test="color != null" >
+                #{color,jdbcType=VARCHAR},
+            </if>
+            <if test="size != null" >
+                #{size,jdbcType=VARCHAR},
+            </if>
+            <if test="colorName != null" >
+                #{colorName,jdbcType=VARCHAR},
+            </if>
+            <if test="sizeName != null" >
+                #{sizeName,jdbcType=VARCHAR},
+            </if>
+            <if test="price != null" >
+                #{price,jdbcType=DECIMAL},
+            </if>
+            <if test="stockQty != null" >
+                #{stockQty,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+
+    <insert id="inserts" parameterType="java.util.List" >
+        <!-- WARNING -  自动生成 2016-12-20 添加多条数据 -->
+        insert into app_product_inventory (product_id, color, size, color_name, size_name, price, stock_qty, create_time)
+        values
+        <foreach collection="list" item="item" separator="," >
+            (#{item.productId,jdbcType=BIGINT}, #{item.color,jdbcType=VARCHAR}, #{item.size,jdbcType=VARCHAR}, #{item.colorName,jdbcType=VARCHAR}, #{item.sizeName,jdbcType=VARCHAR}, #{item.price,jdbcType=DECIMAL}, #{item.stockQty,jdbcType=INTEGER}, #{item.createTime,jdbcType=TIMESTAMP})
+        </foreach>
+    </insert>
+
+    <delete id="delete" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年12月20日 删除数据 -->
+        delete from app_product_inventory
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+
+    <delete id="deletes" >
+        <!-- WARNING -  自动生成 2016-12-20 删除多条数据 -->
+        delete from app_product_inventory where id in
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="deleteByEntity" >
+        <!-- WARNING -  自动生成 2016-12-20 通过实体类中的条件删除数据 -->
+        delete from app_product_inventory
+        <where >
+            <if test="param.id != null " >
+                and id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.productId != null " >
+                and product_id = #{param.productId,jdbcType=BIGINT}
+            </if>
+            <if test="param.color != null" >
+                and color = #{param.color,jdbcType=VARCHAR}
+            </if>
+            <if test="param.size != null" >
+                and size = #{param.size,jdbcType=VARCHAR}
+            </if>
+            <if test="param.colorName != null" >
+                and color_name = #{param.colorName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.sizeName != null" >
+                and size_name = #{param.sizeName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.price != null " >
+                and price = #{param.price,jdbcType=DECIMAL}
+            </if>
+            <if test="param.stockQty != null " >
+                and stock_qty = #{param.stockQty,jdbcType=INTEGER}
+            </if>
+        </where>
+    </delete>
+
+    <select id="findAll" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-20  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp
+    </select>
+
+    <select id="findListByParam" resultType="java.util.Map">
+        SELECT
+        api.`id`,
+        api.`color`,
+        api.`size`,
+        CONCAT(api.`color`,api.`size`)AS colorSize,
+        api.`price`,
+        api.`stock_qty` AS stockQty,
+        DATE_FORMAT(api.`create_time`,'%Y-%m-%d %H:%i:%S') as createTime,
+        p.`item_remark` AS itemRemark,
+        p.`id` AS productId,
+        (SELECT pc.item_name FROM app_product_category pc WHERE pc.id = p.`category_id`) AS itemName
+        FROM app_product_inventory api INNER JOIN app_product p ON api.`product_id`=p.`id`
+        <where>
+            <if test="param.id !=null and param.id !='' ">
+                api.id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.productId !=null and param.productId !='' ">
+                and p.id = #{param.productId,jdbcType=BIGINT}
+            </if>
+        </where>
+        ORDER BY api.create_time DESC
+        <if test="page !=null ">
+            limit #{page,jdbcType=INTEGER},
+        </if>
+        <if test="page !=null ">
+            #{rows,jdbcType=INTEGER}
+        </if>
+    </select>
+
+    <select id="findListByParamCount" resultType="java.lang.Integer" >
+        SELECT count(1)
+        from (SELECT
+        api.`id`,
+        api.`color`,
+        api.`size`,
+        CONCAT(api.`color`,api.`size`)AS colorSize,
+        api.`price`,
+        api.`stock_qty` AS stockQty,
+        DATE_FORMAT(api.`create_time`,'%Y-%m-%d %H:%i:%S') as createTime,
+        p.`item_remark` AS itemRemark,
+        p.`id` AS productId,
+        (SELECT pc.item_name FROM app_product_category pc WHERE pc.id = p.`category_id`) AS itemName
+        FROM app_product_inventory api INNER JOIN app_product p ON api.`product_id`=p.`id`
+        <where>
+            <if test="param.id !=null and param.id !='' ">
+                api.id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.productId !=null and param.productId !='' ">
+                and p.id = #{param.productId,jdbcType=BIGINT}
+            </if>
+        </where>
+        ORDER BY api.create_time DESC
+        )temp
+    </select>
+
+    <select id="findEntityByCondition" resultMap="BaseResultMap">
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp
+    </select>
+
+    <delete id="deletesByProductId" parameterType="java.util.List">
+        DELETE FROM app_product_inventory where product_id in
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </delete>
+
+    <update id="offShelves" parameterType="java.util.List">
+        UPDATE app_product_inventory SET stock_qty=0 WHERE  product_id IN
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </update>
+
+</mapper>

@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kapphk.system.mapper.MessageMapper" >
+    <resultMap id="BaseResultMap" type="com.kapphk.system.bean.Message" >
+        <!--  自动生成 2016年12月06日 表与实体类字段对应 -->
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="title" property="title" jdbcType="VARCHAR" />
+        <result column="msg_type" property="msgType" jdbcType="TINYINT" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+    <resultMap id="EntityResultMap" type="com.kapphk.entity.MessageEntity" extends="BaseResultMap" >
+        <result column="is_read" property="isRead" jdbcType="INTEGER" />
+    </resultMap>
+    
+    <resultMap id="ResultMapWithBLOBs" type="com.kapphk.system.bean.Message" extends="BaseResultMap" >
+        <!--  自动生成 2016年12月06日 表与实体类字段对应 -->
+        <result column="content" property="content" jdbcType="LONGVARCHAR" />
+    </resultMap>
+    
+    <sql id="Base_Column_List" >
+        <!--  自动生成 2016年12月06日 表字段名称 -->
+        id, title, msg_type, create_time
+    </sql>
+    
+    <sql id="Blob_Column_List" >
+        <!--  自动生成 2016年12月06日 表字段名称 -->
+        content
+    </sql>
+    
+    <sql id="findByPageSql" >
+        <!-- WARNING -  自动生成 2016-12-06  分页查询SQL -->
+        select a.* from sys_message a
+        <where >
+            <if test="param.id != null " >
+                and a.id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.title != null and param.title != ''" >
+                and a.title = #{param.title,jdbcType=VARCHAR}
+            </if>
+            <if test="param.msgType != null " >
+                and a.msg_type = #{param.msgType,jdbcType=TINYINT}
+            </if>
+            <if test="param.content != null " >
+                and a.content = #{param.content,jdbcType=LONGVARCHAR}
+            </if>
+        </where>
+        order by a.id desc
+    </sql>
+    
+    <select id="findByPage" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-06  分页查询 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit #{offset}, #{pageSize}
+    </select>
+    
+    <select id="findByPageCount" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-12-06  分页查询总条数 -->
+        select count(1) from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findById" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年12月06日 根据ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        ,
+        <include refid="Blob_Column_List" />
+        from sys_message
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    
+    <select id="load" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-06  根据多个ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from sys_message where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </select>
+    
+    <select id="all" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-06  查询所有 -->
+        select 
+        <include refid="Base_Column_List" />
+        from sys_message
+    </select>
+    
+    <select id="count" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-12-06 查询总条数 -->
+        select count(1) from sys_message
+    </select>
+    
+    <update id="update" parameterType="com.kapphk.system.bean.Message" >
+        <!--  自动生成 2016年12月06日 更新数据 -->
+        update sys_message
+        <set >
+            <if test="title != null" >
+                title = #{title,jdbcType=VARCHAR},
+            </if>
+            <if test="msgType != null" >
+                msg_type = #{msgType,jdbcType=TINYINT},
+            </if>
+            <if test="createTime != null" >
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="content != null" >
+                content = #{content,jdbcType=LONGVARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    
+    <insert id="insert" parameterType="com.kapphk.system.bean.Message" useGeneratedKeys="true" keyProperty="id" >
+        <!--  自动生成 2016年12月06日 添加数据 -->
+        insert into sys_message
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="title != null" >
+                title,
+            </if>
+            <if test="msgType != null" >
+                msg_type,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+            <if test="content != null" >
+                content,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="title != null" >
+                #{title,jdbcType=VARCHAR},
+            </if>
+            <if test="msgType != null" >
+                #{msgType,jdbcType=TINYINT},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="content != null" >
+                #{content,jdbcType=LONGVARCHAR},
+            </if>
+        </trim>
+    </insert>
+    
+    <delete id="delete" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年12月06日 删除数据 -->
+        delete from sys_message
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    
+    <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.kapphk.system.bean.Message" >
+        <!--  自动生成 2016年12月06日 更新数据 -->
+        update sys_message
+        set title = #{title,jdbcType=VARCHAR},
+            msg_type = #{msgType,jdbcType=TINYINT},
+            create_time = #{createTime,jdbcType=TIMESTAMP},
+            content = #{content,jdbcType=LONGVARCHAR}
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    
+    <insert id="inserts" parameterType="java.util.List" >
+        <!-- WARNING -  自动生成 2016-12-06 添加多条数据 -->
+        insert into sys_message (title, msg_type, create_time, content)
+        values
+        <foreach collection="list" item="item" separator="," >
+            (#{item.title,jdbcType=VARCHAR}, #{item.msgType,jdbcType=TINYINT}, #{item.createTime,jdbcType=TIMESTAMP}, #{item.content,jdbcType=LONGVARCHAR})
+        </foreach>
+    </insert>
+    
+    <delete id="deletes" >
+        <!-- WARNING -  自动生成 2016-12-06 删除多条数据 -->
+        delete from sys_message where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteByEntity" >
+        <!-- WARNING -  自动生成 2016-12-06 通过实体类中的条件删除数据 -->
+        delete from sys_message
+        <where >
+            <if test="param.id != null " >
+                and id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.title != null and param.title != ''" >
+                and title = #{param.title,jdbcType=VARCHAR}
+            </if>
+            <if test="param.msgType != null " >
+                and msg_type = #{param.msgType,jdbcType=TINYINT}
+            </if>
+            <if test="param.content != null " >
+                and content = #{param.content,jdbcType=LONGVARCHAR}
+            </if>
+        </where>
+    </delete>
+    
+    <select id="findAll" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-06  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    <select id="findList" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-06  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findListByUid" resultMap="EntityResultMap" >
+        SELECT sm.*,smd.is_read FROM 
+        sys_message sm 
+        LEFT JOIN sys_message_detail smd ON sm.id = smd.message_id
+        <where>          
+        	<if test="isRead != null " >
+                and smd.is_read = #{isRead,jdbcType=INTEGER}
+            </if>
+        	<if test="title != null and title != ''" >
+                and sm.title like CONCAT('%',#{title,jdbcType=VARCHAR},'%')
+            </if>
+            and smd.uid = #{uid,jdbcType=BIGINT}
+        </where>
+    </select>
+</mapper>

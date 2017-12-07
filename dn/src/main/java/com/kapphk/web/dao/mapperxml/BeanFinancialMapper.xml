@@ -1,0 +1,977 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kapphk.web.dao.mapper.BeanFinancialMapper" >
+	
+	<!-- 财务提成列表 -->
+    <select id="findList" resultType="java.util.Map">
+    	<if test="type == 1">
+    		SELECT * FROM(
+	    		SELECT CAST(o.order_no AS CHAR) AS orderNo,u.real_name AS realName,u.user_name AS userName,o.discount_blue AS discountBlue,o.discount_red AS discountRed,
+				SUBSTRING(CAST(o.create_time AS CHAR),1,16) AS createTime,
+				(CASE WHEN o.pay_status=3 THEN '赞赏' ELSE (CASE c.record_type WHEN 1 THEN '线下课程' WHEN 2 THEN '网络课程' ELSE '系统课程'END)END) AS itemName,
+				(CASE WHEN o.is_coupon=1 THEN '课程抵扣卷' ELSE o.pay_method END) AS payMethod,o.pay_amount AS payAmount
+				FROM app_course_order o 
+				INNER JOIN sys_user u ON u.id=o.uid
+				LEFT JOIN app_course c ON c.id=o.course_id
+				WHERE o.is_pay=1 AND o.is_use=1
+				UNION ALL
+				SELECT CAST(ato.id AS CHAR) as orderNo,su.real_name AS realName,su.user_name AS userName,ato.discount_blue AS discountBlue,ato.discount_red AS discountRed,
+				SUBSTRING(CAST(ato.create_time AS CHAR),1,16) AS createTime,(CASE ato.record_type WHEN 1 THEN '讲学预约' ELSE '动能陪伴师'END) AS itemName,
+				'线下支付'AS payMethod,ato.actual_amount AS payAmount
+				FROM app_teacher_order ato
+				INNER JOIN sys_user su ON su.id=ato.uid
+				WHERE ato.state=6
+			) as a 
+			<where>
+				<if test="itemName != null">
+					AND a.orderNo LIKE '%${itemName}%'
+				</if>
+				<if test="param != null">
+					AND a.realName LIKE '%${param}%'
+				</if>
+				<if test="startTime != null and endTime != null">
+					AND a.createTime &gt;= #{startTime} and a.createTime &lt;= #{endTime}
+				</if>
+				<if test="startTime != null and endTime == null">
+					AND a.createTime &gt;= #{startTime}
+				</if>
+				<if test="startTime == null and endTime != null">
+					AND a.createTime &lt;= #{endTime}
+				</if>
+			</where>
+    		ORDER BY a.createTime DESC LIMIT #{page},#{rows} 
+    	</if>
+    	<if test="type == 2">
+    		SELECT c.id,CAST(co.register_date AS CHAR) AS registerDate,ct.user_name AS userName,ct.salary,ct.teach_times AS teachTimes,
+			(ct.salary*ct.teach_times) AS totalAmount,IFNULL(co.offline_amount,0) AS offlineAmount,ct.rate,FLOOR(ct.rate*co.offline_amount*0.01) AS amount,
+			FLOOR(ct.salary*ct.teach_times+IFNULL(ct.rate*co.offline_amount*0.01,0)) AS total,CAST(c.create_time AS CHAR) AS createTime,c.item_name AS itemName
+			FROM app_course c
+			INNER JOIN app_course_offline co ON co.id=c.id
+			RIGHT JOIN app_course_teacher ct ON ct.course_id=c.id
+			<where>
+				c.record_type=1 AND c.state=3
+				<if test="itemName != null">
+				 and c.item_name like '%${itemName}%'
+				</if>
+				<if test="param != null">
+				 and ct.user_name like '%${param}%'
+				</if>
+				<if test="startTime != null and endTime != null">
+				 and co.register_date &gt;= #{startTime} and co.register_date &lt;= #{endTime}
+				</if>
+				<if test="startTime != null and endTime == null">
+				 and co.register_date &gt;= #{startTime}
+				</if>
+				<if test="startTime == null and endTime != null">
+				 and co.register_date &lt;= #{endTime}
+				</if>
+			</where>
+			LIMIT #{page},#{rows} 
+    	</if>
+    	<if test="type == 3">
+    		SELECT c.item_name AS itemName,co.subsidy,CAST(c.create_time AS CHAR) AS createTime,c.id,co.register_date AS registerDate,
+			COUNT(o.id) AS counts,(SELECT COUNT(1) FROM app_course_contact WHERE course_id=c.id) AS contacts,
+			(SELECT GROUP_CONCAT(user_name) FROM app_course_contact WHERE course_id=c.id) AS userName,
+			FLOOR((co.subsidy*COUNT(o.id)/(SELECT COUNT(1) FROM app_course_contact WHERE course_id=c.id))) AS amount
+			FROM app_course c
+			INNER JOIN app_course_offline co ON co.id=c.id
+			LEFT JOIN app_course_order o ON o.course_id=c.id
+			<where>
+				c.record_type=1 AND c.state=3
+				<if test="itemName != null">
+				 and c.item_name like '%${itemName}%'
+				</if>
+				<if test="param != null">
+				 and cc.user_name like '%${param}%'
+				</if>
+				<if test="startTime != null and endTime != null">
+				 and co.register_date &gt;= #{startTime} and co.register_date &lt;= #{endTime}
+				</if>
+				<if test="startTime != null and endTime == null">
+				 and co.register_date &gt;= #{startTime}
+				</if>
+				<if test="startTime == null and endTime != null">
+				 and co.register_date &lt;= #{endTime}
+				</if>
+			</where>
+			GROUP BY c.id ORDER BY c.id LIMIT #{page},#{rows} 
+    	</if>
+    	<if test="type == 4">
+    		SELECT c.item_name AS itemName,c.amount,(SUM(o.discount_red)+SUM(o.pay_amount)) AS totalAmount,c.id,COUNT(o.id) AS counts,c.id as orderNo,
+			l.rate,(SUM(o.discount_red)+SUM(o.pay_amount)*l.rate*0.01) AS amountSum,CAST(c.create_time AS CHAR) AS createTime,co.teacher_name AS teacherName
+			FROM app_course c
+			RIGHT JOIN app_course_order o ON o.course_id=c.id
+			LEFT JOIN app_course_online co ON co.id=c.id
+			LEFT JOIN app_teacher t ON t.id=co.teacher_id
+			LEFT JOIN app_teacher_level l ON l.id=t.teacher_level
+			<where>
+				c.record_type=2 AND o.is_pay = 1
+				<if test="itemName != null">
+				 and c.item_name like '%${itemName}%'
+				</if>
+				<if test="param != null">
+				 and co.teacher_name like '%${param}%'
+				</if>
+			</where>
+			GROUP BY c.id ORDER BY c.create_time DESC LIMIT #{page},#{rows} 
+    	</if>
+    	<if test="type == 5">
+	    	SELECT * FROM (
+				SELECT c.id,c.item_name AS itemName,su.real_name AS kfRealName,'存量客服' AS `position`,u.user_name AS userName,
+				u.real_name AS realName,c.amount,CAST(c.create_time AS CHAR) AS createTime,s.value,FLOOR(c.amount*s.value*0.01) AS totalAmount
+				FROM app_course_order o
+				INNER JOIN app_course c ON c.id=o.course_id
+				INNER JOIN sys_user u ON u.id=o.uid AND o.is_use=1
+				INNER JOIN sys_user su ON su.id=u.service_stock
+				LEFT JOIN sys_setting s ON s.id='stock_service'
+				LIMIT 1
+				UNION ALL 
+				SELECT c.id,c.item_name AS itemName,su.real_name AS kfRealName,'增量客服' AS `position`,u.user_name AS userName,
+				u.real_name AS realName,c.amount,CAST(c.create_time AS CHAR) AS createTime,s.value,FLOOR(c.amount*s.value*0.01) AS totalAmount
+				FROM app_course_order o
+				INNER JOIN app_course c ON c.id=o.course_id
+				INNER JOIN sys_user u ON u.id=o.uid AND o.is_use=1
+				INNER JOIN sys_user su ON su.id=u.service_begin
+				LEFT JOIN sys_setting s ON s.id='increment_service'
+				LIMIT 1,999999
+			) AS a 
+			<where>
+				<if test="itemName != null">
+					 and a.itemName like '%${itemName}%'
+				</if>
+				<if test="param != null">
+					 and a.kfRealName like '%${param}%'
+				</if>
+				<if test="startTime != null and endTime != null">
+					 and a.createTime &gt;= #{startTime} and a.createTime &lt;= #{endTime}
+				</if>
+				<if test="startTime != null and endTime == null">
+					 and a.createTime &gt;= #{startTime}
+				</if>
+				<if test="startTime == null and endTime != null">
+					 and a.createTime &lt;= #{endTime}
+				</if>
+			</where>
+			ORDER BY a.createTime DESC LIMIT #{page},#{rows}
+    	</if>
+    	<if test="type == 6">
+    		SELECT o.id,t.item_name as itemName,l.id AS `level`,l.rate,CONCAT(CAST(o.teach_start AS CHAR),'-',CAST(o.teach_end AS CHAR)) AS `date`,
+			o.address,o.company_name AS companyName,o.nick_name AS nickName,o.phone,o.teach_times AS teachTimes,
+			(o.actual_amount+o.discount_red) AS actualAmount,FLOOR((o.actual_amount+o.discount_red)*l.rate*0.01) AS amount,CAST(o.create_time AS CHAR) AS createTime
+			FROM app_teacher_order o 
+			INNER JOIN app_teacher t ON t.id=o.teacher_id
+			INNER JOIN app_teacher_level l ON t.teacher_level=l.id
+			<where>
+				o.record_type=1 AND o.state=6
+				<if test="itemName != null">
+					 and t.item_name like '%${itemName}%'
+				</if>
+				<if test="param != null">
+					 and o.nick_name like '%${param}%'
+				</if>
+				<if test="startTime != null and endTime != null">
+					 and o.create_time &gt;= #{startTime} and o.create_time &lt;= #{endTime}
+				</if>
+				<if test="startTime != null and endTime == null">
+					 and o.create_time &gt;= #{startTime}
+				</if>
+				<if test="startTime == null and endTime != null">
+					 and o.create_time &lt;= #{endTime}
+				</if>
+			</where>
+			ORDER BY o.create_time DESC LIMIT #{page},#{rows}
+    	</if>
+    	<if test="type == 7">
+    		SELECT o.id,o.nick_name AS nickName,o.phone,u.user_name AS userName,u.real_name AS realName,
+			t.item_name AS itemName,l.id AS `level`,l.rate,o.teach_theme AS teachTheme,(o.actual_amount+o.discount_red) AS actualAmount,
+			FLOOR((o.actual_amount+o.discount_red)*l.rate*0.01) AS amount,CAST(o.create_time AS CHAR) AS createTime
+			FROM app_teacher_order o
+			INNER JOIN sys_user u ON u.id=o.uid
+			INNER JOIN app_teacher t ON t.id=o.teacher_id
+			INNER JOIN app_teacher_level l ON l.id=t.teacher_level
+			<where>
+				o.record_type=2 AND o.state=6
+				<if test="itemName != null">
+					 and t.item_name like '%${itemName}%'
+				</if>
+				<if test="param != null">
+					 and u.real_name like '%${param}%'
+				</if>
+				<if test="startTime != null and endTime != null">
+					 and o.create_time &gt;= #{startTime} and o.create_time &lt;= #{endTime}
+				</if>
+				<if test="startTime != null and endTime == null">
+					 and o.create_time &gt;= #{startTime}
+				</if>
+				<if test="startTime == null and endTime != null">
+					 and o.create_time &lt;= #{endTime}
+				</if>
+			</where>
+			ORDER BY o.create_time DESC LIMIT #{page},#{rows}
+    	</if>
+    	<if test="type == 8">
+    		SELECT m.month,(CASE m.record_type WHEN 1 THEN '区域经理' ELSE '区域总经理' END) AS recordType,u.user_name AS userName,m.direct_amoun AS directAmount,
+			u.real_name AS realName,m.direct_area AS directArea,m.direct_area_rate AS directAreaRate,m.indirect_area AS indirectArea,
+			m.indirect_area_rate AS indirectAreaRate,FLOOR(m.direct_area_rate*m.direct_amoun*0.01) AS directAreaAmount,m.indirect_amount AS indirectAmount,
+			FLOOR(m.indirect_area_rate*m.indirect_amount*0.01) AS indirectAreaAmount,SUBSTRING(CAST(m.create_time AS CHAR),1,16) AS createTime,
+			(FLOOR(m.direct_area_rate*m.direct_amoun*0.01)+IFNULL(FLOOR(m.indirect_area_rate*m.indirect_amount*0.01),0)) AS totalAmount
+			FROM app_manager_bonus m
+			INNER JOIN sys_user u ON u.id=m.uid
+			<where>
+				<if test="itemName != null">
+					 and u.user_name like '%${itemName}%'
+				</if>
+				<if test="param != null">
+					 and u.real_name like '%${param}%'
+				</if>
+			</where>
+			ORDER BY m.create_time LIMIT #{page},#{rows}
+    	</if>
+    	<if test="type == 9">
+    		SELECT * FROM (
+	    		SELECT c.item_name AS itemName,'网络课程' AS `type`,u.user_name AS userName,u.real_name AS realName,
+				'现金赞赏' AS payMethod,FLOOR(o.pay_amount) AS payAmount,CAST(o.create_time AS CHAR) AS createTime,'1' AS state
+				FROM app_course_order o
+				INNER JOIN app_course c ON c.id=o.course_id AND c.record_type=2
+				INNER JOIN sys_user u ON u.id=o.uid
+				UNION ALL 
+				SELECT n.title AS itemName,'动能资讯' AS `type`,u.user_name AS userName,u.real_name AS realName,
+				(CASE WHEN o.pay_method_type='支付方式' THEN '现金赞赏' ELSE '欧币赞赏' END) AS payMethod,
+				(CASE WHEN o.pay_method_type='欧币支付' THEN CONCAT(FLOOR(o.pay_amount),' ',o.pay_method) ELSE FLOOR(o.pay_amount) END) AS payAmount,
+				CAST(o.create_time AS CHAR) AS createTime,'2' AS state
+				FROM app_news_order o
+				INNER JOIN app_news n ON n.id=o.news_id
+				INNER JOIN sys_user u ON u.id=o.uid
+			) as a 
+			<where>
+				<if test="itemName != null and param != null">
+					 and a.itemName like '%${itemName}%' and a.itemName like '%${param}%'
+				</if>
+				<if test="itemName != null and param == null">
+					 and a.itemName like '%${itemName}%' and a.state=1
+				</if>
+				<if test="itemName == null and param != null">
+					 and a.itemName like '%${param}%' and a.state=2
+				</if>
+			</where>
+			ORDER BY a.createTime DESC LIMIT #{page},#{rows}
+    	</if>
+    	<if test="type == 10">
+    		SELECT id,userName,realName,itemName,amount,IFNULL(userName1,'/') AS userName1,IFNULL(userName2,'/') AS userName2,IFNULL(userName3,'/') AS userName3,
+				IFNULL(amount1,'/') AS amount1,IFNULL(amount2,'/') AS amount2,IFNULL(amount3,'/') AS amount3,createTime
+			FROM(
+	    		SELECT u.id,u.user_name AS userName,u.real_name AS realName,(CASE c.record_type WHEN 1 THEN '消费线下课程' WHEN 2 THEN '购买网络课程' ELSE '购买系统课程' END) AS itemName,
+				(o.discount_red+o.pay_amount) AS amount,u1.user_name AS userName1,u2.user_name AS userName2,u3.user_name AS userName3,CAST(o.create_time AS CHAR) AS createTime,
+				CAST(FLOOR((o.discount_red+o.pay_amount)*ac1.level_one*0.01) AS CHAR) AS amount1,CAST(FLOOR((o.discount_red+o.pay_amount)*ac2.level_two*0.01) AS CHAR) AS amount2,
+				CAST(FLOOR((o.discount_red+o.pay_amount)*ac3.level_three*0.01) AS CHAR) AS amount3
+				FROM app_course_order o
+				INNER JOIN app_course c ON c.id=o.course_id
+				INNER JOIN sys_user u ON u.id=o.uid
+				LEFT JOIN sys_user u1 ON u1.id=u.uid_from
+				LEFT JOIN sys_user u2 ON u2.id=u1.uid_from
+				LEFT JOIN sys_user u3 ON u3.id=u2.uid_from
+				LEFT JOIN app_commission ac1 ON ac1.id=(SELECT id FROM app_commission WHERE tag_id IN (SELECT tag_identity FROM user_identity WHERE uid=u1.id) ORDER BY level_one DESC LIMIT 1)
+				LEFT JOIN app_commission ac2 ON ac2.id=(SELECT id FROM app_commission WHERE tag_id IN (SELECT tag_identity FROM user_identity WHERE uid=u2.id) ORDER BY level_two DESC LIMIT 1)
+				LEFT JOIN app_commission ac3 ON ac3.id=(SELECT id FROM app_commission WHERE tag_id IN (SELECT tag_identity FROM user_identity WHERE uid=u3.id) ORDER BY level_three DESC LIMIT 1)
+				WHERE o.is_pay=1 AND o.is_use=1
+				UNION ALL 
+				SELECT u.id,u.user_name AS userName,u.real_name AS realName,'升级身份' AS itemName,f.amount,u1.user_name AS userName1,u2.user_name AS userName2,u3.user_name AS userName3,
+				CAST(f.create_time AS CHAR) AS createTime,CAST(FLOOR(f.amount*ac1.level_one_upgrade*0.01) AS CHAR) AS amount1,NULL AS amount2,
+				NULL AS amount3
+				FROM user_fee f 
+				INNER JOIN sys_user u ON u.id=f.uid
+				LEFT JOIN sys_user u1 ON u1.id=u.uid_from
+				LEFT JOIN sys_user u2 ON u2.id=u1.uid_from
+				LEFT JOIN sys_user u3 ON u3.id=u2.uid_from
+				LEFT JOIN app_commission ac1 ON ac1.id=(SELECT id FROM app_commission WHERE tag_id IN (SELECT tag_identity FROM user_identity WHERE uid=u1.id) ORDER BY level_one DESC LIMIT 1)
+    		) as a
+    		<where>
+    			<if test="itemName != null">
+					 and a.userName like '%${itemName}%'
+				</if>
+				<if test="param != null">
+					 and a.realName like '%${param}%'
+				</if>
+				<if test="endTime != null">
+					 and u.id = #{endTime}
+				</if>
+    		</where>
+    		ORDER BY a.createTime DESC LIMIT #{page},#{rows}
+    	</if>
+    	<if test="type == 11">
+    		SELECT c.use_month AS useMonth,u.user_name AS userName,u.real_name AS realName,c.unuse_amount AS unuseAmount,
+			c.unuse_counts AS unuseCounts,c.unuse_course_name unuseCourseName,c.use_amount AS useAmount,c.use_counts AS useCounts,
+			c.use_course_name AS useCourseName,SUBSTRING(CAST(c.create_time AS CHAR),1,16) AS createTime
+			FROM app_course_use c
+			INNER JOIN sys_user u ON u.id=c.uid
+    		<where>
+    			<if test="itemName != null">
+					 and u.user_name like '%${itemName}%'
+				</if>
+				<if test="param != null">
+					 and u.real_name like '%${param}%'
+				</if>
+				<if test="startTime != null and endTime != null">
+					 and c.create_time &gt;= #{startTime} and c.create_time &lt;= #{endTime}
+				</if>
+				<if test="startTime != null and endTime == null">
+					 and c.create_time &gt;= #{startTime}
+				</if>
+				<if test="startTime == null and endTime != null">
+					 and c.create_time &lt;= #{endTime}
+				</if>
+    		</where>
+    		ORDER BY c.create_time DESC LIMIT #{page},#{rows}
+    	</if>
+    	<if test="type == 12">
+    		SELECT c.id,c.uid,c.month,c.coupon_id AS couponId,c.course_type_name AS courseTypeName,
+			c.total_amount AS totalAmount,c.buy_amount AS buyAmount,c.use_amount AS useAmount,
+			c.last_amount AS lastAmount,SUBSTRING(CAST(c.create_time AS CHAR),1,16) AS createTime,u.real_name as realName
+			FROM app_course_credits c
+			INNER JOIN sys_user u ON u.id=c.uid
+    		<where>
+    			<if test="itemName != null">
+					 and c.course_type_name like '%${itemName}%'
+				</if>
+				<if test="param != null">
+					 and u.real_name like '%${param}%'
+				</if>
+				<if test="startTime != null and endTime != null">
+					 and c.create_time &gt;= #{startTime} and c.create_time &lt;= #{endTime}
+				</if>
+				<if test="startTime != null and endTime == null">
+					 and c.create_time &gt;= #{startTime}
+				</if>
+				<if test="startTime == null and endTime != null">
+					 and c.create_time &lt;= #{endTime}
+				</if>
+    		</where>
+    		ORDER BY c.create_time DESC LIMIT #{page},#{rows}
+    	</if>
+    	<if test="type == 13">
+    		SELECT t.item_name AS itemName,o.id,CONCAT(CAST(o.teach_start AS CHAR),' - ',CAST(o.teach_end AS CHAR)) AS teachDate,
+			o.address,o.company_name AS companyName,o.nick_name AS nickName,o.phone,o.teach_times AS teachTimes,o.free_times AS freeTimes,
+			CAST(o.create_time AS CHAR) AS createTime,o.reason,o.actual_amount AS actualAmount,
+			o.personnel,(CASE o.transportation WHEN 0 THEN '我方付' ELSE '对方付' END) AS transportation
+			FROM app_teacher_order o 
+			INNER JOIN app_teacher t ON t.id=o.teacher_id
+    		<where>
+    			AND o.state=4 AND o.record_type=1
+    			<if test="itemName != null">
+					 and t.item_name like '%${itemName}%'
+				</if>
+				<if test="param != null">
+					 and o.nick_name like '%${param}%'
+				</if>
+				<if test="startTime != null and endTime != null">
+					 and o.create_time &gt;= #{startTime} and o.create_time &lt;= #{endTime}
+				</if>
+				<if test="startTime != null and endTime == null">
+					 and o.create_time &gt;= #{startTime}
+				</if>
+				<if test="startTime == null and endTime != null">
+					 and o.create_time &lt;= #{endTime}
+				</if>
+    		</where>
+    		ORDER BY o.create_time DESC LIMIT #{page},#{rows}
+    	</if>
+    	<if test="type == 14">
+    		SELECT t.item_name AS itemName,o.id,CONCAT(CAST(o.teach_start AS CHAR),' 至 ',CAST(o.teach_end AS CHAR)) AS teachDate,o.address,
+			u.real_name AS nickName,o.phone,o.teach_theme AS teachTheme,CAST(o.create_time AS CHAR) AS createTime,o.actual_amount AS actualAmount,
+			o.personnel,(CASE o.transportation WHEN 0 THEN '我方付' ELSE '对方付' END) AS transportation,t.teacher_level AS teacherLevel
+			FROM app_teacher_order o 
+			INNER JOIN app_teacher t ON t.id=o.teacher_id
+			INNER JOIN sys_user u ON u.id=t.uid
+    		<where>
+    			AND o.state=4 AND o.record_type=2
+    			<if test="itemName != null">
+					 and t.item_name like '%${itemName}%'
+				</if>
+				<if test="param != null">
+					 and o.nick_name like '%${param}%'
+				</if>
+				<if test="startTime != null and endTime != null">
+					 and o.create_time &gt;= #{startTime} and o.create_time &lt;= #{endTime}
+				</if>
+				<if test="startTime != null and endTime == null">
+					 and o.create_time &gt;= #{startTime}
+				</if>
+				<if test="startTime == null and endTime != null">
+					 and o.create_time &lt;= #{endTime}
+				</if>
+    		</where>
+    		ORDER BY o.create_time DESC LIMIT #{page},#{rows}
+    	</if>
+    	<if test="type == 15">
+    		SELECT u.user_name AS userName,u.real_name AS realName,(CASE c.currency_type WHEN 1 THEN '蓝币' ELSE '红币' END) AS currencyType,
+			c.content,c.currency,u.blue_currency AS blueCurrency,u.red_currency AS redCurrency,CAST(c.create_time AS CHAR) AS createTime,
+			(SELECT tag_id FROM app_commission WHERE tag_id IN (SELECT tag_identity FROM user_identity WHERE uid=u.id AND tag_type='动能身份') 
+			ORDER BY level_one DESC LIMIT 1) AS tagId
+			FROM user_currency c
+			INNER JOIN sys_user u ON u.id=c.uid
+			<where>
+				<if test="itemName != null">
+					 and u.user_name like '%${itemName}%'
+				</if>
+				<if test="param != null">
+					 and u.real_name like '%${param}%'
+				</if>
+				<if test="startTime != null and endTime != null">
+					 and c.create_time &gt;= #{startTime} and c.create_time &lt;= #{endTime}
+				</if>
+				<if test="startTime != null and endTime == null">
+					 and c.create_time &gt;= #{startTime}
+				</if>
+				<if test="startTime == null and endTime != null">
+					 and c.create_time &lt;= #{endTime}
+				</if>
+			</where>
+			ORDER BY c.create_time DESC LIMIT #{page},#{rows}
+    	</if>
+    	<if test="type == 16">
+    		SELECT a.id,a.userName,a.realName,a.redCurrency,(a.redCurrency+a.djAmount+a.txAmount) AS total,a.createTime,a.tagId,a.txAmount,a.djAmount,a.syAmount 
+			FROM(SELECT u.id,u.user_name AS userName,u.real_name AS realName,u.red_currency AS redCurrency,CAST(u.create_time AS CHAR) AS createTime,0 AS total,
+				(SELECT tag_id FROM app_commission WHERE tag_id IN (SELECT tag_identity FROM user_identity WHERE uid=u.id AND tag_type='动能身份') ORDER BY level_one DESC LIMIT 1) AS tagId,
+				(
+				 IFNULL(FLOOR((SELECT SUM(discount_red) FROM app_course_order WHERE uid IN 
+					(SELECT id FROM sys_user WHERE uid_from=u.id) AND is_pay=1 AND pay_status !=3 AND is_use=0 AND system_course_name IS NULL AND coupon_id IS NULL)
+					*((100-s1.value)*0.01)*(SELECT level_one FROM app_commission WHERE tag_id IN (SELECT tag_identity FROM user_identity WHERE uid=u.id AND tag_type='动能身份') ORDER BY level_one DESC LIMIT 1)*0.01)*((100-s2.value)*0.01),0)+
+				 IFNULL(FLOOR((SELECT SUM(discount_red) FROM app_course_order WHERE uid IN 
+					(SELECT id FROM sys_user WHERE uid_from IN (SELECT id FROM sys_user WHERE uid_from=u.id)) AND is_pay=1 AND pay_status !=3 AND is_use=0 AND system_course_name IS NULL AND coupon_id IS NULL)
+					*((100-s1.value)*0.01)*(SELECT level_two FROM app_commission WHERE tag_id IN (SELECT tag_identity FROM user_identity WHERE uid=u.id AND tag_type='动能身份') ORDER BY level_two DESC LIMIT 1)*0.01)*((100-s2.value)*0.01),0)+
+				 IFNULL(FLOOR((SELECT SUM(discount_red) FROM app_course_order WHERE uid IN 
+					(SELECT id FROM sys_user WHERE uid_from IN (SELECT id FROM sys_user WHERE uid_from IN (SELECT id FROM sys_user WHERE uid_from=u.id))
+					 AND is_pay=1 AND pay_status !=3 AND is_use=0 AND system_course_name IS NULL AND coupon_id IS NULL))
+					*((100-s1.value)*0.01)*(SELECT level_two FROM app_commission WHERE tag_id IN (SELECT tag_identity FROM user_identity WHERE uid=u.id AND tag_type='动能身份') ORDER BY level_two DESC LIMIT 1)*0.01)*((100-s2.value)*0.01),0)
+				) AS djAmount,
+				(IFNULL(FLOOR((SELECT SUM(amount) FROM user_cash_apply WHERE uid=u.id AND state IN (0,1))),0)) AS txAmount,
+				(
+				 IFNULL(FLOOR((SELECT SUM(amount) FROM user_cash_apply WHERE uid=u.id AND state=2)),0)+
+				 IFNULL(FLOOR((SELECT SUM(discount_red) FROM app_news_order WHERE uid=u.id AND pay_method='红币'AND is_pay=1)),0)+
+				 IFNULL(FLOOR((SELECT SUM(discount_red) FROM app_course_order WHERE uid=u.id AND is_pay=1 AND system_course_name IS NULL AND coupon_id IS NULL)),0)+
+				 IFNULL(FLOOR((SELECT SUBSTRING(SUM(currency),2) FROM user_currency WHERE currency_type=2 AND record_type=8 AND uid=u.id)),0)
+				) AS syAmount
+				FROM sys_user u	
+				INNER JOIN sys_setting s1 ON s1.id='withhold_tax'
+			    INNER JOIN sys_setting s2 ON s2.id='withhold_individual_tax'
+				<where>
+					u.id != -1
+					<if test="itemName != null">
+						 and u.user_name like '%${itemName}%'
+					</if>
+					<if test="param != null">
+						 and u.real_name like '%${param}%'
+					</if>
+					<if test="startTime != null and endTime != null">
+						 and u.create_time &gt;= #{startTime} and u.create_time &lt;= #{endTime}
+					</if>
+					<if test="startTime != null and endTime == null">
+						 and u.create_time &gt;= #{startTime}
+					</if>
+					<if test="startTime == null and endTime != null">
+						 and u.create_time &lt;= #{endTime}
+					</if>
+				</where>
+				ORDER BY u.create_time DESC LIMIT #{page},#{rows}
+			) AS a
+    	</if>
+    	<if test="type == 17">
+    		SELECT * FROM(
+	    		SELECT u.user_name AS userName,u.real_name AS realName,su.user_name AS userName1,su.real_name AS realName1,'一级'AS rank,c.item_name AS itemName,
+				FLOOR(o.discount_red+o.pay_amount) AS amount,(CASE o.is_use WHEN 0 THEN '未消耗' WHEN 1 THEN '已消耗'END) AS isUse,s1.value,ac.level_one AS rate,
+				FLOOR((o.discount_red+o.pay_amount)*s1.value*0.01) AS dkAmount,FLOOR(((100-s1.value)*0.01)*(o.discount_red+o.pay_amount)) AS xhAmount,
+				ac.tag_id AS tagId,FLOOR(((100-s1.value)*0.01)*(o.discount_red+o.pay_amount)*(ac.level_one*0.01)) AS llAmount,s2.value AS value1,
+				FLOOR(((100-s1.value)*0.01)*(o.discount_red+o.pay_amount)*(ac.level_one/100)*((100-s2.value)*0.01)) AS sjAmount,CAST(o.create_time AS CHAR) AS createTime
+				FROM sys_user u 
+				RIGHT JOIN app_course_order o ON o.uid IN (SELECT id FROM sys_user WHERE uid_from=u.id)
+				AND o.is_pay=1 AND o.pay_status != 3 AND o.coupon_id IS NULL AND o.system_course_name IS NULL
+				INNER JOIN sys_user su ON su.id=o.uid
+				INNER JOIN app_course c ON c.id=o.course_id
+				INNER JOIN app_commission ac ON ac.id=(SELECT id FROM app_commission WHERE tag_id IN (SELECT tag_identity FROM user_identity 
+				WHERE uid=u.id AND tag_type='动能身份') ORDER BY level_one DESC LIMIT 1)
+				INNER JOIN sys_setting s1 ON s1.id='withhold_tax'
+				INNER JOIN sys_setting s2 ON s2.id='withhold_individual_tax'
+				WHERE u.position='动能集团合作伙伴'
+				
+				UNION ALL 
+				SELECT u.user_name AS userName,u.real_name AS realName,su.user_name AS userName1,su.real_name AS realName1,'二级'AS rank,c.item_name AS itemName,
+				FLOOR(o.discount_red+o.pay_amount) AS amount,(CASE o.is_use WHEN 0 THEN '未消耗' WHEN 1 THEN '已消耗'END) AS isUse,s1.value,ac.level_one AS rate,
+				FLOOR((o.discount_red+o.pay_amount)*s1.value*0.01) AS dkAmount,FLOOR(((100-s1.value)*0.01)*(o.discount_red+o.pay_amount)) AS xhAmount,
+				ac.tag_id AS tagId,FLOOR(((100-s1.value)*0.01)*(o.discount_red+o.pay_amount)*(ac.level_one*0.01)) AS llAmount,s2.value AS value1,
+				FLOOR(((100-s1.value)*0.01)*(o.discount_red+o.pay_amount)*(ac.level_one*0.01)*((100-s2.value)*0.01)) AS sjAmount,CAST(o.create_time AS CHAR) AS createTime
+				FROM sys_user u 
+				RIGHT JOIN app_course_order o ON o.uid IN (SELECT id FROM sys_user WHERE uid_from IN (SELECT id FROM sys_user WHERE uid_from=u.id))
+				AND o.is_pay=1 AND o.pay_status != 3 AND o.coupon_id IS NULL AND o.system_course_name IS NULL
+				INNER JOIN sys_user su ON su.id=o.uid
+				INNER JOIN app_course c ON c.id=o.course_id
+				INNER JOIN app_commission ac ON ac.id=(SELECT id FROM app_commission WHERE tag_id IN (SELECT tag_identity FROM user_identity 
+				WHERE uid=u.id AND tag_type='动能身份') ORDER BY level_two DESC LIMIT 1)
+				INNER JOIN sys_setting s1 ON s1.id='withhold_tax'
+				INNER JOIN sys_setting s2 ON s2.id='withhold_individual_tax'
+				WHERE u.position='动能集团合作伙伴'
+				
+				UNION ALL 
+				SELECT u.user_name AS userName,u.real_name AS realName,su.user_name AS userName1,su.real_name AS realName1,'三级'AS rank,c.item_name AS itemName,
+				FLOOR(o.discount_red+o.pay_amount) AS amount,(CASE o.is_use WHEN 0 THEN '未消耗' WHEN 1 THEN '已消耗'END) AS isUse,s1.value,ac.level_one AS rate,
+				FLOOR((o.discount_red+o.pay_amount)*s1.value*0.01) AS dkAmount,FLOOR(((100-s1.value)*0.01)*(o.discount_red+o.pay_amount)) AS xhAmount,
+				ac.tag_id AS tagId,FLOOR(((100-s1.value)*0.01)*(o.discount_red+o.pay_amount)*(ac.level_one*0.01)) AS llAmount,s2.value AS value1,
+				FLOOR(((100-s1.value)*0.01)*(o.discount_red+o.pay_amount)*(ac.level_one*0.01)*((100-s2.value)*0.01)) AS sjAmount,CAST(o.create_time AS CHAR) AS createTime
+				FROM sys_user u 
+				RIGHT JOIN app_course_order o ON o.uid IN (SELECT id FROM sys_user WHERE uid_from IN (SELECT id FROM sys_user WHERE uid_from IN (SELECT id FROM sys_user WHERE uid_from=u.id)))
+				AND o.is_pay=1 AND o.pay_status != 3 AND o.coupon_id IS NULL AND o.system_course_name IS NULL
+				INNER JOIN sys_user su ON su.id=o.uid
+				INNER JOIN app_course c ON c.id=o.course_id
+				INNER JOIN app_commission ac ON ac.id=(SELECT id FROM app_commission WHERE tag_id IN (SELECT tag_identity FROM user_identity 
+				WHERE uid=u.id AND tag_type='动能身份') ORDER BY level_two DESC LIMIT 1)
+				INNER JOIN sys_setting s1 ON s1.id='withhold_tax'
+				INNER JOIN sys_setting s2 ON s2.id='withhold_individual_tax'
+				WHERE u.position='动能集团合作伙伴'
+			) as a
+			<where>
+				<if test="itemName != null">
+					and a.userName like '%${itemName}%'
+				</if>
+				<if test="param != null">
+					and a.realName like '%${param}%'
+				</if>
+				<if test="startTime != null and endTime != null">
+					and a.createTime &gt;= #{startTime} and a.createTime &lt;= #{endTime}
+				</if>
+				<if test="startTime != null and endTime == null">
+					and a.createTime &gt;= #{startTime}
+				</if>
+				<if test="startTime == null and endTime != null">
+					and a.createTime &lt;= #{endTime}
+				</if>
+				</where>
+				ORDER BY a.createTime DESC LIMIT #{page},#{rows}
+    	</if>
+    </select>
+    
+    <!-- 财务提成列表数 -->
+    <select id="findCount" resultType="java.lang.Integer">
+    	<if test="type == 1">
+    		SELECT COUNT(1) FROM(
+	    		SELECT o.order_no AS orderNo,u.real_name AS realName,SUBSTRING(CAST(o.create_time AS CHAR),1,16) AS createTime
+				FROM app_course_order o 
+				INNER JOIN sys_user u ON u.id=o.uid
+				WHERE o.is_pay=1 AND o.is_use=1
+				UNION ALL
+				SELECT ato.id as orderNo,su.real_name AS realName,SUBSTRING(CAST(ato.create_time AS CHAR),1,16) AS createTime
+				FROM app_teacher_order ato
+				INNER JOIN sys_user su ON su.id=ato.uid
+				WHERE ato.state=6
+			) as a 
+			<where>
+				<if test="itemName != null">
+					AND a.orderNo LIKE '%${itemName}%'
+				</if>
+				<if test="param != null">
+					AND a.realName LIKE '%${param}%'
+				</if>
+				<if test="startTime != null and endTime != null">
+					AND a.createTime &gt;= #{startTime} and a.createTime &lt;= #{endTime}
+				</if>
+				<if test="startTime != null and endTime == null">
+					AND a.createTime &gt;= #{startTime}
+				</if>
+				<if test="startTime == null and endTime != null">
+					AND a.createTime &lt;= #{endTime}
+				</if>
+			</where>
+    	</if>
+    	<if test="type == 2">
+    		SELECT COUNT(1)
+			FROM app_course c
+			INNER JOIN app_course_offline co ON co.id=c.id
+			RIGHT JOIN app_course_teacher ct ON ct.course_id=c.id
+			<where>
+				c.record_type=1
+				<if test="itemName != null">
+				 and c.item_name like '%${itemName}%'
+				</if>
+				<if test="param != null">
+				 and ct.user_name like '%${param}%'
+				</if>
+				<if test="startTime != null and endTime != null">
+				 and co.register_date &gt;= #{startTime} and co.register_date &lt;= #{endTime}
+				</if>
+				<if test="startTime != null and endTime == null">
+				 and co.register_date &gt;= #{startTime}
+				</if>
+				<if test="startTime == null and endTime != null">
+				 and co.register_date &lt;= #{endTime}
+				</if>
+			</where>
+    	</if>
+    	<if test="type == 3">
+    		SELECT COUNT(1) FROM(
+    		SELECT COUNT(DISTINCT c.id)
+			FROM app_course c
+			INNER JOIN app_course_offline co ON co.id=c.id
+			LEFT JOIN app_course_order o ON o.course_id=c.id
+			<where>
+				c.record_type=1 AND c.state=3
+				<if test="itemName != null">
+				 and c.item_name like '%${itemName}%'
+				</if>
+				<if test="param != null">
+				 and cc.user_name like '%${param}%'
+				</if>
+				<if test="startTime != null and endTime != null">
+				 and co.register_date &gt;= #{startTime} and co.register_date &lt;= #{endTime}
+				</if>
+				<if test="startTime != null and endTime == null">
+				 and co.register_date &gt;= #{startTime}
+				</if>
+				<if test="startTime == null and endTime != null">
+				 and co.register_date &lt;= #{endTime}
+				</if>
+			</where>
+			) as a
+    	</if>
+    	<if test="type == 4">
+	    	SELECT COUNT(1) FROM(
+			SELECT c.id FROM app_course c
+			INNER JOIN app_course_online co ON co.id=c.id
+			RIGHT JOIN app_course_order o ON o.course_id=c.id
+			<where>
+				c.record_type=2 AND o.is_pay = 1
+				<if test="itemName != null">
+				 and c.item_name like '%${itemName}%'
+				</if>
+				<if test="param != null">
+				 and co.teacher_name like '%${param}%'
+				</if>
+			</where>
+			GROUP BY c.id
+			)as a
+		</if>
+		<if test="type == 5">
+	    	SELECT COUNT(1) FROM (
+				SELECT c.item_name AS itemName,su.real_name AS kfRealName,CAST(c.create_time AS CHAR) AS createTime
+				FROM app_course_order o
+				INNER JOIN app_course c ON c.id=o.course_id
+				INNER JOIN sys_user u ON u.id=o.uid AND o.is_use=1
+				INNER JOIN sys_user su ON su.id=u.service_stock
+				LEFT JOIN sys_setting s ON s.id='stock_service'
+				LIMIT 1
+				UNION ALL 
+				SELECT c.item_name AS itemName,su.real_name AS kfRealName,CAST(c.create_time AS CHAR) AS createTime
+				FROM app_course_order o
+				INNER JOIN app_course c ON c.id=o.course_id
+				INNER JOIN sys_user u ON u.id=o.uid AND o.is_use=1
+				INNER JOIN sys_user su ON su.id=u.service_begin
+				LEFT JOIN sys_setting s ON s.id='increment_service'
+				LIMIT 1,999999
+			) AS a 
+			<where>
+				<if test="itemName != null">
+					 and a.itemName like '%${itemName}%'
+				</if>
+				<if test="param != null">
+					 and a.kfRealName like '%${param}%'
+				</if>
+				<if test="startTime != null and endTime != null">
+					 and a.createTime &gt;= #{startTime} and a.createTime &lt;= #{endTime}
+				</if>
+				<if test="startTime != null and endTime == null">
+					 and a.createTime &gt;= #{startTime}
+				</if>
+				<if test="startTime == null and endTime != null">
+					 and a.createTime &lt;= #{endTime}
+				</if>
+			</where>
+    	</if>
+    	<if test="type == 6">
+    		SELECT COUNT(1)
+			FROM app_teacher_order o 
+			INNER JOIN app_teacher t ON t.id=o.teacher_id
+			<where>
+				o.record_type=1 AND o.state=6
+				<if test="itemName != null">
+					 and t.item_name like '%${itemName}%'
+				</if>
+				<if test="param != null">
+					 and o.nick_name like '%${param}%'
+				</if>
+				<if test="startTime != null and endTime != null">
+					 and o.create_time &gt;= #{startTime} and o.create_time &lt;= #{endTime}
+				</if>
+				<if test="startTime != null and endTime == null">
+					 and o.create_time &gt;= #{startTime}
+				</if>
+				<if test="startTime == null and endTime != null">
+					 and o.create_time &lt;= #{endTime}
+				</if>
+			</where>
+    	</if>
+    	<if test="type == 7">
+    		SELECT COUNT(1)
+			FROM app_teacher_order o
+			INNER JOIN sys_user u ON u.id=o.uid
+			INNER JOIN app_teacher t ON t.id=o.teacher_id
+			INNER JOIN app_teacher_level l ON l.id=t.teacher_level
+			<where>
+				o.record_type=2 AND o.state=6
+				<if test="itemName != null">
+					 and t.item_name like '%${itemName}%'
+				</if>
+				<if test="param != null">
+					 and u.real_name like '%${param}%'
+				</if>
+				<if test="startTime != null and endTime != null">
+					 and o.create_time &gt;= #{startTime} and o.create_time &lt;= #{endTime}
+				</if>
+				<if test="startTime != null and endTime == null">
+					 and o.create_time &gt;= #{startTime}
+				</if>
+				<if test="startTime == null and endTime != null">
+					 and o.create_time &lt;= #{endTime}
+				</if>
+			</where>
+    	</if>
+    	<if test="type == 8">
+    		SELECT COUNT(1)
+			FROM app_manager_bonus m
+			INNER JOIN sys_user u ON u.id=m.uid
+			<where>
+				<if test="itemName != null">
+					 and u.user_name like '%${itemName}%'
+				</if>
+				<if test="param != null">
+					 and u.real_name like '%${param}%'
+				</if>
+			</where>
+    	</if>
+    	<if test="type == 9">
+    		SELECT COUNT(1) FROM (
+	    		SELECT c.item_name AS itemName,'1' AS state
+				FROM app_course_order o
+				INNER JOIN app_course c ON c.id=o.course_id AND c.record_type=2
+				INNER JOIN sys_user u ON u.id=o.uid
+				UNION ALL 
+				SELECT n.title AS itemName,'2' AS state
+				FROM app_news_order o
+				INNER JOIN app_news n ON n.id=o.news_id
+				INNER JOIN sys_user u ON u.id=o.uid
+			) as a 
+			<where>
+				<if test="itemName != null and param != null">
+					 and a.itemName like '%${itemName}%' and a.itemName like '%${param}%'
+				</if>
+				<if test="itemName != null and param == null">
+					 and a.itemName like '%${itemName}%' and a.state=1
+				</if>
+				<if test="itemName == null and param != null">
+					 and a.itemName like '%${param}%' and a.state=2
+				</if>
+			</where>
+    	</if>
+    	<if test="type == 10">
+    		SELECT COUNT(1) FROM(
+	    		SELECT u.user_name AS userName,u.real_name AS realName
+				FROM app_course_order o
+				INNER JOIN sys_user u ON u.id=o.uid
+				WHERE o.is_pay=1 AND o.is_use=1
+				UNION ALL 
+				SELECT  u.user_name AS userName,u.real_name AS realName
+				FROM user_fee f 
+				INNER JOIN sys_user u ON u.id=f.uid
+    		) as a
+    		<where>
+    			<if test="itemName != null">
+					 and a.userName like '%${itemName}%'
+				</if>
+				<if test="param != null">
+					 and a.realName like '%${param}%'
+				</if>
+				<if test="endTime != null">
+					 and u.id = #{endTime}
+				</if>
+    		</where>
+    	</if>
+    	<if test="type == 11">
+    		SELECT COUNT(1)
+			FROM app_course_use c
+			INNER JOIN sys_user u ON u.id=c.uid
+    		<where>
+    			<if test="itemName != null">
+					 and u.user_name like '%${itemName}%'
+				</if>
+				<if test="param != null">
+					 and u.real_name like '%${param}%'
+				</if>
+				<if test="startTime != null and endTime != null">
+					 and c.create_time &gt;= #{startTime} and c.create_time &lt;= #{endTime}
+				</if>
+				<if test="startTime != null and endTime == null">
+					 and c.create_time &gt;= #{startTime}
+				</if>
+				<if test="startTime == null and endTime != null">
+					 and c.create_time &lt;= #{endTime}
+				</if>
+    		</where>
+    	</if>
+    	<if test="type == 12">
+    		SELECT COUNT(1)
+			FROM app_course_credits c
+			INNER JOIN sys_user u ON u.id=c.uid
+    		<where>
+    			<if test="itemName != null">
+					 and c.course_type_name like '%${itemName}%'
+				</if>
+				<if test="param != null">
+					 and u.real_name like '%${param}%'
+				</if>
+				<if test="startTime != null and endTime != null">
+					 and c.create_time &gt;= #{startTime} and c.create_time &lt;= #{endTime}
+				</if>
+				<if test="startTime != null and endTime == null">
+					 and c.create_time &gt;= #{startTime}
+				</if>
+				<if test="startTime == null and endTime != null">
+					 and c.create_time &lt;= #{endTime}
+				</if>
+    		</where>
+    	</if>
+    	<if test="type == 13">
+    		SELECT COUNT(1)
+			FROM app_teacher_order o 
+			INNER JOIN app_teacher t ON t.id=o.teacher_id
+    		<where>
+    			AND o.state=4 AND o.record_type=1
+    			<if test="itemName != null">
+					 and t.item_name like '%${itemName}%'
+				</if>
+				<if test="param != null">
+					 and o.nick_name like '%${param}%'
+				</if>
+				<if test="startTime != null and endTime != null">
+					 and o.create_time &gt;= #{startTime} and o.create_time &lt;= #{endTime}
+				</if>
+				<if test="startTime != null and endTime == null">
+					 and o.create_time &gt;= #{startTime}
+				</if>
+				<if test="startTime == null and endTime != null">
+					 and o.create_time &lt;= #{endTime}
+				</if>
+    		</where>
+    	</if>
+    	<if test="type == 14">
+    		SELECT COUNT(1)
+			FROM app_teacher_order o 
+			INNER JOIN app_teacher t ON t.id=o.teacher_id
+    		<where>
+    			AND o.state=4 AND o.record_type=1
+    			<if test="itemName != null">
+					 and t.item_name like '%${itemName}%'
+				</if>
+				<if test="param != null">
+					 and o.nick_name like '%${param}%'
+				</if>
+				<if test="startTime != null and endTime != null">
+					 and o.create_time &gt;= #{startTime} and o.create_time &lt;= #{endTime}
+				</if>
+				<if test="startTime != null and endTime == null">
+					 and o.create_time &gt;= #{startTime}
+				</if>
+				<if test="startTime == null and endTime != null">
+					 and o.create_time &lt;= #{endTime}
+				</if>
+    		</where>
+    	</if>
+    	<if test="type == 15">
+    		SELECT COUNT(1)
+			FROM user_currency c
+			INNER JOIN sys_user u ON u.id=c.uid
+			<where>
+				<if test="itemName != null">
+					 and u.user_name like '%${itemName}%'
+				</if>
+				<if test="param != null">
+					 and u.real_name like '%${param}%'
+				</if>
+				<if test="startTime != null and endTime != null">
+					 and c.create_time &gt;= #{startTime} and c.create_time &lt;= #{endTime}
+				</if>
+				<if test="startTime != null and endTime == null">
+					 and c.create_time &gt;= #{startTime}
+				</if>
+				<if test="startTime == null and endTime != null">
+					 and c.create_time &lt;= #{endTime}
+				</if>
+			</where>
+    	</if>
+    	<if test="type == 16">
+			SELECT COUNT(1)
+			FROM sys_user u	
+			<where>
+				<if test="itemName != null">
+					 and u.user_name like '%${itemName}%'
+				</if>
+				<if test="param != null">
+					 and u.real_name like '%${param}%'
+				</if>
+				<if test="startTime != null and endTime != null">
+					 and u.create_time &gt;= #{startTime} and u.create_time &lt;= #{endTime}
+				</if>
+				<if test="startTime != null and endTime == null">
+					 and u.create_time &gt;= #{startTime}
+				</if>
+				<if test="startTime == null and endTime != null">
+					 and u.create_time &lt;= #{endTime}
+				</if>
+			</where>
+    	</if>
+    	<if test="type == 17">
+    		SELECT COUNT(1) FROM(
+	    		SELECT u.user_name AS userName,u.real_name AS realName,(CASE o.is_use WHEN 0 THEN '未消耗' WHEN 1 THEN '已消耗'END) AS isUse,
+				CAST(o.create_time AS CHAR) AS createTime
+				FROM sys_user u 
+				RIGHT JOIN app_course_order o ON o.uid IN (SELECT id FROM sys_user WHERE uid_from=u.id)
+				AND o.is_pay=1 AND o.pay_status != 3 AND o.coupon_id IS NULL AND o.system_course_name IS NULL
+				INNER JOIN app_commission ac ON ac.id=(SELECT id FROM app_commission WHERE tag_id IN (SELECT tag_identity FROM user_identity 
+				WHERE uid=u.id AND tag_type='动能身份') ORDER BY level_one DESC LIMIT 1)
+				WHERE u.position='动能集团合作伙伴'
+				
+				UNION ALL 
+				SELECT u.user_name AS userName,u.real_name AS realName,(CASE o.is_use WHEN 0 THEN '未消耗' WHEN 1 THEN '已消耗'END) AS isUse,
+				CAST(o.create_time AS CHAR) AS createTime
+				FROM sys_user u 
+				RIGHT JOIN app_course_order o ON o.uid IN (SELECT id FROM sys_user WHERE uid_from IN (SELECT id FROM sys_user WHERE uid_from=u.id))
+				AND o.is_pay=1 AND o.pay_status != 3 AND o.coupon_id IS NULL AND o.system_course_name IS NULL
+				INNER JOIN app_commission ac ON ac.id=(SELECT id FROM app_commission WHERE tag_id IN (SELECT tag_identity FROM user_identity 
+				WHERE uid=u.id AND tag_type='动能身份') ORDER BY level_two DESC LIMIT 1)
+				WHERE u.position='动能集团合作伙伴'
+				
+				UNION ALL 
+				SELECT u.user_name AS userName,u.real_name AS realName,(CASE o.is_use WHEN 0 THEN '未消耗' WHEN 1 THEN '已消耗'END) AS isUse,
+				CAST(o.create_time AS CHAR) AS createTime
+				FROM sys_user u 
+				RIGHT JOIN app_course_order o ON o.uid IN (SELECT id FROM sys_user WHERE uid_from IN (SELECT id FROM sys_user WHERE uid_from IN (SELECT id FROM sys_user WHERE uid_from=u.id)))
+				AND o.is_pay=1 AND o.pay_status != 3 AND o.coupon_id IS NULL AND o.system_course_name IS NULL
+				INNER JOIN app_commission ac ON ac.id=(SELECT id FROM app_commission WHERE tag_id IN (SELECT tag_identity FROM user_identity 
+				WHERE uid=u.id AND tag_type='动能身份') ORDER BY level_two DESC LIMIT 1)
+				WHERE u.position='动能集团合作伙伴'
+			) as a
+			<where>
+				<if test="itemName != null">
+					and a.userName like '%${itemName}%'
+				</if>
+				<if test="param != null">
+					and a.realName like '%${param}%'
+				</if>
+				<if test="startTime != null and endTime != null">
+					and a.createTime &gt;= #{startTime} and a.createTime &lt;= #{endTime}
+				</if>
+				<if test="startTime != null and endTime == null">
+					and a.createTime &gt;= #{startTime}
+				</if>
+				<if test="startTime == null and endTime != null">
+					and a.createTime &lt;= #{endTime}
+				</if>
+				</where>
+    	</if>
+    </select>
+</mapper>

@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kapphk.web.dao.mapper.community.BeanCommunityStaffMapper" >
+    <resultMap id="BaseResultMap" type="com.kapphk.web.bean.community.BeanCommunityStaff" >
+        <!--  自动生成 2016年10月31日 表与实体类字段对应 -->
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="community_id" property="communityId" jdbcType="BIGINT" />
+        <result column="tag_value" property="tagValue" jdbcType="VARCHAR" />
+        <result column="tag_type" property="tagType" jdbcType="VARCHAR" />
+        <result column="uid" property="uid" jdbcType="BIGINT" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+    
+    <!-- 详情 -->
+    <select id="findDetailById" resultType="java.util.Map">
+    	SELECT cs.id,cs.tag_value AS tagValue,c.item_name AS itemName,u.logo_path AS logoPath,cs.uid, 
+		su.user_name AS managerPhone,su.real_name AS managerName,u.user_name AS userName,u.real_name AS realName,
+		cs.community_id AS communityId
+		FROM app_community_staff cs
+		INNER JOIN app_community c ON c.id=cs.community_id
+		INNER JOIN sys_user su ON su.id=c.uid
+		INNER JOIN sys_user u ON u.id=cs.uid
+		where cs.id=#{id}
+    </select>
+    
+    <!-- 查询列表总数 -->
+    <select id="findCount" resultType="java.lang.Integer">
+    	SELECT COUNT(1)
+		FROM app_community_staff cs
+		INNER JOIN app_community c ON c.id=cs.community_id
+		INNER JOIN sys_user su ON su.id=c.uid
+		INNER JOIN sys_user u ON u.id=cs.uid
+		<where>
+			<if test="tagValue != null and tagValue !=  ''">
+				and cs.tag_value = #{tagValue}
+			</if>
+			<if test="itemName != null and itemName !=  ''">
+				and c.item_name like '%${itemName}%'
+			</if>
+			<if test="managerPhone != null and managerPhone !=  ''">
+				and su.user_name like '%${managerPhone}%'
+			</if>
+			<if test="realName != null and realName !=  ''">
+				and u.real_name like '%${realName}%'
+			</if>
+		</where>
+    </select>
+    
+    <!-- 查询列表 -->
+    <select id="findList" resultType="java.util.Map">
+    	SELECT cs.id,cs.tag_value AS tagValue,CAST(cs.create_time AS CHAR) AS createTime,c.item_name AS itemName,
+		su.user_name AS managerPhone,su.real_name AS managerName,u.user_name AS userName,u.real_name AS realName,
+		u.logo_path AS logoPath,cs.uid 
+		FROM app_community_staff cs
+		INNER JOIN app_community c ON c.id=cs.community_id
+		INNER JOIN sys_user su ON su.id=c.uid
+		INNER JOIN sys_user u ON u.id=cs.uid
+		<where>
+			<if test="tagValue != null and tagValue !=  ''">
+				and cs.tag_value = #{tagValue}
+			</if>
+			<if test="itemName != null and itemName !=  ''">
+				and c.item_name like '%${itemName}%'
+			</if>
+			<if test="managerPhone != null and managerPhone !=  ''">
+				and su.user_name like '%${managerPhone}%'
+			</if>
+			<if test="realName != null and realName !=  ''">
+				and u.real_name like '%${realName}%'
+			</if>
+		</where>
+		ORDER BY cs.create_time DESC LIMIT #{page},#{rows}
+    </select>
+    
+    <!-- 获取全部用户 -->
+    <select id="findUserList" resultType="java.util.Map">
+    	SELECT id,CONCAT(user_name,' ------- ',real_name) AS `text` FROM sys_user WHERE user_name LIKE '${userName}%' 
+    	AND (position='动能集团员工' OR position='动能集团合作伙伴')
+    </select>
+    
+    <sql id="Base_Column_List" >
+        <!--  自动生成 2016年10月31日 表字段名称 -->
+        id, community_id, tag_value, tag_type, uid, create_time
+    </sql>
+    
+    <sql id="findByPageSql" >
+        <!-- WARNING -  自动生成 2016-10-31  分页查询SQL -->
+        select a.* from app_community_staff a
+        <where >
+            <if test="param.id != null and param.id != ''" >
+                and a.id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.communityId != null " >
+                and a.community_id = #{param.communityId,jdbcType=BIGINT}
+            </if>
+            <if test="param.tagValue != null and param.tagValue != ''" >
+                and a.tag_value = #{param.tagValue,jdbcType=VARCHAR}
+            </if>
+            <if test="param.tagType != null and param.tagType != ''" >
+                and a.tag_type = #{param.tagType,jdbcType=VARCHAR}
+            </if>
+            <if test="param.uid != null " >
+                and a.uid = #{param.uid,jdbcType=BIGINT}
+            </if>
+        </where>
+        order by a.id desc
+    </sql>
+    
+    <select id="findByPage" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-31  分页查询 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit #{offset}, #{pageSize}
+    </select>
+    
+    <select id="findByPageCount" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-10-31  分页查询总条数 -->
+        select count(1) from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findById" resultMap="BaseResultMap" parameterType="java.lang.String" >
+        <!--  自动生成 2016年10月31日 根据ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_community_staff
+        where id = #{id,jdbcType=VARCHAR}
+    </select>
+    
+    <select id="load" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-31  根据多个ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_community_staff where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </select>
+    
+    <select id="all" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-31  查询所有 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_community_staff
+    </select>
+    
+    <select id="count" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-10-31 查询总条数 -->
+        select count(1) from app_community_staff
+    </select>
+    
+    <update id="update" parameterType="com.kapphk.web.bean.community.BeanCommunityStaff" >
+        <!--  自动生成 2016年10月31日 更新数据 -->
+        update app_community_staff
+        <set >
+            <if test="communityId != null" >
+                community_id = #{communityId,jdbcType=BIGINT},
+            </if>
+            <if test="tagValue != null" >
+                tag_value = #{tagValue,jdbcType=VARCHAR},
+            </if>
+            <if test="tagType != null" >
+                tag_type = #{tagType,jdbcType=VARCHAR},
+            </if>
+            <if test="uid != null" >
+                uid = #{uid,jdbcType=BIGINT},
+            </if>
+            <if test="createTime != null" >
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=VARCHAR}
+    </update>
+    
+    <insert id="insert" parameterType="com.kapphk.web.bean.community.BeanCommunityStaff" useGeneratedKeys="true" keyProperty="id" >
+        <!--  自动生成 2016年10月31日 添加数据 -->
+        insert into app_community_staff
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="communityId != null" >
+                community_id,
+            </if>
+            <if test="tagValue != null" >
+                tag_value,
+            </if>
+            <if test="tagType != null" >
+                tag_type,
+            </if>
+            <if test="uid != null" >
+                uid,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="communityId != null" >
+                #{communityId,jdbcType=BIGINT},
+            </if>
+            <if test="tagValue != null" >
+                #{tagValue,jdbcType=VARCHAR},
+            </if>
+            <if test="tagType != null" >
+                #{tagType,jdbcType=VARCHAR},
+            </if>
+            <if test="uid != null" >
+                #{uid,jdbcType=BIGINT},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    
+    <insert id="inserts" parameterType="java.util.List" >
+        <!-- WARNING -  自动生成 2016-10-31 添加多条数据 -->
+        insert into app_community_staff (community_id, tag_value, tag_type, uid, create_time)
+        values
+        <foreach collection="list" item="item" separator="," >
+            (#{item.communityId,jdbcType=BIGINT}, #{item.tagValue,jdbcType=VARCHAR}, #{item.tagType,jdbcType=VARCHAR}, #{item.uid,jdbcType=BIGINT}, #{item.createTime,jdbcType=TIMESTAMP})
+        </foreach>
+    </insert>
+    
+    <delete id="delete" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年10月31日 删除数据 -->
+        delete from app_community_staff
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    
+    <delete id="deletes" >
+        <!-- WARNING -  自动生成 2016-10-31 删除多条数据 -->
+        delete from app_community_staff where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteByEntity" >
+        <!-- WARNING -  自动生成 2016-10-31 通过实体类中的条件删除数据 -->
+        delete from app_community_staff
+        <where >
+            <if test="param.id != null and param.id != ''" >
+                and id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.communityId != null " >
+                and community_id = #{param.communityId,jdbcType=BIGINT}
+            </if>
+            <if test="param.tagValue != null and param.tagValue != ''" >
+                and tag_value = #{param.tagValue,jdbcType=VARCHAR}
+            </if>
+            <if test="param.tagType != null and param.tagType != ''" >
+                and tag_type = #{param.tagType,jdbcType=VARCHAR}
+            </if>
+            <if test="param.uid != null " >
+                and uid = #{param.uid,jdbcType=BIGINT}
+            </if>
+        </where>
+    </delete>
+    
+    <select id="findAll" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-31  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+</mapper>

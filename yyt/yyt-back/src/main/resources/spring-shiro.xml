@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans  
+    http://www.springframework.org/schema/beans/spring-beans-4.0.xsd   
+    http://www.springframework.org/schema/context   
+    http://www.springframework.org/schema/context/spring-context-4.0.xsd"
+	default-lazy-init="true">
+	
+	<bean id="credentialsMatcher"
+		class="com.kapphk.shiro.CustomCredentialsMatcher">
+		<constructor-arg ref="cacheManager" />
+		<property name="hashAlgorithmName" value="md5" />
+		<property name="hashIterations" value="2" />
+		<property name="storedCredentialsHexEncoded" value="true" />
+	</bean>
+	<!-- 凭证匹配器 -->
+	<bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+		<property name="realm" ref="CustomRealm" />
+		<!-- 使用下面配置的缓存管理器 -->
+		<property name="cacheManager" ref="cacheManager" />
+	</bean>
+	<!--自定义Realm -->
+	<bean id="CustomRealm" class="com.kapphk.shiro.CustomRealm">
+		<property name="credentialsMatcher" ref="credentialsMatcher" />
+		<property name="cachingEnabled" value="false" />
+	</bean>
+
+	<!-- 配置shiro的过滤器工厂类，id- shiroFilter要和我们在web.xml中配置的过滤器一致 -->
+	<bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+		<property name="securityManager" ref="securityManager" />
+		<property name="loginUrl" value="/system/login.htm" />
+		<property name="successUrl" value="/system/index.htm" />
+		<property name="unauthorizedUrl" value="/error/denied.jsp" />
+		<property name="filterChainDefinitionMap" ref="chainDefinitionSectionMetaSource" />
+	</bean>
+	<!--自定义filterChainDefinitionMap -->
+	<bean id="chainDefinitionSectionMetaSource" class="com.kapphk.shiro.CustomChainDefinition">
+		<property name="filterChainDefinitions">
+			<value>
+				/b2b/** = anon
+				/static/** = anon
+				/assets/** = anon
+				/system/login.htm = anon
+				/error/** = anon
+				/welcome.jsp = anon
+			</value>
+		</property>
+	</bean>
+	
+    <bean id="sessionDAO" class="org.apache.shiro.session.mgt.eis.EnterpriseCacheSessionDAO">
+        <property name="activeSessionsCacheName" value="shiro-activeSessionCache"/>
+        <property name="sessionIdGenerator" ref="sessionIdGenerator"/>
+    </bean>
+
+     <!-- 全局的会话信息检测扫描信息间隔30分钟-->
+    <bean id="sessionValidationScheduler" class="org.apache.shiro.session.mgt.quartz.QuartzSessionValidationScheduler">
+        <property name="sessionValidationInterval" value="1800000"/>
+        <property name="sessionManager" ref="sessionManager"/>
+    </bean>
+	
+	<!-- 全局的会话信息设置成30分钟 -->
+    <bean id="sessionManager" class="org.apache.shiro.web.session.mgt.DefaultWebSessionManager">
+        <property name="globalSessionTimeout" value="1800000"/>
+        <property name="deleteInvalidSessions" value="true"/>
+        <property name="sessionValidationSchedulerEnabled" value="true"/>
+        <property name="sessionValidationScheduler" ref="sessionValidationScheduler"/>
+        <property name="sessionDAO" ref="sessionDAO"/>
+    </bean>
+	
+	<bean id="cacheManager" class="com.kapphk.shiro.SpringCacheManagerWrapper" >
+	<property name="cacheManager" ref="springCacheManager"/>
+	</bean>
+	
+	 <bean id="springCacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager">
+        <property name="cacheManager" ref="ehcacheManager"/>
+    </bean>
+
+    <!--ehcache-->
+    <bean id="ehcacheManager" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
+        <property name="configLocation" value="classpath:ehcache.xml"/>
+    </bean>
+	
+	<bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor" />
+
+</beans>

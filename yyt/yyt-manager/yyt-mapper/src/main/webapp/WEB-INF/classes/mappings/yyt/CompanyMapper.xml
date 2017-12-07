@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kapphk.yyt.mapper.CompanyMapper" >
+    <resultMap id="BaseResultMap" type="com.kapphk.yyt.bean.Company" >
+        <!--  自动生成 2016年12月06日 表与实体类字段对应 -->
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="company_name" property="companyName" jdbcType="VARCHAR" />
+        <result column="province" property="province" jdbcType="VARCHAR" />
+        <result column="city" property="city" jdbcType="VARCHAR" />
+        <result column="district" property="district" jdbcType="VARCHAR" />
+        <result column="address" property="address" jdbcType="VARCHAR" />
+        <result column="appid" property="appid" jdbcType="VARCHAR" />
+        <result column="mchid" property="mchid" jdbcType="VARCHAR" />
+        <result column="apikey" property="apikey" jdbcType="VARCHAR" />
+        <result column="appSecret" property="appsecret" jdbcType="VARCHAR" />
+        <result column="file_path" property="filePath" jdbcType="VARCHAR" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+    
+    <sql id="Base_Column_List" >
+        <!--  自动生成 2016年12月06日 表字段名称 -->
+        id, company_name, province, city, district, address, appid, mchid, apikey, appSecret, 
+        file_path, create_time
+    </sql>
+    
+    <sql id="findByPageSql" >
+        <!-- WARNING -  自动生成 2016-12-06  分页查询SQL -->
+        select a.* from app_company a
+        <where >
+            <if test="param.id != null " >
+                and a.id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.companyName != null and param.companyName != ''" >
+                and a.company_name = #{param.companyName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.province != null and param.province != ''" >
+                and a.province = #{param.province,jdbcType=VARCHAR}
+            </if>
+            <if test="param.city != null and param.city != ''" >
+                and a.city = #{param.city,jdbcType=VARCHAR}
+            </if>
+            <if test="param.district != null and param.district != ''" >
+                and a.district = #{param.district,jdbcType=VARCHAR}
+            </if>
+            <if test="param.address != null and param.address != ''" >
+                and a.address = #{param.address,jdbcType=VARCHAR}
+            </if>
+            <if test="param.appid != null and param.appid != ''" >
+                and a.appid = #{param.appid,jdbcType=VARCHAR}
+            </if>
+            <if test="param.mchid != null and param.mchid != ''" >
+                and a.mchid = #{param.mchid,jdbcType=VARCHAR}
+            </if>
+            <if test="param.apikey != null and param.apikey != ''" >
+                and a.apikey = #{param.apikey,jdbcType=VARCHAR}
+            </if>
+            <if test="param.appsecret != null and param.appsecret != ''" >
+                and a.appSecret = #{param.appsecret,jdbcType=VARCHAR}
+            </if>
+            <if test="param.filePath != null and param.filePath != ''" >
+                and a.file_path = #{param.filePath,jdbcType=VARCHAR}
+            </if>
+        </where>
+        order by a.id desc
+    </sql>
+    
+    <select id="findByPage" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-06  分页查询 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit #{offset}, #{pageSize}
+    </select>
+    
+    <select id="findByPageCount" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-12-06  分页查询总条数 -->
+        select count(1) from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findById" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年12月06日 根据ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_company
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    
+    <select id="load" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-06  根据多个ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_company where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </select>
+    
+    <select id="all" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-06  查询所有 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_company
+    </select>
+    
+    <select id="count" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-12-06 查询总条数 -->
+        select count(1) from app_company
+    </select>
+    
+    <update id="update" parameterType="com.kapphk.yyt.bean.Company" >
+        <!--  自动生成 2016年12月06日 更新数据 -->
+        update app_company
+        <set >
+            <if test="companyName != null" >
+                company_name = #{companyName,jdbcType=VARCHAR},
+            </if>
+            <if test="province != null" >
+                province = #{province,jdbcType=VARCHAR},
+            </if>
+            <if test="city != null" >
+                city = #{city,jdbcType=VARCHAR},
+            </if>
+            <if test="district != null" >
+                district = #{district,jdbcType=VARCHAR},
+            </if>
+            <if test="address != null" >
+                address = #{address,jdbcType=VARCHAR},
+            </if>
+            <if test="appid != null" >
+                appid = #{appid,jdbcType=VARCHAR},
+            </if>
+            <if test="mchid != null" >
+                mchid = #{mchid,jdbcType=VARCHAR},
+            </if>
+            <if test="apikey != null" >
+                apikey = #{apikey,jdbcType=VARCHAR},
+            </if>
+            <if test="appsecret != null" >
+                appSecret = #{appsecret,jdbcType=VARCHAR},
+            </if>
+            <if test="filePath != null" >
+                file_path = #{filePath,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null" >
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    
+    <insert id="insert" parameterType="com.kapphk.yyt.bean.Company" useGeneratedKeys="true" keyProperty="id" >
+        <!--  自动生成 2016年12月06日 添加数据 -->
+        insert into app_company
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="companyName != null" >
+                company_name,
+            </if>
+            <if test="province != null" >
+                province,
+            </if>
+            <if test="city != null" >
+                city,
+            </if>
+            <if test="district != null" >
+                district,
+            </if>
+            <if test="address != null" >
+                address,
+            </if>
+            <if test="appid != null" >
+                appid,
+            </if>
+            <if test="mchid != null" >
+                mchid,
+            </if>
+            <if test="apikey != null" >
+                apikey,
+            </if>
+            <if test="appsecret != null" >
+                appSecret,
+            </if>
+            <if test="filePath != null" >
+                file_path,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="companyName != null" >
+                #{companyName,jdbcType=VARCHAR},
+            </if>
+            <if test="province != null" >
+                #{province,jdbcType=VARCHAR},
+            </if>
+            <if test="city != null" >
+                #{city,jdbcType=VARCHAR},
+            </if>
+            <if test="district != null" >
+                #{district,jdbcType=VARCHAR},
+            </if>
+            <if test="address != null" >
+                #{address,jdbcType=VARCHAR},
+            </if>
+            <if test="appid != null" >
+                #{appid,jdbcType=VARCHAR},
+            </if>
+            <if test="mchid != null" >
+                #{mchid,jdbcType=VARCHAR},
+            </if>
+            <if test="apikey != null" >
+                #{apikey,jdbcType=VARCHAR},
+            </if>
+            <if test="appsecret != null" >
+                #{appsecret,jdbcType=VARCHAR},
+            </if>
+            <if test="filePath != null" >
+                #{filePath,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    
+    <insert id="inserts" parameterType="java.util.List" >
+        <!-- WARNING -  自动生成 2016-12-06 添加多条数据 -->
+        insert into app_company (company_name, province, city, district, address, appid, mchid, apikey, appSecret, file_path, create_time)
+        values
+        <foreach collection="list" item="item" separator="," >
+            (#{item.companyName,jdbcType=VARCHAR}, #{item.province,jdbcType=VARCHAR}, #{item.city,jdbcType=VARCHAR}, #{item.district,jdbcType=VARCHAR}, #{item.address,jdbcType=VARCHAR}, #{item.appid,jdbcType=VARCHAR}, #{item.mchid,jdbcType=VARCHAR}, #{item.apikey,jdbcType=VARCHAR}, #{item.appsecret,jdbcType=VARCHAR}, #{item.filePath,jdbcType=VARCHAR}, #{item.createTime,jdbcType=TIMESTAMP})
+        </foreach>
+    </insert>
+    
+    <delete id="delete" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年12月06日 删除数据 -->
+        delete from app_company
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    
+    <delete id="deletes" >
+        <!-- WARNING -  自动生成 2016-12-06 删除多条数据 -->
+        delete from app_company where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteByEntity" >
+        <!-- WARNING -  自动生成 2016-12-06 通过实体类中的条件删除数据 -->
+        delete from app_company
+        <where >
+            <if test="param.id != null " >
+                and id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.companyName != null and param.companyName != ''" >
+                and company_name = #{param.companyName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.province != null and param.province != ''" >
+                and province = #{param.province,jdbcType=VARCHAR}
+            </if>
+            <if test="param.city != null and param.city != ''" >
+                and city = #{param.city,jdbcType=VARCHAR}
+            </if>
+            <if test="param.district != null and param.district != ''" >
+                and district = #{param.district,jdbcType=VARCHAR}
+            </if>
+            <if test="param.address != null and param.address != ''" >
+                and address = #{param.address,jdbcType=VARCHAR}
+            </if>
+            <if test="param.appid != null and param.appid != ''" >
+                and appid = #{param.appid,jdbcType=VARCHAR}
+            </if>
+            <if test="param.mchid != null and param.mchid != ''" >
+                and mchid = #{param.mchid,jdbcType=VARCHAR}
+            </if>
+            <if test="param.apikey != null and param.apikey != ''" >
+                and apikey = #{param.apikey,jdbcType=VARCHAR}
+            </if>
+            <if test="param.appsecret != null and param.appsecret != ''" >
+                and appSecret = #{param.appsecret,jdbcType=VARCHAR}
+            </if>
+            <if test="param.filePath != null and param.filePath != ''" >
+                and file_path = #{param.filePath,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </delete>
+    
+    <select id="findAll" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-06  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    <select id="findList" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-06  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findListByParam" resultType="java.util.HashMap" >
+        select temp.*,su.user_name from (
+        <include refid="findByPageSql" />
+        ) temp 
+        left join sys_system_user su on su.id = temp.id
+    </select>
+</mapper>

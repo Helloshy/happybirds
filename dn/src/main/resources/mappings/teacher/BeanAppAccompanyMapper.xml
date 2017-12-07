@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kapphk.web.dao.mapper.teacher.BeanAppAccompanyMapper" >
+    <resultMap id="BaseResultMap" type="com.kapphk.web.bean.teacher.BeanAppAccompany" >
+        <!--  自动生成 2016年10月10日 表与实体类字段对应 -->
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="teacher_id" property="teacherId" jdbcType="BIGINT" />
+        <result column="remark" property="remark" jdbcType="VARCHAR" />
+        <result column="logo_path" property="logoPath" jdbcType="VARCHAR" />
+        <result column="logo_path2" property="logoPath2" jdbcType="VARCHAR" />
+        <result column="logo_path3" property="logoPath3" jdbcType="VARCHAR" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+    
+    <!-- APP获取陪伴经历列表 -->
+    <select id="findUndergoList" resultType="java.util.Map">
+    	SELECT a.id,a.remark,SUBSTRING(CAST(a.create_time AS CHAR),3,8) AS createTime,
+		CONCAT(IF(a.logo_path IS NOT NULL,a.logo_path,''),IF(a.logo_path2 IS NOT NULL,CONCAT(',',a.logo_path2),''),
+		IF(a.logo_path3 IS NOT NULL,CONCAT(',',a.logo_path3),'')) AS photos,
+		COUNT(l.id) AS isPoint,
+		(SELECT COUNT(1)  FROM app_accompany_like WHERE accompany_id = a.id) AS points
+		FROM app_accompany a 
+		LEFT JOIN app_accompany_like l ON l.uid=#{uid} AND l.accompany_id=a.id
+		WHERE a.teacher_id = #{tid}
+		GROUP BY a.id 
+		ORDER BY a.create_time DESC LIMIT #{page},#{rows}
+    </select>
+    
+    <!--查询列表  -->
+    <select id="findList" resultType="java.util.Map">
+    	SELECT a.id,a.remark,a.logo_path as logoPath,CAST(a.create_time AS CHAR) AS createTime,u.user_name AS userName,
+		u.real_name AS realName,t.item_name as itemName,(SELECT COUNT(1) FROM app_accompany_like al WHERE al.accompany_id=a.id) AS likes
+		FROM app_accompany a 
+		INNER JOIN app_teacher t ON t.id=a.teacher_id 
+		INNER JOIN sys_user u ON u.id=t.uid
+		<where>
+			<if test="teacherId !=null">
+				a.teacher_id = #{teacherId}
+			</if>
+		</where>
+		ORDER BY a.create_time DESC LIMIT #{page},#{rows}
+    </select>
+    
+    <!-- 查询列表总数 -->
+    <select id="findCount" resultType="java.lang.Integer">
+    	SELECT COUNT(1)
+		FROM app_accompany a 
+		<where>
+			<if test="teacherId !=null">
+				a.teacher_id = #{teacherId}
+			</if>
+		</where>
+    </select>
+    
+    <sql id="Base_Column_List" >
+        <!--  自动生成 2016年10月10日 表字段名称 -->
+        id, teacher_id, remark, logo_path, logo_path2, logo_path3, create_time
+    </sql>
+    
+    <sql id="findByPageSql" >
+        <!-- WARNING -  自动生成 2016-10-10  分页查询SQL -->
+        select a.* from app_accompany a
+        <where >
+            <if test="param.id != null " >
+                and a.id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.teacherId != null " >
+                and a.teacher_id = #{param.teacherId,jdbcType=BIGINT}
+            </if>
+            <if test="param.remark != null and param.remark != ''" >
+                and a.remark = #{param.remark,jdbcType=VARCHAR}
+            </if>
+            <if test="param.logoPath != null and param.logoPath != ''" >
+                and a.logo_path = #{param.logoPath,jdbcType=VARCHAR}
+            </if>
+            <if test="param.logoPath2 != null and param.logoPath2 != ''" >
+                and a.logo_path2 = #{param.logoPath2,jdbcType=VARCHAR}
+            </if>
+            <if test="param.logoPath3 != null and param.logoPath3 != ''" >
+                and a.logo_path3 = #{param.logoPath3,jdbcType=VARCHAR}
+            </if>
+        </where>
+        order by a.id desc
+    </sql>
+    
+    <select id="findByPage" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-10  分页查询 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit #{offset}, #{pageSize}
+    </select>
+    
+    <select id="findByPageCount" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-10-10  分页查询总条数 -->
+        select count(1) from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findById" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年10月10日 根据ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_accompany
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    
+    <select id="load" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-10  根据多个ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_accompany where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </select>
+    
+    <select id="all" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-10  查询所有 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_accompany
+    </select>
+    
+    <select id="count" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-10-10 查询总条数 -->
+        select count(1) from app_accompany
+    </select>
+    
+    <update id="update" parameterType="com.kapphk.web.bean.teacher.BeanAppAccompany" >
+        <!--  自动生成 2016年10月10日 更新数据 -->
+        update app_accompany
+        <set >
+            <if test="teacherId != null " >
+                teacher_id = #{teacherId,jdbcType=BIGINT},
+            </if>
+            <if test="remark != null" >
+                remark = #{remark,jdbcType=VARCHAR},
+            </if>
+                logo_path = #{logoPath,jdbcType=VARCHAR},
+                logo_path2 = #{logoPath2,jdbcType=VARCHAR},
+                logo_path3 = #{logoPath3,jdbcType=VARCHAR},
+            <if test="createTime != null" >
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    
+    <insert id="insert" parameterType="com.kapphk.web.bean.teacher.BeanAppAccompany" useGeneratedKeys="true" keyProperty="id" >
+        <!--  自动生成 2016年10月10日 添加数据 -->
+        insert into app_accompany
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="teacherId != null" >
+                teacher_id,
+            </if>
+            <if test="remark != null" >
+                remark,
+            </if>
+            <if test="logoPath != null" >
+                logo_path,
+            </if>
+            <if test="logoPath2 != null" >
+                logo_path2,
+            </if>
+            <if test="logoPath3 != null" >
+                logo_path3,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="teacherId != null" >
+                #{teacherId,jdbcType=BIGINT},
+            </if>
+            <if test="remark != null" >
+                #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="logoPath != null" >
+                #{logoPath,jdbcType=VARCHAR},
+            </if>
+            <if test="logoPath2 != null" >
+                #{logoPath2,jdbcType=VARCHAR},
+            </if>
+            <if test="logoPath3 != null" >
+                #{logoPath3,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    
+    <insert id="inserts" parameterType="java.util.List" >
+        <!-- WARNING -  自动生成 2016-10-10 添加多条数据 -->
+        insert into app_accompany (teacher_id, remark, logo_path, logo_path2, logo_path3, create_time)
+        values
+        <foreach collection="list" item="item" separator="," >
+            (#{item.teacherId,jdbcType=BIGINT}, #{item.remark,jdbcType=VARCHAR}, #{item.logoPath,jdbcType=VARCHAR}, #{item.logoPath2,jdbcType=VARCHAR}, #{item.logoPath3,jdbcType=VARCHAR}, #{item.createTime,jdbcType=TIMESTAMP})
+        </foreach>
+    </insert>
+    
+    <delete id="delete" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年10月10日 删除数据 -->
+        delete from app_accompany
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    
+    <delete id="deletes" >
+        <!-- WARNING -  自动生成 2016-10-10 删除多条数据 -->
+        delete from app_accompany where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteByEntity" >
+        <!-- WARNING -  自动生成 2016-10-10 通过实体类中的条件删除数据 -->
+        delete from app_accompany
+        <where >
+            <if test="param.id != null " >
+                and id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.teacherId!= null " >
+                and teacher_id = #{param.teacherId,jdbcType=BIGINT}
+            </if>
+            <if test="param.remark != null and param.remark != ''" >
+                and remark = #{param.remark,jdbcType=VARCHAR}
+            </if>
+            <if test="param.logoPath != null and param.logoPath != ''" >
+                and logo_path = #{param.logoPath,jdbcType=VARCHAR}
+            </if>
+            <if test="param.logoPath2 != null and param.logoPath2 != ''" >
+                and logo_path2 = #{param.logoPath2,jdbcType=VARCHAR}
+            </if>
+            <if test="param.logoPath3 != null and param.logoPath3 != ''" >
+                and logo_path3 = #{param.logoPath3,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </delete>
+    
+    <select id="findAll" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-10  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+</mapper>

@@ -1,0 +1,371 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kapphk.web.dao.mapper.user.BeanReportTransMapper" >
+    <resultMap id="BaseResultMap" type="com.kapphk.web.bean.user.BeanReportTrans" >
+        <!--  自动生成 2016年11月16日 表与实体类字段对应 -->
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="ym" property="ym" jdbcType="VARCHAR" />
+        <result column="from_phone" property="fromPhone" jdbcType="VARCHAR" />
+        <result column="from_name" property="fromName" jdbcType="VARCHAR" />
+        <result column="from_course" property="fromCourse" jdbcType="VARCHAR" />
+        <result column="from_amount" property="fromAmount" jdbcType="DECIMAL" />
+        <result column="from_operator" property="fromOperator" jdbcType="VARCHAR" />
+        <result column="to_phone" property="toPhone" jdbcType="VARCHAR" />
+        <result column="to_name" property="toName" jdbcType="VARCHAR" />
+        <result column="to_course" property="toCourse" jdbcType="VARCHAR" />
+        <result column="to_amount" property="toAmount" jdbcType="DECIMAL" />
+        <result column="to_operator" property="toOperator" jdbcType="VARCHAR" />
+        <result column="approve_who" property="approveWho" jdbcType="VARCHAR" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+    
+    <!-- 查询列表 -->
+    <select id="findList" resultType="java.util.Map">
+    	SELECT t.id,t.ym,t.from_phone AS fromPhone,t.from_name AS fromName,t.from_course AS fromCourse,t.from_amount AS fromAmount,
+		t.from_operator AS fromOperator,t.to_phone AS toPhone,t.to_name AS toName,t.to_course AS toCourse,t.to_amount AS toAmount,
+		t.to_operator AS toOperator,t.approve_who AS approveWho,SUBSTRING(CAST(t.create_time AS CHAR),1,16) AS createTime
+		FROM app_report_trans t
+		<where>
+			<if test="realName != null">
+				AND t.from_name LIKE '%${realName}%' OR t.to_name LIKE '%${realName}%'
+			</if>
+			<if test="startTime != null and endTime != null">
+				AND t.create_time &gt;= #{startTime} AND t.create_time &lt;= #{endTime}
+			</if>
+			<if test="startTime != null and endTime == null">
+				AND t.create_time &gt;= #{startTime}
+			</if>
+			<if test="startTime == null and endTime != null">
+				AND t.create_time &lt;= #{endTime}
+			</if>
+		</where>
+		ORDER BY t.create_time DESC LIMIT #{page},#{rows}
+    </select>
+    
+    <!-- 查询列表数 -->
+    <select id="findCount" resultType="java.lang.Integer">
+    	SELECT COUNT(1)
+		FROM app_report_trans t
+		<where>
+			<if test="realName != null">
+				AND t.from_name LIKE '%${realName}%' OR t.to_name LIKE '%${realName}%'
+			</if>
+			<if test="startTime != null and endTime != null">
+				AND t.create_time &gt;= #{startTime} AND t.create_time &lt;= #{endTime}
+			</if>
+			<if test="startTime != null and endTime == null">
+				AND t.create_time &gt;= #{startTime}
+			</if>
+			<if test="startTime == null and endTime != null">
+				AND t.create_time &lt;= #{endTime}
+			</if>
+		</where>
+    </select>
+    
+    <sql id="Base_Column_List" >
+        <!--  自动生成 2016年11月16日 表字段名称 -->
+        id, ym, from_phone, from_name, from_course, from_amount, from_operator, to_phone, 
+        to_name, to_course, to_amount, to_operator, approve_who, create_time
+    </sql>
+    
+    <sql id="findByPageSql" >
+        <!-- WARNING -  自动生成 2016-11-16  分页查询SQL -->
+        select a.* from app_report_trans a
+        <where >
+            <if test="param.id != null " >
+                and a.id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.ym != null and param.ym != ''" >
+                and a.ym = #{param.ym,jdbcType=VARCHAR}
+            </if>
+            <if test="param.fromPhone != null and param.fromPhone != ''" >
+                and a.from_phone = #{param.fromPhone,jdbcType=VARCHAR}
+            </if>
+            <if test="param.fromName != null and param.fromName != ''" >
+                and a.from_name = #{param.fromName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.fromCourse != null and param.fromCourse != ''" >
+                and a.from_course = #{param.fromCourse,jdbcType=VARCHAR}
+            </if>
+            <if test="param.fromAmount != null " >
+                and a.from_amount = #{param.fromAmount,jdbcType=DECIMAL}
+            </if>
+            <if test="param.fromOperator != null and param.fromOperator != ''" >
+                and a.from_operator = #{param.fromOperator,jdbcType=VARCHAR}
+            </if>
+            <if test="param.toPhone != null and param.toPhone != ''" >
+                and a.to_phone = #{param.toPhone,jdbcType=VARCHAR}
+            </if>
+            <if test="param.toName != null and param.toName != ''" >
+                and a.to_name = #{param.toName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.toCourse != null and param.toCourse != ''" >
+                and a.to_course = #{param.toCourse,jdbcType=VARCHAR}
+            </if>
+            <if test="param.toAmount != null " >
+                and a.to_amount = #{param.toAmount,jdbcType=DECIMAL}
+            </if>
+            <if test="param.toOperator != null and param.toOperator != ''" >
+                and a.to_operator = #{param.toOperator,jdbcType=VARCHAR}
+            </if>
+            <if test="param.approveWho != null and param.approveWho != ''" >
+                and a.approve_who = #{param.approveWho,jdbcType=VARCHAR}
+            </if>
+        </where>
+        order by a.id desc
+    </sql>
+    
+    <select id="findByPage" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-11-16  分页查询 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit #{offset}, #{pageSize}
+    </select>
+    
+    <select id="findByPageCount" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-11-16  分页查询总条数 -->
+        select count(1) from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findById" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年11月16日 根据ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_report_trans
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    
+    <select id="load" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-11-16  根据多个ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_report_trans where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </select>
+    
+    <select id="all" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-11-16  查询所有 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_report_trans
+    </select>
+    
+    <select id="count" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-11-16 查询总条数 -->
+        select count(1) from app_report_trans
+    </select>
+    
+    <update id="update" parameterType="com.kapphk.web.bean.user.BeanReportTrans" >
+        <!--  自动生成 2016年11月16日 更新数据 -->
+        update app_report_trans
+        <set >
+            <if test="ym != null" >
+                ym = #{ym,jdbcType=VARCHAR},
+            </if>
+            <if test="fromPhone != null" >
+                from_phone = #{fromPhone,jdbcType=VARCHAR},
+            </if>
+            <if test="fromName != null" >
+                from_name = #{fromName,jdbcType=VARCHAR},
+            </if>
+            <if test="fromCourse != null" >
+                from_course = #{fromCourse,jdbcType=VARCHAR},
+            </if>
+            <if test="fromAmount != null" >
+                from_amount = #{fromAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="fromOperator != null" >
+                from_operator = #{fromOperator,jdbcType=VARCHAR},
+            </if>
+            <if test="toPhone != null" >
+                to_phone = #{toPhone,jdbcType=VARCHAR},
+            </if>
+            <if test="toName != null" >
+                to_name = #{toName,jdbcType=VARCHAR},
+            </if>
+            <if test="toCourse != null" >
+                to_course = #{toCourse,jdbcType=VARCHAR},
+            </if>
+            <if test="toAmount != null" >
+                to_amount = #{toAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="toOperator != null" >
+                to_operator = #{toOperator,jdbcType=VARCHAR},
+            </if>
+            <if test="approveWho != null" >
+                approve_who = #{approveWho,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null" >
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    
+    <insert id="insert" parameterType="com.kapphk.web.bean.user.BeanReportTrans" useGeneratedKeys="true" keyProperty="id" >
+        <!--  自动生成 2016年11月16日 添加数据 -->
+        insert into app_report_trans
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="ym != null" >
+                ym,
+            </if>
+            <if test="fromPhone != null" >
+                from_phone,
+            </if>
+            <if test="fromName != null" >
+                from_name,
+            </if>
+            <if test="fromCourse != null" >
+                from_course,
+            </if>
+            <if test="fromAmount != null" >
+                from_amount,
+            </if>
+            <if test="fromOperator != null" >
+                from_operator,
+            </if>
+            <if test="toPhone != null" >
+                to_phone,
+            </if>
+            <if test="toName != null" >
+                to_name,
+            </if>
+            <if test="toCourse != null" >
+                to_course,
+            </if>
+            <if test="toAmount != null" >
+                to_amount,
+            </if>
+            <if test="toOperator != null" >
+                to_operator,
+            </if>
+            <if test="approveWho != null" >
+                approve_who,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="ym != null" >
+                #{ym,jdbcType=VARCHAR},
+            </if>
+            <if test="fromPhone != null" >
+                #{fromPhone,jdbcType=VARCHAR},
+            </if>
+            <if test="fromName != null" >
+                #{fromName,jdbcType=VARCHAR},
+            </if>
+            <if test="fromCourse != null" >
+                #{fromCourse,jdbcType=VARCHAR},
+            </if>
+            <if test="fromAmount != null" >
+                #{fromAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="fromOperator != null" >
+                #{fromOperator,jdbcType=VARCHAR},
+            </if>
+            <if test="toPhone != null" >
+                #{toPhone,jdbcType=VARCHAR},
+            </if>
+            <if test="toName != null" >
+                #{toName,jdbcType=VARCHAR},
+            </if>
+            <if test="toCourse != null" >
+                #{toCourse,jdbcType=VARCHAR},
+            </if>
+            <if test="toAmount != null" >
+                #{toAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="toOperator != null" >
+                #{toOperator,jdbcType=VARCHAR},
+            </if>
+            <if test="approveWho != null" >
+                #{approveWho,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    
+    <insert id="inserts" parameterType="java.util.List" >
+        <!-- WARNING -  自动生成 2016-11-16 添加多条数据 -->
+        insert into app_report_trans (ym, from_phone, from_name, from_course, from_amount, from_operator, to_phone, to_name, to_course, to_amount, to_operator, approve_who, create_time)
+        values
+        <foreach collection="list" item="item" separator="," >
+            (#{item.ym,jdbcType=VARCHAR}, #{item.fromPhone,jdbcType=VARCHAR}, #{item.fromName,jdbcType=VARCHAR}, #{item.fromCourse,jdbcType=VARCHAR}, #{item.fromAmount,jdbcType=DECIMAL}, #{item.fromOperator,jdbcType=VARCHAR}, #{item.toPhone,jdbcType=VARCHAR}, #{item.toName,jdbcType=VARCHAR}, #{item.toCourse,jdbcType=VARCHAR}, #{item.toAmount,jdbcType=DECIMAL}, #{item.toOperator,jdbcType=VARCHAR}, #{item.approveWho,jdbcType=VARCHAR}, #{item.createTime,jdbcType=TIMESTAMP})
+        </foreach>
+    </insert>
+    
+    <delete id="delete" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年11月16日 删除数据 -->
+        delete from app_report_trans
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    
+    <delete id="deletes" >
+        <!-- WARNING -  自动生成 2016-11-16 删除多条数据 -->
+        delete from app_report_trans where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteByEntity" >
+        <!-- WARNING -  自动生成 2016-11-16 通过实体类中的条件删除数据 -->
+        delete from app_report_trans
+        <where >
+            <if test="param.id != null " >
+                and id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.ym != null and param.ym != ''" >
+                and ym = #{param.ym,jdbcType=VARCHAR}
+            </if>
+            <if test="param.fromPhone != null and param.fromPhone != ''" >
+                and from_phone = #{param.fromPhone,jdbcType=VARCHAR}
+            </if>
+            <if test="param.fromName != null and param.fromName != ''" >
+                and from_name = #{param.fromName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.fromCourse != null and param.fromCourse != ''" >
+                and from_course = #{param.fromCourse,jdbcType=VARCHAR}
+            </if>
+            <if test="param.fromAmount != null " >
+                and from_amount = #{param.fromAmount,jdbcType=DECIMAL}
+            </if>
+            <if test="param.fromOperator != null and param.fromOperator != ''" >
+                and from_operator = #{param.fromOperator,jdbcType=VARCHAR}
+            </if>
+            <if test="param.toPhone != null and param.toPhone != ''" >
+                and to_phone = #{param.toPhone,jdbcType=VARCHAR}
+            </if>
+            <if test="param.toName != null and param.toName != ''" >
+                and to_name = #{param.toName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.toCourse != null and param.toCourse != ''" >
+                and to_course = #{param.toCourse,jdbcType=VARCHAR}
+            </if>
+            <if test="param.toAmount != null " >
+                and to_amount = #{param.toAmount,jdbcType=DECIMAL}
+            </if>
+            <if test="param.toOperator != null and param.toOperator != ''" >
+                and to_operator = #{param.toOperator,jdbcType=VARCHAR}
+            </if>
+            <if test="param.approveWho != null and param.approveWho != ''" >
+                and approve_who = #{param.approveWho,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </delete>
+    
+    <select id="findAll" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-11-16  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+</mapper>

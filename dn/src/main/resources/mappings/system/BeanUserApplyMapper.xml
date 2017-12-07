@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kapphk.web.dao.mapper.system.BeanUserApplyMapper" >
+    <resultMap id="BaseResultMap" type="com.kapphk.web.bean.system.BeanUserApply" >
+        <!--  自动生成 2016年09月21日 表与实体类字段对应 -->
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="record_type" property="recordType" jdbcType="BIGINT" />
+        <result column="user_name" property="userName" jdbcType="VARCHAR" />
+        <result column="user_tel" property="userTel" jdbcType="VARCHAR" />
+        <result column="province" property="province" jdbcType="VARCHAR" />
+        <result column="city" property="city" jdbcType="VARCHAR" />
+        <result column="district" property="district" jdbcType="VARCHAR" />
+        <result column="content" property="content" jdbcType="VARCHAR" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+    
+    <!-- 查询列表 -->
+	<select id="findList" resultType="java.util.Map">
+		SELECT a.id,a.content,a.user_name AS userName,a.user_tel AS userTel,CONCAT(a.province,a.city,a.district) AS pcd,
+		CAST(a.create_time AS CHAR) createTime,a.record_type as recordType
+		FROM user_apply a 
+		<where>
+			<if test="param.recordType != null and param.recordType != ''">
+				and a.record_type = #{param.recordType}
+			</if>
+			<if test="param.userName != null and param.userName != ''">
+				AND a.user_name LIKE '%${param.userName}%'
+			</if>
+		</where>
+		ORDER BY a.create_time DESC 
+	</select>
+	
+	<!-- 查询总数 -->
+	<select id="findCount" resultType="java.lang.Integer">
+		SELECT count(1)
+		FROM user_apply a 
+		<where>
+			<if test="param.recordType != null and param.recordType != ''">
+				and a.record_type = #{param.recordType}
+			</if>
+			<if test="param.userName != null and param.userName != ''">
+				AND a.user_name LIKE '%${param.userName}%'
+			</if>
+		</where>
+	</select>
+	
+	<!-- 详情 -->
+	<select id="findDetailById" resultType="java.util.Map">
+		SELECT a.id,a.content,a.user_name AS userName,a.user_tel AS userTel,CONCAT(a.province,a.city,a.district) AS pcd,
+		CAST(a.create_time AS CHAR) createTime,a.record_type as recordType
+		FROM user_apply a where a.id = #{id}
+	</select>
+	
+    <sql id="Base_Column_List" >
+        <!--  自动生成 2016年09月21日 表字段名称 -->
+        id, record_type, user_name, user_tel, province, city, district, content, create_time
+    </sql>
+    
+    <sql id="findByPageSql" >
+        <!-- WARNING -  自动生成 2016-09-21  分页查询SQL -->
+        select a.* from user_apply a
+        <where >
+            <if test="param.id != null " >
+                and a.id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.recordType != null " >
+                and a.record_type = #{param.recordType,jdbcType=BIGINT}
+            </if>
+            <if test="param.userName != null and param.userName != ''" >
+                and a.user_name = #{param.userName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.userTel != null and param.userTel != ''" >
+                and a.user_tel = #{param.userTel,jdbcType=VARCHAR}
+            </if>
+            <if test="param.province != null and param.province != ''" >
+                and a.province = #{param.province,jdbcType=VARCHAR}
+            </if>
+            <if test="param.city != null and param.city != ''" >
+                and a.city = #{param.city,jdbcType=VARCHAR}
+            </if>
+            <if test="param.district != null and param.district != ''" >
+                and a.district = #{param.district,jdbcType=VARCHAR}
+            </if>
+            <if test="param.content != null and param.content != ''" >
+                and a.content = #{param.content,jdbcType=VARCHAR}
+            </if>
+        </where>
+        order by a.id desc
+    </sql>
+    
+    <select id="findByPage" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-09-21  分页查询 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit #{offset}, #{pageSize}
+    </select>
+    
+    <select id="findByPageCount" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-09-21  分页查询总条数 -->
+        select count(1) from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findById" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年09月21日 根据ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from user_apply
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    
+    <select id="load" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-09-21  根据多个ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from user_apply where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </select>
+    
+    <select id="all" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-09-21  查询所有 -->
+        select 
+        <include refid="Base_Column_List" />
+        from user_apply
+    </select>
+    
+    <select id="count" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-09-21 查询总条数 -->
+        select count(1) from user_apply
+    </select>
+    
+    <update id="update" parameterType="com.kapphk.web.bean.system.BeanUserApply" >
+        <!--  自动生成 2016年09月21日 更新数据 -->
+        update user_apply
+        <set >
+            <if test="recordType != null" >
+                record_type = #{recordType,jdbcType=BIGINT},
+            </if>
+            <if test="userName != null" >
+                user_name = #{userName,jdbcType=VARCHAR},
+            </if>
+            <if test="userTel != null" >
+                user_tel = #{userTel,jdbcType=VARCHAR},
+            </if>
+            <if test="province != null" >
+                province = #{province,jdbcType=VARCHAR},
+            </if>
+            <if test="city != null" >
+                city = #{city,jdbcType=VARCHAR},
+            </if>
+            <if test="district != null" >
+                district = #{district,jdbcType=VARCHAR},
+            </if>
+            <if test="content != null" >
+                content = #{content,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null" >
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    
+    <insert id="insert" parameterType="com.kapphk.web.bean.system.BeanUserApply" useGeneratedKeys="true" keyProperty="id" >
+        <!--  自动生成 2016年09月21日 添加数据 -->
+        insert into user_apply
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="recordType != null" >
+                record_type,
+            </if>
+            <if test="userName != null" >
+                user_name,
+            </if>
+            <if test="userTel != null" >
+                user_tel,
+            </if>
+            <if test="province != null" >
+                province,
+            </if>
+            <if test="city != null" >
+                city,
+            </if>
+            <if test="district != null" >
+                district,
+            </if>
+            <if test="content != null" >
+                content,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="recordType != null" >
+                #{recordType,jdbcType=BIGINT},
+            </if>
+            <if test="userName != null" >
+                #{userName,jdbcType=VARCHAR},
+            </if>
+            <if test="userTel != null" >
+                #{userTel,jdbcType=VARCHAR},
+            </if>
+            <if test="province != null" >
+                #{province,jdbcType=VARCHAR},
+            </if>
+            <if test="city != null" >
+                #{city,jdbcType=VARCHAR},
+            </if>
+            <if test="district != null" >
+                #{district,jdbcType=VARCHAR},
+            </if>
+            <if test="content != null" >
+                #{content,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    
+    <insert id="inserts" parameterType="java.util.List" >
+        <!-- WARNING -  自动生成 2016-09-21 添加多条数据 -->
+        insert into user_apply (record_type, user_name, user_tel, province, city, district, content, create_time)
+        values
+        <foreach collection="list" item="item" separator="," >
+            (#{item.recordType,jdbcType=BIGINT}, #{item.userName,jdbcType=VARCHAR}, #{item.userTel,jdbcType=VARCHAR}, #{item.province,jdbcType=VARCHAR}, #{item.city,jdbcType=VARCHAR}, #{item.district,jdbcType=VARCHAR}, #{item.content,jdbcType=VARCHAR}, #{item.createTime,jdbcType=TIMESTAMP})
+        </foreach>
+    </insert>
+    
+    <delete id="delete" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年09月21日 删除数据 -->
+        delete from user_apply
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    
+    <delete id="deletes" >
+        <!-- WARNING -  自动生成 2016-09-21 删除多条数据 -->
+        delete from user_apply where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteByEntity" >
+        <!-- WARNING -  自动生成 2016-09-21 通过实体类中的条件删除数据 -->
+        delete from user_apply
+        <where >
+            <if test="param.id != null " >
+                and id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.recordType != null " >
+                and record_type = #{param.recordType,jdbcType=BIGINT}
+            </if>
+            <if test="param.userName != null and param.userName != ''" >
+                and user_name = #{param.userName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.userTel != null and param.userTel != ''" >
+                and user_tel = #{param.userTel,jdbcType=VARCHAR}
+            </if>
+            <if test="param.province != null and param.province != ''" >
+                and province = #{param.province,jdbcType=VARCHAR}
+            </if>
+            <if test="param.city != null and param.city != ''" >
+                and city = #{param.city,jdbcType=VARCHAR}
+            </if>
+            <if test="param.district != null and param.district != ''" >
+                and district = #{param.district,jdbcType=VARCHAR}
+            </if>
+            <if test="param.content != null and param.content != ''" >
+                and content = #{param.content,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </delete>
+    
+    <select id="findAll" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-09-21  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+</mapper>

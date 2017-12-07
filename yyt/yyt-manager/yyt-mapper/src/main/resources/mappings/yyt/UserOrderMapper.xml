@@ -1,0 +1,435 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kapphk.yyt.mapper.UserOrderMapper" >
+    <resultMap id="BaseResultMap" type="com.kapphk.yyt.bean.UserOrder" >
+        <!--  自动生成 2016年12月06日 表与实体类字段对应 -->
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="company_id" property="companyId" jdbcType="BIGINT" />
+        <result column="unid" property="unid" jdbcType="BIGINT" />
+        <result column="order_no" property="orderNo" jdbcType="VARCHAR" />
+        <result column="is_pay" property="isPay" jdbcType="INTEGER" />
+        <result column="amount" property="amount" jdbcType="DECIMAL" />
+        <result column="balance_amount" property="balanceAmount" jdbcType="DECIMAL" />
+        <result column="sid" property="sid" jdbcType="BIGINT" />
+        <result column="uid" property="uid" jdbcType="BIGINT" />
+        <result column="pay_method" property="payMethod" jdbcType="INTEGER" />
+        <result column="remark" property="remark" jdbcType="VARCHAR" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+    <resultMap id="EntityResultMap" type="com.kapphk.entity.UserOrderEntity" extends="BaseResultMap">
+        <result column="preBalance" property="preBalance" jdbcType="DECIMAL" />
+        <result column="address" property="address" jdbcType="VARCHAR" />
+        <result column="community_name" property="communityName" jdbcType="VARCHAR" />
+        <result column="unit" property="unit" jdbcType="VARCHAR" />
+        <result column="tel" property="tel" jdbcType="VARCHAR" />
+        <result column="real_name" property="realName" jdbcType="VARCHAR" />
+        <result column="record_tag" property="recordTag" jdbcType="VARCHAR" />
+        <result column="province" property="province" jdbcType="VARCHAR" />
+        <result column="city" property="city" jdbcType="VARCHAR" />
+        <result column="district" property="district" jdbcType="VARCHAR" />
+    </resultMap>
+    
+    <sql id="Base_Column_List" >
+        <!--  自动生成 2016年12月06日 表字段名称 -->
+        id, company_id, unid,order_no,is_pay, amount, balance_amount, sid, uid, pay_method, remark, create_time
+    </sql>
+    
+    <sql id="findByPageSql" >
+        <!-- WARNING -  自动生成 2016-12-06  分页查询SQL -->
+        select a.* from user_order a
+        <where >
+            <if test="param.id != null " >
+                and a.id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.isPay != null " >
+                and a.is_pay = #{param.isPay,jdbcType=INTEGER}
+            </if>
+             <if test="param.orderNo != null " >
+                and a.order_no = #{param.orderNo,jdbcType=VARCHAR}
+            </if>
+            <if test="param.companyId != null " >
+                and a.company_id = #{param.companyId,jdbcType=BIGINT}
+            </if>
+            <if test="param.unid != null " >
+                and a.unid = #{param.unid,jdbcType=BIGINT}
+            </if>
+            <if test="param.amount != null " >
+                and a.amount = #{param.amount,jdbcType=DECIMAL}
+            </if>
+            <if test="param.balanceAmount != null " >
+                and a.balance_amount = #{param.balanceAmount,jdbcType=DECIMAL}
+            </if>
+            <if test="param.sid != null " >
+                and a.sid = #{param.sid,jdbcType=BIGINT}
+            </if>
+            <if test="param.uid != null " >
+                and a.uid = #{param.uid,jdbcType=BIGINT}
+            </if>
+            <if test="param.payMethod != null " >
+                and a.pay_method = #{param.payMethod,jdbcType=INTEGER}
+            </if>
+            <if test="param.remark != null and param.remark != ''" >
+                and a.remark = #{param.remark,jdbcType=VARCHAR}
+            </if>
+        </where>
+        order by a.id desc
+    </sql>
+    
+    <select id="findByPage" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-06  分页查询 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit #{offset}, #{pageSize}
+    </select>
+    
+    <select id="findByPageCount" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-12-06  分页查询总条数 -->
+        select count(1) from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findById" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年12月06日 根据ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from user_order
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    
+    <select id="load" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-06  根据多个ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from user_order where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </select>
+    
+    <select id="all" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-06  查询所有 -->
+        select 
+        <include refid="Base_Column_List" />
+        from user_order
+    </select>
+    
+    <select id="count" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-12-06 查询总条数 -->
+        select count(1) from user_order
+    </select>
+    
+    <update id="update" parameterType="com.kapphk.yyt.bean.UserOrder" >
+        <!--  自动生成 2016年12月06日 更新数据 -->
+        update user_order
+        <set >
+            <if test="companyId != null" >
+                company_id = #{companyId,jdbcType=BIGINT},
+            </if>
+            <if test="unid != null" >
+                unid = #{unid,jdbcType=BIGINT},
+            </if>
+            <if test="isPay != null" >
+                is_pay = #{isPay,jdbcType=BIGINT},
+            </if>
+            <if test="orderNo != null" >
+                order_no = #{orderNo,jdbcType=BIGINT},
+            </if>
+            <if test="amount != null" >
+                amount = #{amount,jdbcType=DECIMAL},
+            </if>
+            <if test="balanceAmount != null" >
+                balance_amount = #{balanceAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="sid != null" >
+                sid = #{sid,jdbcType=BIGINT},
+            </if>
+            <if test="uid != null" >
+                uid = #{uid,jdbcType=BIGINT},
+            </if>
+            <if test="payMethod != null" >
+                pay_method = #{payMethod,jdbcType=INTEGER},
+            </if>
+            <if test="remark != null" >
+                remark = #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null" >
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    
+    <insert id="insert" parameterType="com.kapphk.yyt.bean.UserOrder" useGeneratedKeys="true" keyProperty="id" >
+        <!--  自动生成 2016年12月06日 添加数据 -->
+        insert into user_order
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="companyId != null" >
+                company_id,
+            </if>
+            <if test="unid != null" >
+                unid,
+            </if>
+            <if test="orderNo != null" >
+                order_no,
+            </if>
+            <if test="isPay != null" >
+                is_pay,
+            </if>
+            <if test="amount != null" >
+                amount,
+            </if>
+            <if test="balanceAmount != null" >
+                balance_amount,
+            </if>
+            <if test="sid != null" >
+                sid,
+            </if>
+            <if test="uid != null" >
+                uid,
+            </if>
+            <if test="payMethod != null" >
+                pay_method,
+            </if>
+            <if test="remark != null" >
+                remark,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="companyId != null" >
+                #{companyId,jdbcType=BIGINT},
+            </if>
+            <if test="unid != null" >
+                #{unid,jdbcType=BIGINT},
+            </if>
+            <if test="orderNo != null" >
+                #{orderNo,jdbcType=BIGINT},
+            </if>
+            <if test="orderNo != null" >
+                #{isPay,jdbcType=INTEGER},
+            </if>
+            <if test="amount != null" >
+                #{amount,jdbcType=DECIMAL},
+            </if>
+            <if test="balanceAmount != null" >
+                #{balanceAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="sid != null" >
+                #{sid,jdbcType=BIGINT},
+            </if>
+            <if test="uid != null" >
+                #{uid,jdbcType=BIGINT},
+            </if>
+            <if test="payMethod != null" >
+                #{payMethod,jdbcType=INTEGER},
+            </if>
+            <if test="remark != null" >
+                #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    
+    <insert id="inserts" parameterType="java.util.List" >
+        <!-- WARNING -  自动生成 2016-12-06 添加多条数据 -->
+        insert into user_order (company_id, unid, amount, balance_amount, sid, uid, pay_method, remark, create_time)
+        values
+        <foreach collection="list" item="item" separator="," >
+            (#{item.companyId,jdbcType=BIGINT}, #{item.unid,jdbcType=BIGINT}, #{item.amount,jdbcType=DECIMAL}, #{item.balanceAmount,jdbcType=DECIMAL}, #{item.sid,jdbcType=BIGINT}, #{item.uid,jdbcType=BIGINT}, #{item.payMethod,jdbcType=INTEGER}, #{item.remark,jdbcType=VARCHAR}, #{item.createTime,jdbcType=TIMESTAMP})
+        </foreach>
+    </insert>
+    
+    <delete id="delete" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年12月06日 删除数据 -->
+        delete from user_order
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    
+    <delete id="deletes" >
+        <!-- WARNING -  自动生成 2016-12-06 删除多条数据 -->
+        delete from user_order where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteByEntity" >
+        <!-- WARNING -  自动生成 2016-12-06 通过实体类中的条件删除数据 -->
+        delete from user_order
+        <where >
+            <if test="param.id != null " >
+                and id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.companyId != null " >
+                and company_id = #{param.companyId,jdbcType=BIGINT}
+            </if>
+            <if test="param.unid != null " >
+                and unid = #{param.unid,jdbcType=BIGINT}
+            </if>
+            <if test="param.amount != null " >
+                and amount = #{param.amount,jdbcType=DECIMAL}
+            </if>
+            <if test="param.balanceAmount != null " >
+                and balance_amount = #{param.balanceAmount,jdbcType=DECIMAL}
+            </if>
+            <if test="param.sid != null " >
+                and sid = #{param.sid,jdbcType=BIGINT}
+            </if>
+            <if test="param.uid != null " >
+                and uid = #{param.uid,jdbcType=BIGINT}
+            </if>
+            <if test="param.payMethod != null " >
+                and pay_method = #{param.payMethod,jdbcType=INTEGER}
+            </if>
+            <if test="param.remark != null and param.remark != ''" >
+                and remark = #{param.remark,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </delete>
+    
+    <select id="findAll" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-06  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findPage" resultMap="EntityResultMap" >
+       SELECT uo.*,un.unit,un.real_name ,ac.address,un.record_tag,un.tel,ac.item_name as community_name,
+       ac.province,ac.city,ac.district,
+		(SELECT uo2.balance_amount FROM user_order uo2 WHERE uo2.unid = uo.unid AND uo2.create_time > uo.create_time ORDER BY uo2.create_time DESC LIMIT 1) AS preBalance
+		FROM user_order uo  LEFT JOIN user_number un ON uo.unid= un.id
+		LEFT JOIN app_community ac ON un.community_id = ac.id
+		<where>
+		  <if test="param.unid != null " >
+                and uo.unid = #{param.unid,jdbcType=BIGINT}
+           </if>
+		  <if test="param.sid != null " >
+                and uo.sid = #{param.sid,jdbcType=BIGINT}
+           </if>
+		  <if test="param.orderNo != null and param.orderNo != ''" >
+                and uo.order_no like CONCAT('%',#{param.orderNo,jdbcType=VARCHAR},'%')
+           </if>
+        </where>
+    </select>
+
+    <select id="queryPayment" resultType="java.util.Map">
+        SELECT
+        c.company_name AS companyName,
+        ch.hall_name AS hallName,
+        SUM( IFNULL(uo.amount,0)) as totalPayment,
+        uo.create_time as createTime
+        from app_company_hall ch
+        INNER JOIN app_community cn on ch.id = cn.company_hall_id
+        INNER JOIN app_company c on ch.company_id = c.id
+        INNER JOIN user_number un ON un.community_id = cn.id
+        LEFT JOIN user_order uo ON uo.unid = un.id
+        <where >
+            <if test="param.companyId != null and param.companyId!= ''" >
+                and c.id= #{param.companyId,jdbcType=BIGINT}
+            </if>
+            <if test="param.beginDate != null and param.beginDate != ''" >
+                and uo.create_time &gt;=#{param.beginDate,jdbcType=DATE}
+            </if>
+            <if test="param.endDate != null and param.endDate != ''" >
+                and uo.create_time &lt;=#{param.beginDate,jdbcType=DATE}
+            </if>
+        </where>
+        GROUP BY ch.id
+        ORDER BY uo.create_time DESC
+    </select>
+
+    <select id="queryGasCount" resultType="java.util.Map">
+      SELECT tmp.*,
+        ach.hall_name,
+        ac.company_name,
+        (SELECT COUNT(1) FROM user_number un1
+        LEFT JOIN app_community ac1 ON un1.community_id = ac1.id
+         WHERE ac1.`company_hall_id` = tmp.company_hall_id AND tmp.record_tag = un1.record_tag) AS totalUser
+        FROM (
+        SELECT (SUM(umr.current_count)-SUM(umr.last_count)) AS totalgas,
+        SUM(umr.amount)AS totalPrice,
+        un.`record_tag`,
+        ac.`company_hall_id`,
+        umr.`record_time`
+        FROM `user_meter_record` umr
+        INNER JOIN user_number un ON un.`id` = umr.unid
+        INNER JOIN app_community ac ON un.community_id = ac.id
+        GROUP BY un.`record_tag`, ac.`company_hall_id`
+        ) tmp
+        LEFT JOIN app_company_hall ach ON tmp.company_hall_id = ach.`id`
+        LEFT JOIN `app_company` ac ON ach.`company_id` = ac.`id`
+
+        <where >
+            <if test="param.companyId != null and param.companyId!= ''" >
+                and ac.id= #{param.companyId,jdbcType=BIGINT}
+            </if>
+            <if test="param.beginDate != null and param.beginDate != ''" >
+                and tmp.record_time &gt;=#{param.beginDate,jdbcType=DATE}
+            </if>
+            <if test="param.endDate != null and param.endDate != ''" >
+                and tmp.record_time &lt;=#{param.beginDate,jdbcType=DATE}
+            </if>
+        </where>
+    </select>
+
+
+    <select id="queryPaymentCount" resultType="java.util.Map">
+    SELECT
+        c.company_name AS companyName,
+        ch.hall_name AS hallName,
+        uo.`pay_method` AS payMethod,
+        SUM( IFNULL(uo.amount,0)) AS totalPayment,
+        uo.create_time AS createTime
+        FROM app_company_hall ch
+        INNER JOIN app_community cn ON ch.id = cn.company_hall_id
+        INNER JOIN app_company c ON ch.company_id = c.id
+        INNER JOIN user_number un ON un.community_id = cn.id
+        LEFT JOIN user_order uo ON uo.unid = un.id
+        <where >
+            <if test="param.companyId != null and param.companyId!= ''" >
+                and c.id= #{param.companyId,jdbcType=BIGINT}
+            </if>
+            <if test="param.beginDate != null and param.beginDate != ''" >
+                and uo.create_time &gt;=#{param.beginDate,jdbcType=DATE}
+            </if>
+            <if test="param.endDate != null and param.endDate != ''" >
+                and uo.create_time &lt;=#{param.beginDate,jdbcType=DATE}
+            </if>
+        </where>
+        GROUP BY ch.id,uo.`pay_method`
+        ORDER BY uo.create_time DESC
+    </select>
+
+
+    <select id="queryCellUserCount" resultType="java.util.Map">
+      SELECT
+        COUNT(IF(un.`status` = 0,TRUE,NULL)) AS closeCount,
+        COUNT(IF(un.`status` = 1,TRUE,NULL)) AS OPENCount,
+        ac.item_name AS itemName,
+        ap.company_name companyName,
+        MAX(un.update_time) AS updateTime
+        FROM
+            app_community ac
+        LEFT JOIN user_number un ON ac.id = un.community_id
+        LEFT JOIN app_company ap ON ap.id = ac.company_id
+        <where >
+            <if test="param.companyId != null and param.companyId!= ''" >
+                and ac.company_id= #{param.companyId,jdbcType=BIGINT}
+            </if>
+            <if test="param.beginDate != null and param.beginDate != ''" >
+                and un.update_time &gt;=#{param.beginDate,jdbcType=DATE}
+            </if>
+            <if test="param.endDate != null and param.endDate != ''" >
+                and un.update_time &lt;=#{param.beginDate,jdbcType=DATE}
+            </if>
+        </where>
+        GROUP BY ac.id
+    </select>
+
+</mapper>

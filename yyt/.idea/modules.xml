@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/yyt-back/yyt-back.iml" filepath="$PROJECT_DIR$/yyt-back/yyt-back.iml" />
+      <module fileurl="file://$PROJECT_DIR$/yyt-manager/yyt-bean/yyt-bean.iml" filepath="$PROJECT_DIR$/yyt-manager/yyt-bean/yyt-bean.iml" group="yyt-manager and modules" />
+      <module fileurl="file://$PROJECT_DIR$/yyt-manager/yyt-manager.iml" filepath="$PROJECT_DIR$/yyt-manager/yyt-manager.iml" group="yyt-manager and modules" />
+      <module fileurl="file://$PROJECT_DIR$/yyt-manager/yyt-mapper/yyt-mapper.iml" filepath="$PROJECT_DIR$/yyt-manager/yyt-mapper/yyt-mapper.iml" group="yyt-manager and modules" />
+      <module fileurl="file://$PROJECT_DIR$/yyt-parent/yyt-parent.iml" filepath="$PROJECT_DIR$/yyt-parent/yyt-parent.iml" />
+    </modules>
+  </component>
+</project>

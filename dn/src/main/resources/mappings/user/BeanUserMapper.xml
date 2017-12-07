@@ -1,0 +1,1261 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kapphk.web.dao.mapper.user.BeanUserMapper" >
+    <resultMap id="BaseResultMap" type="com.kapphk.web.bean.user.BeanUser" >
+        <!--  自动生成 2016年10月18日 表与实体类字段对应 -->
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="user_name" property="userName" jdbcType="VARCHAR" />
+        <result column="pwd" property="pwd" jdbcType="VARCHAR" />
+        <result column="nick_name" property="nickName" jdbcType="VARCHAR" />
+        <result column="real_name" property="realName" jdbcType="VARCHAR" />
+        <result column="logo_path" property="logoPath" jdbcType="VARCHAR" />
+        <result column="sex" property="sex" jdbcType="INTEGER" />
+        <result column="position" property="position" jdbcType="VARCHAR" />
+        <result column="province" property="province" jdbcType="VARCHAR" />
+        <result column="city" property="city" jdbcType="VARCHAR" />
+        <result column="district" property="district" jdbcType="VARCHAR" />
+        <result column="blue_currency" property="blueCurrency" jdbcType="DECIMAL" />
+        <result column="red_currency" property="redCurrency" jdbcType="DECIMAL" />
+        <result column="invite_code" property="inviteCode" jdbcType="VARCHAR" />
+        <result column="id_card" property="idCard" jdbcType="VARCHAR" />
+        <result column="id_photo_front" property="idPhotoFront" jdbcType="VARCHAR" />
+        <result column="id_photo_back" property="idPhotoBack" jdbcType="VARCHAR" />
+        <result column="uid_from" property="uidFrom" jdbcType="BIGINT" />
+        <result column="mail" property="mail" jdbcType="VARCHAR" />
+        <result column="wechat" property="wechat" jdbcType="VARCHAR" />
+        <result column="due_date" property="dueDate" jdbcType="DATE" />
+        <result column="reject_reason" property="rejectReason" jdbcType="VARCHAR" />
+        <result column="longitude" property="longitude" jdbcType="DECIMAL" />
+        <result column="latitude" property="latitude" jdbcType="DECIMAL" />
+        <result column="is_permissions" property="isPermissions" jdbcType="INTEGER" />
+        <result column="state" property="state" jdbcType="INTEGER" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+        <result column="service_begin" property="serviceBegin" jdbcType="BIGINT" />
+        <result column="service_stock" property="serviceStock" jdbcType="BIGINT" />
+    </resultMap>
+    
+    <!-- 获取课程订单与商品订单 -->
+    <select id="cancellationOfOrder" resultType="java.util.Map">
+    	<if test="type == 1">
+    		SELECT o.id,o.uid,CAST(o.discount_blue AS CHAR) AS db,CAST(o.discount_red AS CHAR) AS dr 
+			FROM app_course_order o 
+			WHERE o.pay_status != 3 AND o.is_pay=0 
+			AND (o.discount_blue > 0 OR o.discount_red >0)
+			AND SUBSTRING(CAST(o.create_time AS CHAR),1,15) &lt;= #{date} 
+    	</if>
+    	<if test="type == 2">
+    		SELECT o.id,o.uid,CAST(o.discount_blue AS CHAR) AS db,CAST(o.discount_red AS CHAR) AS dr 
+			FROM app_product_order o 
+			WHERE o.state=0 AND (o.discount_blue > 0 OR o.discount_red >0)
+			AND SUBSTRING(CAST(o.create_time AS CHAR),1,15) &lt;= #{date} 
+    	</if>
+    </select>
+    
+    <!-- 员工岗位数据迁移 -->
+    <select id="getStaffPosition" resultType="java.util.Map">
+    	SELECT id,staff_position AS staffPosition FROM sys_user WHERE `position`='动能集团员工'
+    </select>
+    
+    <!-- 获取所在城市的存量客服 -->
+    <select id="findStaffPositionByCity" resultType="java.lang.Long">
+    	SELECT DISTINCT u.id FROM user_identity ui
+		INNER JOIN sys_user u ON u.id=ui.uid AND u.city=#{city}
+		<where>
+			ui.tag_type='员工岗位'
+			<if test="type == 1">
+				AND tag_identity='存量客服'
+			</if>
+			<if test="type == 2">
+				AND tag_identity='增量客服'
+			</if>
+		</where>
+    </select>
+    
+    <!-- 支付控制  zoneyu 16-12-10 -->
+    <select id="getPaySet" resultType="java.util.Map">
+    	select id,versions from app_set
+    </select>
+    
+    <!-- 计算升级身份获得分佣 -->
+    <select id="findCommissionByuid" resultType="java.lang.Float">
+    	SELECT IFNULL((c.level_one_upgrade*0.01)*((100-s1.value)*0.01)*((100-s2.value)*0.01),0) AS amount  
+		FROM sys_setting s1 
+		INNER JOIN sys_setting s2 ON s2.id='withhold_individual_tax'
+		LEFT JOIN app_commission c ON c.id=(SELECT id FROM app_commission WHERE tag_id IN (SELECT tag_identity 
+		FROM user_identity WHERE uid=#{id} AND tag_type='动能身份') ORDER BY level_one_upgrade DESC LIMIT 1)
+		WHERE s1.id='withhold_tax'
+    </select>
+    
+    <!-- 查询上三级  zoneyu 16-11-23 -->
+    <select id="getThreeUid" resultType="java.util.Map">
+    	(SELECT su.uid_from AS uid,ac.level_one*0.01 AS rebate 
+		FROM user_identity AS ui 
+		INNER JOIN sys_user AS su ON ui.uid = su.uid_from AND ui.tag_type = '动能身份' 
+		INNER JOIN app_commission AS ac ON ui.tag_identity = ac.tag_id 
+		WHERE su.id = #{uid} ORDER BY ac.level_one DESC LIMIT 0,1)
+		UNION ALL 
+		(SELECT su2.uid_from AS uid,ac.level_two*0.01 AS rebate  
+		FROM user_identity AS ui 
+		INNER JOIN sys_user AS su2 ON ui.uid = su2.uid_from AND ui.tag_type = '动能身份' 
+		INNER JOIN sys_user AS su ON su2.id = su.uid_from 
+		INNER JOIN app_commission AS ac ON ui.tag_identity = ac.tag_id 
+		WHERE su.id = #{uid} ORDER BY ac.level_two DESC LIMIT 0,1)
+		UNION ALL 
+		(SELECT su3.uid_from AS uid,ac.level_three*0.01 AS rebate 
+		FROM user_identity AS ui 
+		INNER JOIN sys_user AS su3 ON ui.uid = su3.uid_from AND ui.tag_type = '动能身份' 
+		INNER JOIN sys_user AS su2 ON su3.id = su2.uid_from 
+		INNER JOIN sys_user AS su ON su2.id = su.uid_from 
+		INNER JOIN app_commission AS ac ON ui.tag_identity = ac.tag_id 
+		WHERE su.id = #{uid} ORDER BY ac.level_three DESC LIMIT 0,1)
+    </select>
+    
+    <!-- APP分佣明细 -->
+    <select id="searchCentCommissionDetail" resultType="java.util.Map">
+    	SELECT * FROM(
+	    	SELECT '收益'AS `type`,SUBSTRING(CAST(o.create_time AS CHAR),1,16) AS createTime,(CASE o.is_use WHEN 0 THEN 3 ELSE 4 END) AS state,
+			CONCAT('一级客户 ',u.real_name,'购买课程-',(CASE o.is_use WHEN 0 THEN '未消耗' ELSE '已消耗' END)) AS content,
+			CONCAT(CAST('+'AS CHAR),CAST(FLOOR((o.discount_red+o.pay_amount)*(c.level_one*0.01)*((100-s1.value)*0.01)*((100-s2.value)*0.01)) AS CHAR),
+			(CASE o.is_use WHEN 0 THEN '(冻结中)' ELSE '(可使用)' END)) AS amount 
+			FROM app_course_order o
+			INNER JOIN sys_user u ON u.id=o.uid
+			INNER JOIN app_commission c 
+			ON c.id=(SELECT id FROM app_commission WHERE tag_id IN (SELECT tag_identity 
+			FROM user_identity WHERE uid=#{uid} AND tag_type='动能身份') ORDER BY level_one DESC LIMIT 1)
+			INNER JOIN sys_setting s1 ON s1.id='withhold_tax'
+			INNER JOIN sys_setting s2 ON s2.id='withhold_individual_tax'
+			WHERE o.is_pay=1 AND o.pay_status !=3 AND o.system_course_name IS NULL AND o.coupon_id IS NULL
+			AND o.uid IN(SELECT su.id FROM sys_user AS su WHERE su.uid_from = #{uid})
+			
+			UNION ALL 
+			SELECT '收益'AS `type`,SUBSTRING(CAST(o.create_time AS CHAR),1,16) AS createTime,(CASE o.is_use WHEN 0 THEN 3 ELSE 4 END) AS state,
+			CONCAT('二级客户 ',u.real_name,'购买课程-',(CASE o.is_use WHEN 0 THEN '未消耗' ELSE '已消耗' END)) AS content,
+			CONCAT(CAST('+'AS CHAR),CAST(FLOOR((o.discount_red+o.pay_amount)*(c.level_two*0.01)*((100-s1.value)*0.01)*((100-s2.value)*0.01)) AS CHAR),
+			(CASE o.is_use WHEN 0 THEN '(冻结中)' ELSE '(可使用)' END)) AS amount 
+			FROM app_course_order o
+			INNER JOIN sys_user u ON u.id=o.uid
+			INNER JOIN app_commission c 
+			ON c.id=(SELECT id FROM app_commission WHERE tag_id IN (SELECT tag_identity 
+			FROM user_identity WHERE uid=#{uid} AND tag_type='动能身份') ORDER BY level_two DESC LIMIT 1)
+			INNER JOIN sys_setting s1 ON s1.id='withhold_tax'
+			INNER JOIN sys_setting s2 ON s2.id='withhold_individual_tax'
+			WHERE o.is_pay=1 AND o.pay_status !=3 AND o.system_course_name IS NULL AND o.coupon_id IS NULL
+			AND o.uid IN(SELECT su.id FROM sys_user AS su INNER JOIN sys_user AS su2 ON su.uid_from = su2.id AND su2.uid_from = #{uid})
+			
+			UNION ALL 
+			SELECT '收益'AS `type`,SUBSTRING(CAST(o.create_time AS CHAR),1,16) AS createTime,(CASE o.is_use WHEN 0 THEN 3 ELSE 4 END) AS state,
+			CONCAT('三级客户 ',u.real_name,'购买课程-',(CASE o.is_use WHEN 0 THEN '未消耗' ELSE '已消耗' END)) AS content,
+			CONCAT(CAST('+'AS CHAR),CAST(FLOOR((o.discount_red+o.pay_amount)*(c.level_three*0.01)*((100-s1.value)*0.01)*((100-s2.value)*0.01)) AS CHAR),
+			(CASE o.is_use WHEN 0 THEN '(冻结中)' ELSE '(可使用)' END)) AS amount 
+			FROM app_course_order o
+			INNER JOIN sys_user u ON u.id=o.uid
+			INNER JOIN app_commission c 
+			ON c.id=(SELECT id FROM app_commission WHERE tag_id IN (SELECT tag_identity 
+			FROM user_identity WHERE uid=#{uid} AND tag_type='动能身份') ORDER BY level_three DESC LIMIT 1)
+			INNER JOIN sys_setting s1 ON s1.id='withhold_tax'
+			INNER JOIN sys_setting s2 ON s2.id='withhold_individual_tax'
+			WHERE o.is_pay=1 AND o.pay_status !=3 AND o.system_course_name IS NULL AND o.coupon_id IS NULL
+			AND o.uid IN(SELECT su.id FROM sys_user AS su INNER JOIN sys_user AS su2 ON su.uid_from = su2.id 
+			INNER JOIN sys_user AS su3 ON su2.uid_from = su3.id AND su3.uid_from = #{uid})
+			
+			UNION ALL
+			SELECT '收益'AS `type`,SUBSTRING(CAST(f.create_time AS CHAR),1,16) AS createTime,4 AS state,
+			CONCAT('一级客户 ',u.real_name,'升级身份') AS content,
+			CONCAT(CAST('+'AS CHAR),CAST(FLOOR(f.amount*(c.level_one_upgrade*0.01)*((100-s1.value)*0.01)*((100-s2.value)*0.01)) AS CHAR),
+			'(可使用)') AS amount 
+			FROM user_fee f
+			INNER JOIN sys_user u ON u.id=f.uid
+			INNER JOIN app_commission c 
+			ON c.id=(SELECT id FROM app_commission WHERE tag_id IN (SELECT tag_identity 
+			FROM user_identity WHERE uid=#{uid} AND tag_type='动能身份') ORDER BY level_one_upgrade DESC LIMIT 1)
+			INNER JOIN sys_setting s1 ON s1.id='withhold_tax'
+			INNER JOIN sys_setting s2 ON s2.id='withhold_individual_tax'
+			WHERE f.uid IN(SELECT su.id FROM sys_user AS su WHERE su.uid_from = #{uid})
+			 
+			UNION ALL
+			SELECT '提现'AS `type`,SUBSTRING(CAST(c.create_time AS CHAR),1,16) AS createTime,c.state,
+			CONCAT(CAST('提现卡号 'AS CHAR),CAST(c.card_id AS CHAR)) AS content,
+			CONCAT(CAST('-' AS CHAR),CAST(FLOOR(c.amount) AS CHAR),(CASE c.state WHEN 0 THEN '(待处理)' 
+			WHEN 1 THEN '(已处理)' WHEN 2 THEN '(已到账)' END)) AS amount
+			FROM user_cash_apply c WHERE uid=#{uid} 
+			
+			UNION ALL
+			SELECT '其他'AS `type`,SUBSTRING(CAST(o.create_time AS CHAR),1,16) AS createTime,5 AS state,
+			CONCAT('赞赏资讯-',n.title) AS content,CONCAT(CAST('-' AS CHAR),FLOOR(o.discount_red),'(已使用)') AS amount
+			FROM app_news_order o
+			INNER JOIN app_news n ON n.id=o.news_id
+			WHERE o.pay_method='红币' AND o.is_pay=1 AND o.discount_red > 0 AND o.uid=#{uid} 
+			
+			UNION ALL
+			SELECT '其他'AS `type`,SUBSTRING(CAST(o.create_time AS CHAR),1,16) AS createTime,5 AS state,
+			CONCAT((CASE o.pay_status WHEN 3 THEN '赞赏' ELSE '购买'END),'课程-',c.item_name) AS content,
+			CONCAT(CAST('-' AS CHAR),FLOOR(o.discount_red),'(已使用)') AS amount
+			FROM app_course_order o
+			INNER JOIN app_course c ON c.id=o.course_id
+			WHERE o.pay_method='红币' AND o.is_pay=1 AND o.system_course_name IS NULL AND o.coupon_id IS NULL AND o.discount_red > 0 AND o.uid=#{uid} 
+			
+			UNION ALL
+			SELECT '其他'AS `type`,SUBSTRING(CAST(create_time AS CHAR),1,16) AS createTime,5 AS state,
+			content,CONCAT(CAST(currency AS CHAR),'(已使用)') AS amount
+			FROM user_currency WHERE currency_type=2 AND record_type=8 AND uid=#{uid}
+		) as a 
+		<where>
+			<if test="type != null and type != ''">
+				a.type=#{type}
+			</if>
+		</where>
+		ORDER BY a.createTime DESC LIMIT #{page},#{rows}    	
+    </select>
+    
+    <!-- APP我的分佣 -->
+    <select id="findCentCommission" resultType="java.util.Map">
+    	SELECT a.nickName,a.realName,a.redCurrency,a.createTime,a.logoPath,a.inviteCode,a.djCurrency,a.txCurrency,a.syCurrency,(a.djCurrency+a.txCurrency+a.redCurrency) as total
+    	FROM (SELECT su.nick_name AS nickName,su.real_name AS realName,u.red_currency AS redCurrency,CAST(su.create_time AS CHAR) AS createTime,su.logo_path AS logoPath,su.invite_code AS inviteCode,
+				(
+				 IFNULL(FLOOR((SELECT SUM(discount_red) FROM app_course_order WHERE uid IN 
+					(SELECT id FROM sys_user WHERE uid_from=u.id) AND is_pay=1 AND pay_status !=3 AND is_use=0 AND system_course_name IS NULL AND coupon_id IS NULL)
+					*((100-s1.value)*0.01)*(SELECT level_one FROM app_commission WHERE tag_id IN (SELECT tag_identity FROM user_identity WHERE uid=u.id AND tag_type='动能身份') ORDER BY level_one DESC LIMIT 1)*0.01)*((100-s2.value)*0.01),0)+
+				 IFNULL(FLOOR((SELECT SUM(discount_red) FROM app_course_order WHERE uid IN 
+					(SELECT id FROM sys_user WHERE uid_from IN (SELECT id FROM sys_user WHERE uid_from=u.id)) AND is_pay=1 AND pay_status !=3 AND is_use=0 AND system_course_name IS NULL AND coupon_id IS NULL)
+					*((100-s1.value)*0.01)*(SELECT level_two FROM app_commission WHERE tag_id IN (SELECT tag_identity FROM user_identity WHERE uid=u.id AND tag_type='动能身份') ORDER BY level_two DESC LIMIT 1)*0.01)*((100-s2.value)*0.01),0)+
+				 IFNULL(FLOOR((SELECT SUM(discount_red) FROM app_course_order WHERE uid IN 
+					(SELECT id FROM sys_user WHERE uid_from IN (SELECT id FROM sys_user WHERE uid_from IN (SELECT id FROM sys_user WHERE uid_from=u.id))
+					 AND is_pay=1 AND pay_status !=3 AND is_use=0 AND system_course_name IS NULL AND coupon_id IS NULL))
+					*((100-s1.value)*0.01)*(SELECT level_two FROM app_commission WHERE tag_id IN (SELECT tag_identity FROM user_identity WHERE uid=u.id AND tag_type='动能身份') ORDER BY level_two DESC LIMIT 1)*0.01)*((100-s2.value)*0.01),0)
+				) AS djCurrency,
+				(IFNULL(FLOOR((SELECT SUM(amount) FROM user_cash_apply WHERE uid=u.id AND state IN (0,1))),0)) AS txCurrency,
+				(
+				 IFNULL(FLOOR((SELECT SUM(amount) FROM user_cash_apply WHERE uid=u.id AND state=2)),0)+
+				 IFNULL(FLOOR((SELECT SUM(discount_red) FROM app_news_order WHERE uid=u.id AND pay_method='红币'AND is_pay=1)),0)+
+				 IFNULL(FLOOR((SELECT SUM(discount_red) FROM app_course_order WHERE uid=u.id AND is_pay=1 AND system_course_name IS NULL AND coupon_id IS NULL)),0)+
+				 IFNULL(FLOOR((SELECT SUBSTRING(SUM(currency),2) FROM user_currency WHERE currency_type=2 AND record_type=8 AND uid=u.id)),0)
+				) AS syCurrency
+			FROM sys_user u	
+			INNER JOIN sys_setting s1 ON s1.id='withhold_tax'
+			INNER JOIN sys_setting s2 ON s2.id='withhold_individual_tax'
+			LEFT JOIN sys_user su ON su.id=u.uid_from
+			WHERE u.id=#{uid}
+		) AS a
+    </select>
+    
+    <!-- 获取当月交易总金额 -->
+    <select id="findTotalAmount" resultType="java.lang.Long">
+    	SELECT FLOOR(o.pay_amount+o.discount_red)  
+		FROM app_course_order o
+		WHERE o.uid IN (SELECT id FROM sys_user u WHERE u.province IN 
+		<foreach collection="list" item="item" open="(" separator="," close=")" >
+	            #{item}
+	    </foreach>) AND o.coupon_id IS NULL AND o.is_pay=1
+		AND o.pay_status != 3 AND o.is_use=1 AND o.pay_time IS NOT NULL AND o.system_course_name IS NULL
+		AND o.pay_time &gt;= #{startTime} AND o.pay_time &lt;= #{endTime} 
+    </select>
+    
+    <!-- 获取员工身份 -->
+    <select id="findByStaffPosition" resultType="java.util.Map">
+    	SELECT (SELECT GROUP_CONCAT(tag_identity) FROM user_identity WHERE tag_type='员工岗位' AND (tag_identity='区域经理' OR tag_identity='区域总经理') AND uid=u.id) AS staffPosition,
+		u.user_name AS userName,u.real_name AS realName,GROUP_CONCAT(DISTINCT a.province)AS directArea,
+		GROUP_CONCAT(DISTINCT a1.province)AS indirectArea,u.id
+		FROM sys_user u 
+		LEFT JOIN user_area a ON a.uid=u.id AND a.record_type=1
+		LEFT JOIN user_area a1 ON a1.uid=u.id AND a1.record_type=2
+		LEFT JOIN sys_user u1 ON u1.province=a.province
+		WHERE u.position='动能集团员工' AND u.id IN (SELECT DISTINCT uid FROM user_identity WHERE tag_type='员工岗位' AND (tag_identity='区域经理' OR tag_identity='区域总经理'))
+		GROUP BY u.id 
+    </select>
+    
+    <!-- 查询下级   zoenyu 16-11-10 -->
+    <select id="searchchildList" resultType="java.util.Map">
+    	<if test="grade == 1">
+    		SELECT su.id,su.logo_path AS logoPath,su.nick_name AS nickName,su.invite_code AS inviteCode,
+			su.real_name AS realName,SUBSTRING(CAST(su.create_time AS CHAR),1,10) AS createTime 
+			FROM sys_user AS su WHERE su.uid_from = #{uid} ORDER BY su.id DESC LIMIT #{page},#{rows}
+    	</if>
+    	<if test="grade == 2">
+    		SELECT su.id,su.logo_path AS logoPath,su.nick_name AS nickName,su.invite_code AS inviteCode,
+			su.real_name AS realName,SUBSTRING(CAST(su.create_time AS CHAR),1,10) AS createTime 
+			FROM sys_user AS su 
+			INNER JOIN sys_user AS su2 ON su.uid_from = su2.id AND su2.uid_from = #{uid} 
+			ORDER BY su.id DESC LIMIT #{page},#{rows}
+    	</if>
+    	<if test="grade == 3">
+    		SELECT su.id,su.logo_path AS logoPath,su.nick_name AS nickName,su.invite_code AS inviteCode,
+			su.real_name AS realName,SUBSTRING(CAST(su.create_time AS CHAR),1,10) AS createTime 
+			FROM sys_user AS su 
+			INNER JOIN sys_user AS su2 ON su.uid_from = su2.id 
+			INNER JOIN sys_user AS su3 ON su2.uid_from = su3.id AND su3.uid_from = #{uid} 
+			ORDER BY su.id DESC LIMIT #{page},#{rows}
+    	</if>
+    </select>
+    
+    <!-- 所有市 zoneyu 16-11-7 -->
+    <select id="getCityAll" resultType="java.util.Map">
+    	SELECT id,pid FROM sys_addr_city ORDER BY pid asc 
+    </select>
+    
+    <!-- 所有区 zoneyu 16-11-7 -->
+    <select id="getDistrictAll" resultType="java.util.Map">
+    	SELECT id,cid as pid FROM sys_addr_district order by cid asc 
+    </select>
+    
+    <!-- 根据身份获取用户id集合 -->
+    <select id="findByPositionList" resultType="java.lang.String">
+    	select id from sys_user
+    	<if test="list != null">
+	    	where id!=-1 AND position in 
+	    	<foreach collection="list" item="item" open="(" separator="," close=")" >
+	            #{item}
+	        </foreach>
+    	</if>
+    </select>
+    
+    <!-- 客服服务管理列表 -->
+    <select id="findServiceList" resultType="java.util.Map">
+    	SELECT a.sid,a.userName,a.userName,a.position,a.id,a.kuserName,a.krealName,a.realName,
+    	a.pcd,a.itenName,a.registerDate,cast(a.createTime as char) as createTime,a.position
+    	FROM (
+		SELECT su.id as sid,su.user_name AS userName,su.real_name AS realName,
+		('增量客服') AS position,
+		u.id AS id,u.user_name AS kuserName,u.real_name AS krealName,
+		CONCAT(u.province,u.city,u.district) AS pcd,
+		(SELECT CONCAT(@cid := l1.course_id,@isUse :=l1.is_use,@createTime :=l1.create_time) FROM app_course_order AS l1 WHERE l1.uid = u.id ORDER BY l1.pay_time ASC LIMIT 1) AS course_id,
+		(SELECT l1.item_name FROM app_course AS l1 WHERE l1.id = @cid) AS itenName,
+		(CASE @isUse WHEN 0 THEN '未消耗' ELSE '已消耗' END) AS isUse,(@createTime) AS createTime,
+		(SELECT l1.register_date FROM app_course_offline AS l1 WHERE l1.id = @cid) AS registerDate
+		FROM sys_user AS su
+		LEFT JOIN sys_user u ON su.id=u.service_begin
+		<where>
+			su.position = '动能集团员工' AND su.id IN (SELECT uid FROM user_identity WHERE tag_type='员工岗位' AND tag_identity='增量客服')
+			<if test="userId != null">
+				and su.id = #{userId}
+			</if>
+			<if test="province != null and province != ''">
+				and u.province= #{province}
+			</if>
+			<if test="city != null and city != ''">
+				and u.city= #{city}
+			</if>
+			<if test="userName != null and userName != ''">
+				and u.user_name like '%${userName}%'
+			</if>
+			<if test="realName != null and realName != ''">
+				and u.real_name like '%${realName}%'
+			</if>
+		</where>
+		UNION ALL
+		SELECT su.id as sid,su.user_name AS userName,su.real_name AS realName,
+		('存量客服') AS position,
+		u.id AS id,u.user_name AS kuserName,u.real_name AS krealName,
+		CONCAT(u.province,u.city,u.district) AS pcd,
+		(SELECT CONCAT(@cid := l1.course_id,@isUse :=l1.is_use,@createTime :=l1.create_time) FROM app_course_order AS l1 WHERE l1.uid = u.id ORDER BY l1.pay_time DESC LIMIT 1) AS course_id,
+		(SELECT l1.item_name FROM app_course AS l1 WHERE l1.id = @cid) AS itenName,
+		(CASE @isUse WHEN 0 THEN '未消耗' ELSE '已消耗' END) AS isUse,(@createTime) AS createTime,
+		(SELECT l1.register_date FROM app_course_offline AS l1 WHERE l1.id = @cid) AS registerDate
+		FROM sys_user AS su
+		LEFT JOIN sys_user u ON su.id=u.service_stock
+		<where>
+			su.position = '动能集团员工' AND su.id IN (SELECT uid FROM user_identity WHERE tag_type='员工岗位' AND tag_identity='存量客服')
+			<if test="userId != null">
+				and su.id = #{userId}
+			</if>
+			<if test="province != null and province != ''">
+				and u.province= #{province}
+			</if>
+			<if test="city != null and city != ''">
+				and u.city= #{city}
+			</if>
+			<if test="userName != null and userName != ''">
+				and u.user_name like '%${userName}%'
+			</if>
+			<if test="realName != null and realName != ''">
+				and u.real_name like '%${realName}%'
+			</if>
+		</where>
+		) AS a  ORDER BY a.createTime DESC LIMIT #{page},#{rows}
+    </select>
+    
+    <!-- 客服服务管理总数 -->
+    <select id="findServiceCount" resultType="java.lang.Integer">
+    	SELECT COUNT(a.id) FROM (
+		SELECT su.id
+		FROM sys_user AS su
+		LEFT JOIN sys_user u ON su.id=u.service_begin
+		<where>
+			su.position = '动能集团员工' AND su.id IN (SELECT uid FROM user_identity WHERE tag_type='员工岗位' AND tag_identity='增量客服')
+			<if test="userId != null">
+				and su.id = #{userId}
+			</if>
+			<if test="province != null and province != ''">
+				and u.province= #{province}
+			</if>
+			<if test="city != null and city != ''">
+				and u.city= #{city}
+			</if>
+			<if test="userName != null and userName != ''">
+				and u.user_name like '%${userName}%'
+			</if>
+			<if test="realName != null and realName != ''">
+				and u.real_name like '%${realName}%'
+			</if>
+		</where>
+		UNION ALL
+		SELECT su.id
+		FROM sys_user AS su
+		LEFT JOIN sys_user u ON su.id=u.service_stock
+		<where>
+			su.position = '动能集团员工' AND su.id IN (SELECT uid FROM user_identity WHERE tag_type='员工岗位' AND tag_identity='存量客服')
+			<if test="userId != null">
+				and su.id = #{userId}
+			</if>
+			<if test="province != null and province != ''">
+				and u.province= #{province}
+			</if>
+			<if test="city != null and city != ''">
+				and u.city= #{city}
+			</if>
+			<if test="userName != null and userName != ''">
+				and u.user_name like '%${userName}%'
+			</if>
+			<if test="realName != null and realName != ''">
+				and u.real_name like '%${realName}%'
+			</if>
+		</where>
+		) AS a
+    </select>
+    
+    <!-- 省 zoneyu 16-11-2 -->
+    <select id="getProvince" resultType="java.util.Map">
+    	SELECT id,code FROM sys_addr_province ORDER BY CODE ASC
+    </select>
+    
+    <!-- 市 zoneyu 16-11-2 -->
+    <select id="getCity" resultType="java.util.Map">
+    	SELECT id,code FROM sys_addr_city 
+    	<where>
+    		<if test="pid != null and pid != ''">
+    			pid like '%${pid}%'
+    		</if>
+    	</where>
+    	ORDER BY CODE ASC
+    </select>
+    
+    <!-- 区 zoneyu 16-11-2 -->
+    <select id="getDistrict" resultType="java.util.Map">
+    	SELECT id FROM sys_addr_district 
+    	<where>
+    		<if test="pid != null and pid != ''">
+    			cid like '%${pid}%'
+    		</if>
+    	</where>
+    </select>
+    
+    <!-- 用户关系列表 -->
+    <select id="findUserRelationList" resultType="java.util.Map">
+    	SELECT su.id,u.user_name AS userName,u.logo_path AS logoPath,u.real_name AS realName,u.invite_code AS inviteCode,
+		su1.real_name AS yqRealName,su1.invite_code AS yqInviteCode,(CASE WHEN su.real_name IS NOT NULL THEN '一级' END)AS hierarchy,
+		su.real_name AS khRealName,su.invite_code AS khInviteCode,CAST(su.create_time AS CHAR) AS createTime,u.position
+		FROM sys_user u 
+		LEFT JOIN sys_user su ON u.id=su.uid_from
+		LEFT JOIN sys_user su1 ON su1.id=u.uid_from
+		<where>
+			<if test="id != null">
+				AND u.id=#{id}
+			</if>
+			<if test="position != null and position != ''">
+				AND u.position = #{position}
+			</if>
+			<if test="userName != null and userName != ''">
+				AND u.user_name like '%${userName}%'
+			</if>
+			<if test="realName != null and realName != ''">
+				AND u.real_name like '%${realName}%'
+			</if>
+			<if test="yqRealName != null and yqRealName != ''">
+				AND su1.real_name like '%${yqRealName}%'
+			</if>
+			<if test="khRealName != null and khRealName != ''">
+				AND su.real_name like '%${khRealName}%'
+			</if>
+		</where>
+		ORDER BY u.create_time DESC LIMIT #{page},#{rows}   
+    </select>
+    
+     <!-- 用户关系列表总数 -->
+    <select id="findUserRelationCount" resultType="java.lang.Integer">
+    	SELECT COUNT(1)
+		FROM sys_user u 
+		LEFT JOIN sys_user su ON u.id=su.uid_from
+		LEFT JOIN sys_user su1 ON su1.id=u.uid_from
+		<where>
+			<if test="id != null">
+				AND u.id=#{id}
+			</if>
+			<if test="position != null and position != ''">
+				AND u.position = #{position}
+			</if>
+			<if test="userName != null and userName != ''">
+				AND u.user_name like '%${userName}%'
+			</if>
+			<if test="realName != null and realName != ''">
+				AND u.real_name like '%${realName}%'
+			</if>
+			<if test="yqRealName != null and yqRealName != ''">
+				AND su1.real_name like '%${yqRealName}%'
+			</if>
+			<if test="khRealName != null and khRealName != ''">
+				AND su.real_name like '%${khRealName}%'
+			</if>
+		</where>
+    </select>
+    
+    <!-- 获取动能家人 -->
+    <select id="getRelationList" resultType="java.util.Map">
+    	SELECT su.logo_path AS dnLogoPath,su.invite_code AS dnInviteCode,su.nick_name AS dnNickName,SUBSTRING(CAST(su.create_time AS CHAR),1,10) AS dnCreateTime,
+		u.invite_code AS inviteCode,COUNT(DISTINCT u1.id) AS count1,COUNT(DISTINCT u2.id) AS count2,COUNT(DISTINCT u3.id) AS count3,
+		(CASE WHEN u.uid_from IS NULL THEN 0 ELSE 1 END) AS `is`,GROUP_CONCAT(DISTINCT CAST(u1.id AS CHAR)) AS uid1,
+		GROUP_CONCAT(DISTINCT CAST(u2.id AS CHAR)) AS uid2,GROUP_CONCAT(DISTINCT CAST(u3.id AS CHAR)) AS uid3,su.real_name as dnRealName 
+		FROM sys_user u 
+		LEFT JOIN sys_user su ON su.id = u.uid_from
+		LEFT JOIN sys_user u1 ON u1.uid_from = u.id
+		LEFT JOIN sys_user u2 ON u2.uid_from = u1.id
+		LEFT JOIN sys_user u3 ON u3.uid_from  = u2.id
+		WHERE u.id= #{id}
+    </select>
+    
+    <!-- 获取个人信息 -->
+    <select id="findUserInfo" resultType="java.util.Map">
+    	SELECT u.id,u.user_name AS userName,u.nick_name AS nickName,u.real_name AS realName,u.logo_path AS logoPath,
+		(SELECT GROUP_CONCAT(i.tag_identity) FROM user_identity i WHERE i.uid=u.id AND i.tag_type='员工岗位') AS staffPosition,
+		u.sex,u.position,u.province,u.city,u.district,u.blue_currency AS blueCurrency,
+		u.red_currency AS redCurrency,u.invite_code AS inviteCode,u.id_card AS idCard,u.id_photo_front AS idPhotoFront,
+		u.id_photo_back AS idPhotoBack,u.mail,u.wechat,CAST(u.due_date AS CHAR) AS dueDate,u.reject_reason AS rejectReason,
+		u.longitude,u.latitude,u.state,
+		(SELECT GROUP_CONCAT(i.tag_identity) FROM user_identity i WHERE i.uid=u.id AND i.tag_type='个人身份') AS grPosition,
+		(SELECT GROUP_CONCAT(i.tag_identity) FROM user_identity i WHERE i.uid=u.id AND i.tag_type='动能身份') AS dnPosition,
+		(SELECT GROUP_CONCAT(province) FROM user_area a WHERE uid=u.id AND record_type=1) AS directArea,
+		(SELECT GROUP_CONCAT(province) FROM user_area a WHERE uid=u.id AND record_type=2) AS indirectArea
+		FROM sys_user u WHERE u.id = #{id}
+    </select>
+    
+    <!-- 获取省市区 -->
+    <select id="findPcd" resultType="java.util.Map">
+    	<if test="type == 0">
+    		SELECT p.id, p.id as `name` FROM sys_addr_province p  
+    	</if>
+    	<if test=" type == 1">
+    		SELECT c.id, c.id as `name` FROM sys_addr_city c WHERE c.pid=#{id}
+    	</if>
+		<if test=" type == 2">
+    		SELECT d.id, d.id as `name` FROM  sys_addr_district d WHERE d.cid=#{id}
+    	</if>
+    </select>
+    
+    <!-- 更改密码  zoneyu 16-9-30 -->
+    <update id="updatePwd">
+    	update sys_user set pwd = #{newPwd} where user_name = #{userName}
+    </update>
+    
+    <!-- 获取用户 -->
+    <select id="searchUserList" resultType="java.util.Map">
+    	<if test="staffPosition != null and staffPosition != ''">
+    		SELECT uid FROM user_identity WHERE tag_type='员工岗位' AND tag_identity=#{staffPosition} 
+    	</if>
+    </select>
+    
+    <!-- 审核 -->
+    <update id="saveState">
+    	update sys_user set state=#{state},<if test="state == 1">due_date = #{dueDate}</if><if test="state == 3">reject_reason = #{rejectReason}</if>
+    	where id in 
+    	<foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </update>
+    
+    <!-- 详情信息 -->
+    <select id="findDetailById" resultType="java.util.Map">
+    	SELECT u.id,u.user_name AS userName,u.nick_name AS nickName,u.logo_path AS logoPath,u.real_name AS realName,
+    	CAST(u.due_date AS CHAR) as dueDate, (CASE WHEN u.sex=1 THEN '男' ELSE '女' END) AS sex,su.invite_code AS sjInviteCode,
+		u.position,CONCAT(u.province,u.city,u.district) AS pcd,u.id_card AS idCard,u.blue_currency AS blueCurrency,u.red_currency AS redCurrency,u.province,
+		u.invite_code AS inviteCode,su.invite_code AS inviteCode1,u.mail,u.wechat,u.state,CAST(u.create_time AS CHAR) AS createTime,u.city,u.district,
+		u.id_photo_front AS idPhotoFront,u.id_photo_back AS idPhotoBack,u.is_permissions as isPermissions,
+		(SELECT GROUP_CONCAT(ui.tag_identity) FROM user_identity ui WHERE ui.uid=u.id AND ui.tag_type='员工岗位') AS staffPosition,
+		(SELECT GROUP_CONCAT(ui.tag_identity) FROM user_identity ui WHERE ui.uid=u.id AND ui.tag_type='个人身份') AS grPosition,
+		(SELECT GROUP_CONCAT(ui.tag_identity) FROM user_identity ui WHERE ui.uid=u.id AND ui.tag_type='动能身份') AS dnPosition,
+		(SELECT GROUP_CONCAT(ua.province) FROM user_area ua WHERE ua.uid=u.id AND ua.record_type = 1) AS directArea,
+		(SELECT GROUP_CONCAT(ua.province) FROM user_area ua WHERE ua.uid=u.id AND ua.record_type = 2) AS indirectArea
+		FROM sys_user u 
+		LEFT JOIN sys_user su ON u.uid_from=su.id
+		WHERE u.id=#{id}
+    </select>
+    
+    <!-- 暂停或使用 -->
+    <update id="upstatus">
+    	update sys_user set state=#{state} where id in
+    	<foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </update>
+    
+    <!-- 查询列表 -->
+    <select id="findList" resultType="java.util.Map">
+    	SELECT u.id,u.user_name AS userName,u.nick_name AS nickName,u.logo_path AS logoPath,u.real_name AS realName,(CASE WHEN u.sex=1 THEN '男' ELSE '女' END) AS sex,
+		u.position,CONCAT(u.province,u.city,u.district) AS pcd,u.id_card AS idCard,u.blue_currency AS blueCurrency,u.red_currency AS redCurrency,
+		u.invite_code AS inviteCode,u.mail,u.wechat,u.state,CAST(u.create_time AS CHAR) AS createTime,su.invite_code AS yqInviteCode,su.real_name AS yqRealName,
+		(SELECT GROUP_CONCAT(ui.tag_identity) FROM user_identity ui WHERE ui.uid=u.id AND ui.tag_type='个人身份') AS grPosition,u.position,
+		(SELECT GROUP_CONCAT(ui.tag_identity) FROM user_identity ui WHERE ui.uid=u.id AND ui.tag_type='动能身份') AS dnPosition,
+		(SELECT GROUP_CONCAT(ui.tag_identity) FROM user_identity ui WHERE ui.uid=u.id AND ui.tag_type='员工岗位') AS staffPosition,
+		u.is_permissions AS isPermissions,(CASE WHEN u.is_permissions=0 THEN '不可以' ELSE '可以' END) AS isPermissions1,
+		(SELECT GROUP_CONCAT(ua.province) FROM user_area ua WHERE ua.uid=u.id AND ua.record_type = 1) AS directArea,CAST(u.due_date AS CHAR) AS dueDate
+		FROM sys_user u 
+		LEFT JOIN sys_user su ON u.uid_from=su.id
+		<where>
+			<if test="type == 1">
+				and u.position in ('其他','动能集团学员')
+			</if>
+			<if test="type == 2">
+				and u.position = '动能集团合作伙伴' and u.state in (0,1)
+			</if>
+			<if test="type == 3">
+				and u.position = '动能集团员工'
+			</if>
+			<if test="type == 4">
+				and u.position = '动能集团合作伙伴' and u.state in (2,3)
+			</if>
+			<if test="param.state != null">
+				and u.state = #{param.state}
+			</if>
+			<if test="param.userName != null and param.userName != ''">
+				and u.user_name like '%${param.userName}%'
+			</if>
+			<if test="param.realName != null and param.realName != ''">
+				and u.real_name like '%${param.realName}%'
+			</if>
+			<if test="staffPosition != null and staffPosition != ''">
+				and u.id IN (SELECT uid FROM user_identity WHERE tag_type='员工岗位' AND tag_identity= #{staffPosition})
+			</if>
+			<if test="param.inviteCode != null and param.inviteCode != ''">
+				and u.invite_code like '%${param.inviteCode}%'
+			</if>
+			<if test="param.isPermissions != null">
+				and u.is_permissions = #{param.isPermissions}
+			</if>
+			<if test="yqRealName != null and yqRealName != ''">
+				and su.real_name like '%${yqRealName}%'
+			</if>
+			<if test="yqRealName != null and yqRealName != ''">
+				and su.real_name like '%${yqRealName}%'
+			</if>
+			<if test="param.province != null and param.province != ''">
+				and u.province = #{param.province}
+			</if>
+			<if test="param.city != null and param.city != ''">
+				and u.city = #{param.city}
+			</if>
+			<if test="startTime != null and endTime != null">
+				AND a.createTime &gt;= #{startTime} and a.createTime &lt;= #{endTime}
+			</if>
+			<if test="startTime != null and endTime == null">
+				AND a.createTime &gt;= #{startTime}
+			</if>
+			<if test="startTime == null and endTime != null">
+				AND a.createTime &lt;= #{endTime}
+			</if>
+		</where>
+		ORDER BY u.create_time DESC LIMIT #{page},#{rows} 
+    </select>
+    
+    <!-- 查询总数 -->
+    <select id="findCount" resultType="java.lang.Integer">
+    	SELECT COUNT(1) FROM sys_user u
+		<where>
+			<if test="type == 1">
+				and u.position in ('其他','动能集团学员')
+			</if>
+			<if test="type == 2">
+				and u.position = '动能集团合作伙伴' and u.state in (0,1)
+			</if>
+			<if test="type == 3">
+				and u.position = '动能集团员工'
+			</if>
+			<if test="type == 4">
+				and u.position = '动能集团合作伙伴' and u.state in (2,3)
+			</if>
+			<if test="param.state != null">
+				and u.state = #{param.state}
+			</if>
+			<if test="param.userName != null and param.userName != ''">
+				and u.user_name like '%${param.userName}%'
+			</if>
+			<if test="param.realName != null and param.realName != ''">
+				and u.real_name like '%${param.realName}%'
+			</if>
+			<if test="staffPosition != null and staffPosition != ''">
+				and u.id IN (SELECT uid FROM user_identity WHERE tag_type='员工岗位' AND tag_identity= #{staffPosition})
+			</if>
+			<if test="param.inviteCode != null and param.inviteCode != ''">
+				and u.invite_code like '%${param.inviteCode}%'
+			</if>
+			<if test="param.isPermissions != null">
+				and u.is_permissions = #{param.isPermissions}
+			</if>
+			<if test="yqRealName != null and yqRealName != ''">
+				and su.real_name like '%${yqRealName}%'
+			</if>
+			<if test="param.province != null and param.province != ''">
+				and u.province = #{param.province}
+			</if>
+			<if test="param.city != null and param.city != ''">
+				and u.city = #{param.city}
+			</if>
+			<if test="startTime != null and endTime != null">
+				AND a.createTime &gt;= #{startTime} and a.createTime &lt;= #{endTime}
+			</if>
+			<if test="startTime != null and endTime == null">
+				AND a.createTime &gt;= #{startTime}
+			</if>
+			<if test="startTime == null and endTime != null">
+				AND a.createTime &lt;= #{endTime}
+			</if>
+		</where>
+    </select>
+    
+    <sql id="Base_Column_List" >
+        <!--  自动生成 2016年10月18日 表字段名称 -->
+        id, user_name, pwd, nick_name, real_name, logo_path, sex, staff_position, position, 
+        province, city, district, blue_currency, red_currency, invite_code, id_card, id_photo_front, 
+        id_photo_back, uid_from, mail, wechat, due_date, reject_reason, longitude, latitude, 
+        is_permissions, state, create_time, service_begin, service_stock
+    </sql>
+    
+    <sql id="findByPageSql" >
+        <!-- WARNING -  自动生成 2016-10-18  分页查询SQL -->
+        select a.* from sys_user a
+        <where >
+        	<if test="param.serviceBegin != null " >
+                and a.service_begin = #{param.serviceBegin,jdbcType=BIGINT}
+            </if>
+            <if test="param.serviceStock != null " >
+                and a.service_stock = #{param.serviceStock,jdbcType=BIGINT}
+            </if>
+            <if test="param.id != null " >
+                and a.id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.userName != null and param.userName != ''" >
+                and a.user_name = #{param.userName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.pwd != null and param.pwd != ''" >
+                and a.pwd = #{param.pwd,jdbcType=VARCHAR}
+            </if>
+            <if test="param.nickName != null and param.nickName != ''" >
+                and a.nick_name = #{param.nickName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.realName != null and param.realName != ''" >
+                and a.real_name = #{param.realName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.logoPath != null and param.logoPath != ''" >
+                and a.logo_path = #{param.logoPath,jdbcType=VARCHAR}
+            </if>
+            <if test="param.sex != null " >
+                and a.sex = #{param.sex,jdbcType=INTEGER}
+            </if>
+            <if test="param.position != null and param.position != ''" >
+                and a.position = #{param.position,jdbcType=VARCHAR}
+            </if>
+            <if test="param.province != null and param.province != ''" >
+                and a.province = #{param.province,jdbcType=VARCHAR}
+            </if>
+            <if test="param.city != null and param.city != ''" >
+                and a.city = #{param.city,jdbcType=VARCHAR}
+            </if>
+            <if test="param.district != null and param.district != ''" >
+                and a.district = #{param.district,jdbcType=VARCHAR}
+            </if>
+            <if test="param.blueCurrency != null " >
+                and a.blue_currency = #{param.blueCurrency,jdbcType=DECIMAL}
+            </if>
+            <if test="param.redCurrency != null " >
+                and a.red_currency = #{param.redCurrency,jdbcType=DECIMAL}
+            </if>
+            <if test="param.inviteCode != null and param.inviteCode != ''" >
+                and a.invite_code = #{param.inviteCode,jdbcType=VARCHAR}
+            </if>
+            <if test="param.idCard != null and param.idCard != ''" >
+                and a.id_card = #{param.idCard,jdbcType=VARCHAR}
+            </if>
+            <if test="param.idPhotoFront != null and param.idPhotoFront != ''" >
+                and a.id_photo_front = #{param.idPhotoFront,jdbcType=VARCHAR}
+            </if>
+            <if test="param.idPhotoBack != null and param.idPhotoBack != ''" >
+                and a.id_photo_back = #{param.idPhotoBack,jdbcType=VARCHAR}
+            </if>
+            <if test="param.uidFrom != null " >
+                and a.uid_from = #{param.uidFrom,jdbcType=BIGINT}
+            </if>
+            <if test="param.mail != null and param.mail != ''" >
+                and a.mail = #{param.mail,jdbcType=VARCHAR}
+            </if>
+            <if test="param.wechat != null and param.wechat != ''" >
+                and a.wechat = #{param.wechat,jdbcType=VARCHAR}
+            </if>
+            <if test="param.dueDate != null " >
+                and a.due_date = #{param.dueDate,jdbcType=DATE}
+            </if>
+            <if test="param.rejectReason != null and param.rejectReason != ''" >
+                and a.reject_reason = #{param.rejectReason,jdbcType=VARCHAR}
+            </if>
+            <if test="param.longitude != null " >
+                and a.longitude = #{param.longitude,jdbcType=DECIMAL}
+            </if>
+            <if test="param.latitude != null " >
+                and a.latitude = #{param.latitude,jdbcType=DECIMAL}
+            </if>
+            <if test="param.isPermissions != null " >
+                and a.is_permissions = #{param.isPermissions,jdbcType=INTEGER}
+            </if>
+            <if test="param.state != null " >
+                and a.state = #{param.state,jdbcType=INTEGER}
+            </if>
+        </where>
+        order by a.id desc
+    </sql>
+    
+    <select id="findByPage" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-18  分页查询 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit #{offset}, #{pageSize}
+    </select>
+    
+    <select id="findByPageCount" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-10-18  分页查询总条数 -->
+        select count(1) from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findById" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年10月18日 根据ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from sys_user
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    
+    <select id="load" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-18  根据多个ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from sys_user where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </select>
+    
+    <select id="all" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-18  查询所有 -->
+        select 
+        <include refid="Base_Column_List" />
+        from sys_user
+    </select>
+    
+    <select id="count" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-10-18 查询总条数 -->
+        select count(1) from sys_user
+    </select>
+    
+    <update id="update" parameterType="com.kapphk.web.bean.user.BeanUser" >
+        <!--  自动生成 2016年10月18日 更新数据 -->
+        update sys_user
+        <set >
+            <if test="userName != null" >
+                user_name = #{userName,jdbcType=VARCHAR},
+            </if>
+            <if test="pwd != null" >
+                pwd = #{pwd,jdbcType=VARCHAR},
+            </if>
+            <if test="nickName != null" >
+                nick_name = #{nickName,jdbcType=VARCHAR},
+            </if>
+            <if test="realName != null" >
+                real_name = #{realName,jdbcType=VARCHAR},
+            </if>
+            <if test="logoPath != null" >
+                logo_path = #{logoPath,jdbcType=VARCHAR},
+            </if>
+            <if test="sex != null" >
+                sex = #{sex,jdbcType=INTEGER},
+            </if>
+            <if test="position != null" >
+                position = #{position,jdbcType=VARCHAR},
+            </if>
+            <if test="province != null" >
+                province = #{province,jdbcType=VARCHAR},
+            </if>
+            <if test="city != null" >
+                city = #{city,jdbcType=VARCHAR},
+            </if>
+            <if test="district != null" >
+                district = #{district,jdbcType=VARCHAR},
+            </if>
+            <if test="blueCurrency != null" >
+                blue_currency = #{blueCurrency,jdbcType=DECIMAL},
+            </if>
+            <if test="redCurrency != null" >
+                red_currency = #{redCurrency,jdbcType=DECIMAL},
+            </if>
+            <if test="inviteCode != null" >
+                invite_code = #{inviteCode,jdbcType=VARCHAR},
+            </if>
+            <if test="idCard != null" >
+                id_card = #{idCard,jdbcType=VARCHAR},
+            </if>
+            <if test="idPhotoFront != null" >
+                id_photo_front = #{idPhotoFront,jdbcType=VARCHAR},
+            </if>
+            <if test="idPhotoBack != null" >
+                id_photo_back = #{idPhotoBack,jdbcType=VARCHAR},
+            </if>
+            <if test="uidFrom != null" >
+                uid_from = #{uidFrom,jdbcType=BIGINT},
+            </if>
+            <if test="mail != null" >
+                mail = #{mail,jdbcType=VARCHAR},
+            </if>
+            <if test="wechat != null" >
+                wechat = #{wechat,jdbcType=VARCHAR},
+            </if>
+            <if test="dueDate != null" >
+                due_date = #{dueDate,jdbcType=DATE},
+            </if>
+            <if test="rejectReason != null" >
+                reject_reason = #{rejectReason,jdbcType=VARCHAR},
+            </if>
+            <if test="longitude != null" >
+                longitude = #{longitude,jdbcType=DECIMAL},
+            </if>
+            <if test="latitude != null" >
+                latitude = #{latitude,jdbcType=DECIMAL},
+            </if>
+            <if test="isPermissions != null" >
+                is_permissions = #{isPermissions,jdbcType=INTEGER},
+            </if>
+            <if test="state != null" >
+                state = #{state,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null" >
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="serviceBegin != null" >
+                service_begin = #{serviceBegin,jdbcType=BIGINT},
+            </if>
+            <if test="serviceStock != null" >
+                service_stock = #{serviceStock,jdbcType=BIGINT},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    
+    <insert id="insert" parameterType="com.kapphk.web.bean.user.BeanUser" useGeneratedKeys="true" keyProperty="id" >
+        <!--  自动生成 2016年10月18日 添加数据 -->
+        insert into sys_user
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="serviceBegin != null" >
+                service_begin,
+            </if>
+            <if test="serviceStock != null" >
+                service_stock,
+            </if>
+            <if test="userName != null" >
+                user_name,
+            </if>
+            <if test="pwd != null" >
+                pwd,
+            </if>
+            <if test="nickName != null" >
+                nick_name,
+            </if>
+            <if test="realName != null" >
+                real_name,
+            </if>
+            <if test="logoPath != null" >
+                logo_path,
+            </if>
+            <if test="sex != null" >
+                sex,
+            </if>
+            <if test="position != null" >
+                position,
+            </if>
+            <if test="province != null" >
+                province,
+            </if>
+            <if test="city != null" >
+                city,
+            </if>
+            <if test="district != null" >
+                district,
+            </if>
+            <if test="blueCurrency != null" >
+                blue_currency,
+            </if>
+            <if test="redCurrency != null" >
+                red_currency,
+            </if>
+            <if test="inviteCode != null" >
+                invite_code,
+            </if>
+            <if test="idCard != null" >
+                id_card,
+            </if>
+            <if test="idPhotoFront != null" >
+                id_photo_front,
+            </if>
+            <if test="idPhotoBack != null" >
+                id_photo_back,
+            </if>
+            <if test="uidFrom != null" >
+                uid_from,
+            </if>
+            <if test="mail != null" >
+                mail,
+            </if>
+            <if test="wechat != null" >
+                wechat,
+            </if>
+            <if test="dueDate != null" >
+                due_date,
+            </if>
+            <if test="rejectReason != null" >
+                reject_reason,
+            </if>
+            <if test="longitude != null" >
+                longitude,
+            </if>
+            <if test="latitude != null" >
+                latitude,
+            </if>
+            <if test="isPermissions != null" >
+                is_permissions,
+            </if>
+            <if test="state != null" >
+                state,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="serviceBegin != null" >
+                #{serviceBegin,jdbcType=BIGINT},
+            </if>
+            <if test="serviceStock != null" >
+                #{serviceStock,jdbcType=BIGINT},
+            </if>
+            <if test="userName != null" >
+                #{userName,jdbcType=VARCHAR},
+            </if>
+            <if test="pwd != null" >
+                #{pwd,jdbcType=VARCHAR},
+            </if>
+            <if test="nickName != null" >
+                #{nickName,jdbcType=VARCHAR},
+            </if>
+            <if test="realName != null" >
+                #{realName,jdbcType=VARCHAR},
+            </if>
+            <if test="logoPath != null" >
+                #{logoPath,jdbcType=VARCHAR},
+            </if>
+            <if test="sex != null" >
+                #{sex,jdbcType=INTEGER},
+            </if>
+            <if test="position != null" >
+                #{position,jdbcType=VARCHAR},
+            </if>
+            <if test="province != null" >
+                #{province,jdbcType=VARCHAR},
+            </if>
+            <if test="city != null" >
+                #{city,jdbcType=VARCHAR},
+            </if>
+            <if test="district != null" >
+                #{district,jdbcType=VARCHAR},
+            </if>
+            <if test="blueCurrency != null" >
+                #{blueCurrency,jdbcType=DECIMAL},
+            </if>
+            <if test="redCurrency != null" >
+                #{redCurrency,jdbcType=DECIMAL},
+            </if>
+            <if test="inviteCode != null" >
+                #{inviteCode,jdbcType=VARCHAR},
+            </if>
+            <if test="idCard != null" >
+                #{idCard,jdbcType=VARCHAR},
+            </if>
+            <if test="idPhotoFront != null" >
+                #{idPhotoFront,jdbcType=VARCHAR},
+            </if>
+            <if test="idPhotoBack != null" >
+                #{idPhotoBack,jdbcType=VARCHAR},
+            </if>
+            <if test="uidFrom != null" >
+                #{uidFrom,jdbcType=BIGINT},
+            </if>
+            <if test="mail != null" >
+                #{mail,jdbcType=VARCHAR},
+            </if>
+            <if test="wechat != null" >
+                #{wechat,jdbcType=VARCHAR},
+            </if>
+            <if test="dueDate != null" >
+                #{dueDate,jdbcType=DATE},
+            </if>
+            <if test="rejectReason != null" >
+                #{rejectReason,jdbcType=VARCHAR},
+            </if>
+            <if test="longitude != null" >
+                #{longitude,jdbcType=DECIMAL},
+            </if>
+            <if test="latitude != null" >
+                #{latitude,jdbcType=DECIMAL},
+            </if>
+            <if test="isPermissions != null" >
+                #{isPermissions,jdbcType=INTEGER},
+            </if>
+            <if test="state != null" >
+                #{state,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    
+    <insert id="inserts" parameterType="java.util.List" >
+        <!-- WARNING -  自动生成 2016-10-18 添加多条数据 -->
+        insert into sys_user ( service_begin, service_stock, user_name, pwd, nick_name, real_name, logo_path, sex, position, province, city, district, blue_currency, red_currency, invite_code, id_card, id_photo_front, id_photo_back, uid_from, mail, wechat, due_date, reject_reason, longitude, latitude, is_permissions, state, create_time)
+        values
+        <foreach collection="list" item="item" separator="," >
+            (#{item.serviceBegin,jdbcType=BIGINT},#{item.serviceStock,jdbcType=BIGINT},#{item.userName,jdbcType=VARCHAR}, #{item.pwd,jdbcType=VARCHAR}, #{item.nickName,jdbcType=VARCHAR}, #{item.realName,jdbcType=VARCHAR}, #{item.logoPath,jdbcType=VARCHAR}, #{item.sex,jdbcType=INTEGER}, #{item.position,jdbcType=VARCHAR}, #{item.province,jdbcType=VARCHAR}, #{item.city,jdbcType=VARCHAR}, #{item.district,jdbcType=VARCHAR}, #{item.blueCurrency,jdbcType=DECIMAL}, #{item.redCurrency,jdbcType=DECIMAL}, #{item.inviteCode,jdbcType=VARCHAR}, #{item.idCard,jdbcType=VARCHAR}, #{item.idPhotoFront,jdbcType=VARCHAR}, #{item.idPhotoBack,jdbcType=VARCHAR}, #{item.uidFrom,jdbcType=BIGINT}, #{item.mail,jdbcType=VARCHAR}, #{item.wechat,jdbcType=VARCHAR}, #{item.dueDate,jdbcType=DATE}, #{item.rejectReason,jdbcType=VARCHAR}, #{item.longitude,jdbcType=DECIMAL}, #{item.latitude,jdbcType=DECIMAL}, #{item.isPermissions,jdbcType=INTEGER}, #{item.state,jdbcType=INTEGER}, #{item.createTime,jdbcType=TIMESTAMP})
+        </foreach>
+    </insert>
+    
+    <delete id="delete" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年10月18日 删除数据 -->
+        delete from sys_user
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    
+    <delete id="deletes" >
+        <!-- WARNING -  自动生成 2016-10-18 删除多条数据 -->
+        delete from sys_user where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteByEntity" >
+        <!-- WARNING -  自动生成 2016-10-18 通过实体类中的条件删除数据 -->
+        delete from sys_user
+        <where >
+        	<if test="param.serviceBegin != null " >
+                and a.service_begin = #{param.serviceBegin,jdbcType=BIGINT}
+            </if>
+            <if test="param.serviceStock != null " >
+                and a.service_stock = #{param.serviceStock,jdbcType=BIGINT}
+            </if>
+            <if test="param.id != null " >
+                and id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.userName != null and param.userName != ''" >
+                and user_name = #{param.userName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.pwd != null and param.pwd != ''" >
+                and pwd = #{param.pwd,jdbcType=VARCHAR}
+            </if>
+            <if test="param.nickName != null and param.nickName != ''" >
+                and nick_name = #{param.nickName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.realName != null and param.realName != ''" >
+                and real_name = #{param.realName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.logoPath != null and param.logoPath != ''" >
+                and logo_path = #{param.logoPath,jdbcType=VARCHAR}
+            </if>
+            <if test="param.sex != null " >
+                and sex = #{param.sex,jdbcType=INTEGER}
+            </if>
+            <if test="param.position != null and param.position != ''" >
+                and position = #{param.position,jdbcType=VARCHAR}
+            </if>
+            <if test="param.province != null and param.province != ''" >
+                and province = #{param.province,jdbcType=VARCHAR}
+            </if>
+            <if test="param.city != null and param.city != ''" >
+                and city = #{param.city,jdbcType=VARCHAR}
+            </if>
+            <if test="param.district != null and param.district != ''" >
+                and district = #{param.district,jdbcType=VARCHAR}
+            </if>
+            <if test="param.blueCurrency != null " >
+                and blue_currency = #{param.blueCurrency,jdbcType=DECIMAL}
+            </if>
+            <if test="param.redCurrency != null " >
+                and red_currency = #{param.redCurrency,jdbcType=DECIMAL}
+            </if>
+            <if test="param.inviteCode != null and param.inviteCode != ''" >
+                and invite_code = #{param.inviteCode,jdbcType=VARCHAR}
+            </if>
+            <if test="param.idCard != null and param.idCard != ''" >
+                and id_card = #{param.idCard,jdbcType=VARCHAR}
+            </if>
+            <if test="param.idPhotoFront != null and param.idPhotoFront != ''" >
+                and id_photo_front = #{param.idPhotoFront,jdbcType=VARCHAR}
+            </if>
+            <if test="param.idPhotoBack != null and param.idPhotoBack != ''" >
+                and id_photo_back = #{param.idPhotoBack,jdbcType=VARCHAR}
+            </if>
+            <if test="param.uidFrom != null " >
+                and uid_from = #{param.uidFrom,jdbcType=BIGINT}
+            </if>
+            <if test="param.mail != null and param.mail != ''" >
+                and mail = #{param.mail,jdbcType=VARCHAR}
+            </if>
+            <if test="param.wechat != null and param.wechat != ''" >
+                and wechat = #{param.wechat,jdbcType=VARCHAR}
+            </if>
+            <if test="param.dueDate != null " >
+                and due_date = #{param.dueDate,jdbcType=DATE}
+            </if>
+            <if test="param.rejectReason != null and param.rejectReason != ''" >
+                and reject_reason = #{param.rejectReason,jdbcType=VARCHAR}
+            </if>
+            <if test="param.longitude != null " >
+                and longitude = #{param.longitude,jdbcType=DECIMAL}
+            </if>
+            <if test="param.latitude != null " >
+                and latitude = #{param.latitude,jdbcType=DECIMAL}
+            </if>
+            <if test="param.isPermissions != null " >
+                and is_permissions = #{param.isPermissions,jdbcType=INTEGER}
+            </if>
+            <if test="param.state != null " >
+                and state = #{param.state,jdbcType=INTEGER}
+            </if>
+        </where>
+    </delete>
+    
+    <select id="findAll" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-18  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findEntityByCondition" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-10-18  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit 0,1
+    </select>
+</mapper>

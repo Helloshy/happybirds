@@ -1,0 +1,425 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kapphk.web.dao.mapper.product.BeanAppProductMapper" >
+    <resultMap id="BaseResultMap" type="com.kapphk.web.bean.product.BeanAppProduct" >
+        <!--  自动生成 2016年12月19日 表与实体类字段对应 -->
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="logo_path" property="logoPath" jdbcType="VARCHAR" />
+        <result column="category_id" property="categoryId" jdbcType="BIGINT" />
+        <result column="item_name" property="itemName" jdbcType="VARCHAR" />
+        <result column="item_remark" property="itemRemark" jdbcType="VARCHAR" />
+        <result column="row_seq" property="rowSeq" jdbcType="INTEGER" />
+        <result column="price" property="price" jdbcType="DECIMAL" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+    
+    <!-- 商品详情 -->
+    <select id="getProductDetail" resultType="java.util.Map">
+    	SELECT p.id,p.item_remark AS itemRemark,p.price,p.item_name AS itemName,p.logo_path as productLogoPath,
+		((SELECT SUM(stock_qty) FROM app_product_inventory WHERE product_id=p.id) 
+		 - (SELECT COUNT(1) FROM app_product_order WHERE product_id=p.id)) AS counts,
+		(SELECT GROUP_CONCAT(logo_path) FROM app_product_photo WHERE product_id=p.id) AS photos,
+		u.real_name AS realName,u.nick_name AS nickName,u.logo_path AS logoPath,FLOOR(o.comment_star) AS commentStar,
+		o.comment_remark AS commentRemark,SUBSTRING(CAST(o.comment_time AS CHAR),1,16) AS commentTime,
+		(SELECT COUNT(1) FROM app_product_collect WHERE product_id=p.id AND uid=#{uid}) AS isCollect,
+		GROUP_CONCAT(DISTINCT i.color) AS color,GROUP_CONCAT(DISTINCT i.size) AS size,
+		(SELECT `value` FROM sys_setting WHERE id='ded_product') AS ratio
+		FROM app_product p
+		LEFT JOIN app_product_order o ON o.id=(SELECT id FROM app_product_order WHERE product_id=p.id ORDER BY comment_time DESC LIMIT 1)
+		LEFT JOIN sys_user u ON u.id=o.uid
+		LEFT JOIN app_product_inventory i ON i.product_id=p.id
+		WHERE p.id=#{id}
+    </select>
+    
+    <!-- 商品列表 -->
+    <select id="getProductList" resultType="java.util.Map">
+    	SELECT p.id,p.logo_path AS logoPath,p.item_remark AS itemRemark,p.price,p.item_name AS itemName,
+		(SELECT COUNT(1) FROM app_product_order WHERE product_id=p.id AND state=3) AS counts
+		FROM app_product p
+		<where>
+			<if test="itemName != null and itemName != ''">
+				and p.item_name like '%${itemName}%'
+			</if>
+			<if test="categoryId != null">
+				and p.category_id = #{categoryId}
+			</if>
+		</where>
+		ORDER BY 
+		<if test="sales == 0">counts ASC,</if><if test="sales == 1">counts DESC,</if>  
+		<if test="price == 0">price ASC,</if><if test="price == 1">price DESC,</if> 
+		p.row_seq DESC,p.create_time DESC 
+		LIMIT #{page},#{rows}
+    </select>
+    
+    <resultMap id="ResultMapWithBLOBs" type="com.kapphk.web.bean.product.BeanAppProduct" extends="BaseResultMap" >
+        <!--  自动生成 2016年12月19日 表与实体类字段对应 -->
+        <result column="item_comment" property="itemComment" jdbcType="LONGVARCHAR" />
+    </resultMap>
+    
+    <sql id="Base_Column_List" >
+        <!--  自动生成 2016年12月19日 表字段名称 -->
+        id, logo_path, category_id, item_name, item_remark, row_seq, price, create_time
+    </sql>
+    
+    <sql id="Blob_Column_List" >
+        <!--  自动生成 2016年12月19日 表字段名称 -->
+        item_comment
+    </sql>
+    
+    <sql id="findByPageSql" >
+        <!-- WARNING -  自动生成 2016-12-19  分页查询SQL -->
+        select a.* from app_product a
+        <where >
+            <if test="param.id != null " >
+                and a.id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.logoPath != null and param.logoPath != ''" >
+                and a.logo_path = #{param.logoPath,jdbcType=VARCHAR}
+            </if>
+            <if test="param.categoryId != null " >
+                and a.category_id = #{param.categoryId,jdbcType=BIGINT}
+            </if>
+            <if test="param.itemName != null and param.itemName != ''" >
+                and a.item_name = #{param.itemName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.itemRemark != null and param.itemRemark != ''" >
+                and a.item_remark = #{param.itemRemark,jdbcType=VARCHAR}
+            </if>
+            <if test="param.rowSeq != null " >
+                and a.row_seq = #{param.rowSeq,jdbcType=INTEGER}
+            </if>
+            <if test="param.price != null " >
+                and a.price = #{param.price,jdbcType=DECIMAL}
+            </if>
+            <if test="param.itemComment != null " >
+                and a.item_comment = #{param.itemComment,jdbcType=LONGVARCHAR}
+            </if>
+        </where>
+        order by a.id desc
+    </sql>
+    
+    <select id="findByPage" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-19  分页查询 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit #{offset}, #{pageSize}
+    </select>
+    
+    <select id="findByPageCount" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-12-19  分页查询总条数 -->
+        select count(1) from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findById" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年12月19日 根据ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        ,
+        <include refid="Blob_Column_List" />
+        from app_product
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    
+    <select id="load" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-19  根据多个ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_product where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </select>
+    
+    <select id="all" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-19  查询所有 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_product
+    </select>
+    
+    <select id="count" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-12-19 查询总条数 -->
+        select count(1) from app_product
+    </select>
+    
+    <update id="update" parameterType="com.kapphk.web.bean.product.BeanAppProduct" >
+        <!--  自动生成 2016年12月19日 更新数据 -->
+        update app_product
+        <set >
+            <if test="logoPath != null" >
+                logo_path = #{logoPath,jdbcType=VARCHAR},
+            </if>
+            <if test="categoryId != null" >
+                category_id = #{categoryId,jdbcType=BIGINT},
+            </if>
+            <if test="itemName != null" >
+                item_name = #{itemName,jdbcType=VARCHAR},
+            </if>
+            <if test="itemRemark != null" >
+                item_remark = #{itemRemark,jdbcType=VARCHAR},
+            </if>
+            <if test="rowSeq != null" >
+                row_seq = #{rowSeq,jdbcType=INTEGER},
+            </if>
+            <if test="price != null" >
+                price = #{price,jdbcType=DECIMAL},
+            </if>
+            <if test="createTime != null" >
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="itemComment != null" >
+                item_comment = #{itemComment,jdbcType=LONGVARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    
+    <insert id="insert" parameterType="com.kapphk.web.bean.product.BeanAppProduct" useGeneratedKeys="true" keyProperty="id" >
+        <!--  自动生成 2016年12月19日 添加数据 -->
+        insert into app_product
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="logoPath != null" >
+                logo_path,
+            </if>
+            <if test="categoryId != null" >
+                category_id,
+            </if>
+            <if test="itemName != null" >
+                item_name,
+            </if>
+            <if test="itemRemark != null" >
+                item_remark,
+            </if>
+            <if test="rowSeq != null" >
+                row_seq,
+            </if>
+            <if test="price != null" >
+                price,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+            <if test="itemComment != null" >
+                item_comment,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="logoPath != null" >
+                #{logoPath,jdbcType=VARCHAR},
+            </if>
+            <if test="categoryId != null" >
+                #{categoryId,jdbcType=BIGINT},
+            </if>
+            <if test="itemName != null" >
+                #{itemName,jdbcType=VARCHAR},
+            </if>
+            <if test="itemRemark != null" >
+                #{itemRemark,jdbcType=VARCHAR},
+            </if>
+            <if test="rowSeq != null" >
+                #{rowSeq,jdbcType=INTEGER},
+            </if>
+            <if test="price != null" >
+                #{price,jdbcType=DECIMAL},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="itemComment != null" >
+                #{itemComment,jdbcType=LONGVARCHAR},
+            </if>
+        </trim>
+    </insert>
+
+    <insert id="insertOverride" parameterType="com.kapphk.web.bean.product.BeanAppProduct" useGeneratedKeys="true" keyProperty="id" >
+        <!--  自动生成 2016年12月19日 添加数据 -->
+        insert into app_product
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="logoPath != null" >
+                logo_path,
+            </if>
+            <if test="categoryId != null" >
+                category_id,
+            </if>
+            <if test="itemName != null" >
+                item_name,
+            </if>
+            <if test="itemRemark != null" >
+                item_remark,
+            </if>
+            <if test="rowSeq != null" >
+                row_seq,
+            </if>
+            <if test="price != null" >
+                price,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+            <if test="itemComment != null" >
+                item_comment,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="logoPath != null" >
+                #{logoPath,jdbcType=VARCHAR},
+            </if>
+            <if test="categoryId != null" >
+                #{categoryId,jdbcType=BIGINT},
+            </if>
+            <if test="itemName != null" >
+                #{itemName,jdbcType=VARCHAR},
+            </if>
+            <if test="itemRemark != null" >
+                #{itemRemark,jdbcType=VARCHAR},
+            </if>
+            <if test="rowSeq != null" >
+                #{rowSeq,jdbcType=INTEGER},
+            </if>
+            <if test="price != null" >
+                #{price,jdbcType=DECIMAL},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="itemComment != null" >
+                #{itemComment,jdbcType=LONGVARCHAR},
+            </if>
+        </trim>
+    </insert>
+    
+    <delete id="delete" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年12月19日 删除数据 -->
+        delete from app_product
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    
+    <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.kapphk.web.bean.product.BeanAppProduct" >
+        <!--  自动生成 2016年12月19日 更新数据 -->
+        update app_product
+        set logo_path = #{logoPath,jdbcType=VARCHAR},
+            category_id = #{categoryId,jdbcType=BIGINT},
+            item_name = #{itemName,jdbcType=VARCHAR},
+            item_remark = #{itemRemark,jdbcType=VARCHAR},
+            row_seq = #{rowSeq,jdbcType=INTEGER},
+            price = #{price,jdbcType=DECIMAL},
+            create_time = #{createTime,jdbcType=TIMESTAMP},
+            item_comment = #{itemComment,jdbcType=LONGVARCHAR}
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    
+    <insert id="inserts" parameterType="java.util.List" >
+        <!-- WARNING -  自动生成 2016-12-19 添加多条数据 -->
+        insert into app_product (logo_path, category_id, item_name, item_remark, row_seq, price, create_time, item_comment)
+        values
+        <foreach collection="list" item="item" separator="," >
+            (#{item.logoPath,jdbcType=VARCHAR}, #{item.categoryId,jdbcType=BIGINT}, #{item.itemName,jdbcType=VARCHAR}, #{item.itemRemark,jdbcType=VARCHAR}, #{item.rowSeq,jdbcType=INTEGER}, #{item.price,jdbcType=DECIMAL}, #{item.createTime,jdbcType=TIMESTAMP}, #{item.itemComment,jdbcType=LONGVARCHAR})
+        </foreach>
+    </insert>
+    
+    <delete id="deletes" >
+        <!-- WARNING -  自动生成 2016-12-19 删除多条数据 -->
+        delete from app_product where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteByEntity" >
+        <!-- WARNING -  自动生成 2016-12-19 通过实体类中的条件删除数据 -->
+        delete from app_product
+        <where >
+            <if test="param.id != null " >
+                and id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.logoPath != null and param.logoPath != ''" >
+                and logo_path = #{param.logoPath,jdbcType=VARCHAR}
+            </if>
+            <if test="param.categoryId != null " >
+                and category_id = #{param.categoryId,jdbcType=BIGINT}
+            </if>
+            <if test="param.itemName != null and param.itemName != ''" >
+                and item_name = #{param.itemName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.itemRemark != null and param.itemRemark != ''" >
+                and item_remark = #{param.itemRemark,jdbcType=VARCHAR}
+            </if>
+            <if test="param.rowSeq != null " >
+                and row_seq = #{param.rowSeq,jdbcType=INTEGER}
+            </if>
+            <if test="param.price != null " >
+                and price = #{param.price,jdbcType=DECIMAL}
+            </if>
+            <if test="param.itemComment != null " >
+                and item_comment = #{param.itemComment,jdbcType=LONGVARCHAR}
+            </if>
+        </where>
+    </delete>
+    
+    <select id="findAll" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-19  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+
+    <select id="findList" resultType="java.util.Map">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM app_prodect
+        <if test="param">
+
+        </if>
+
+    </select>
+
+    <!--后台商品管理列表 -->
+    <select id="findListByParam" resultType="java.util.Map">
+        SELECT
+            p.id,
+            p.`item_name`,
+            p.`item_remark`,
+            p.`item_comment`,
+            p.`logo_path`,
+            p.`row_seq`,
+            p.`price`,
+            DATE_FORMAT(p.`create_time`,'%Y-%m-%d %H:%i:%S') AS create_time,
+            (SELECT SUM(api.`stock_qty`) FROM app_product_inventory api WHERE api.`product_id` = p.`id`)AS totalStockQty,
+            (SELECT pc.item_name FROM app_product_category AS pc WHERE pc.id = p.`category_id`)AS category_name,
+        (SELECT pc.id FROM app_product_category AS pc WHERE pc.id = p.`category_id`)AS categoryId
+            FROM app_product p
+        <where>
+          <if test="param.itemName !=null and param.itemName !='' ">
+            p.item_name  like CONCAT('%',#{param.itemName,jdbcType=VARCHAR},'%')
+          </if>
+          <if test="param.id !=null and param.id !='' ">
+              and p.id = #{param.id,jdbcType=BIGINT}
+          </if>
+        </where>
+        ORDER BY p.`create_time` DESC ,p.`row_seq` ASC
+        <if test="page !=null ">
+          limit #{page,jdbcType=INTEGER},
+        </if>
+        <if test="page !=null ">
+             #{rows,jdbcType=INTEGER}
+        </if>
+    </select>
+
+    <!-- 条件查询总记录数 -->
+    <select id="findListByParamCount" resultType="java.lang.Integer">
+        SELECT
+          count(1)
+        FROM app_product p
+        <where>
+            <if test="param.itemName !=null and param.itemName !='' ">
+                p.item_name  like CONCAT('%',#{param.itemName,jdbcType=VARCHAR},'%')
+            </if>
+            <if test="param.id !=null and param.id !='' ">
+                and p.id = #{param.id,jdbcType=BIGINT}
+            </if>
+        </where>
+        ORDER BY p.`create_time` DESC ,p.`row_seq` ASC
+    </select>
+</mapper>

@@ -1,0 +1,392 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kapphk.system.mapper.SystemUserMapper" >
+    <resultMap id="BaseResultMap" type="com.kapphk.system.bean.SystemUser" >
+        <!--  自动生成 2016年12月06日 表与实体类字段对应 -->
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="user_name" property="userName" jdbcType="VARCHAR" />
+        <result column="pwd" property="pwd" jdbcType="VARCHAR" />
+        <result column="real_name" property="realName" jdbcType="VARCHAR" />
+        <result column="company_id" property="companyId" jdbcType="BIGINT" />
+        <result column="department_tag" property="departmentTag" jdbcType="VARCHAR" />
+        <result column="tag_type" property="tagType" jdbcType="VARCHAR" />
+        <result column="position" property="position" jdbcType="VARCHAR" />
+        <result column="tel" property="tel" jdbcType="VARCHAR" />
+        <result column="state" property="state" jdbcType="INTEGER" />
+        <result column="update_by" property="updateBy" jdbcType="BIGINT" />
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+        <result column="salt" property="salt" jdbcType="VARCHAR" />
+    </resultMap>
+    <resultMap id="EmployeeResultMap" type="com.kapphk.entity.EmployeeEntity" extends="BaseResultMap" >
+        <result column="company_name" property="companyName" jdbcType="VARCHAR" />
+        <result column="hall_name" property="hallName" jdbcType="VARCHAR" />
+        <result column="operator" property="operator" jdbcType="VARCHAR" />
+        <result column="role" property="role" jdbcType="VARCHAR" />
+    </resultMap>
+    
+    <sql id="Base_Column_List" >
+        <!--  自动生成 2016年12月06日 表字段名称 -->
+        id, user_name, pwd, real_name, company_id, department_tag, tag_type, position, tel, 
+        state, update_by, update_time, create_time, salt
+    </sql>
+
+    <select id="findByUsername" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from sys_system_user
+        where user_name = #{userName}
+    </select>
+
+    <sql id="findByPageSql" >
+        <!-- WARNING -  自动生成 2016-12-06  分页查询SQL -->
+        select a.* from sys_system_user a
+        <where >
+            <if test="param.id != null " >
+                and a.id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.userName != null and param.userName != ''" >
+                and a.user_name = #{param.userName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.pwd != null and param.pwd != ''" >
+                and a.pwd = #{param.pwd,jdbcType=VARCHAR}
+            </if>
+            <if test="param.realName != null and param.realName != ''" >
+                and a.real_name = #{param.realName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.companyId != null " >
+                and a.company_id = #{param.companyId,jdbcType=BIGINT}
+            </if>
+            <if test="param.departmentTag != null and param.departmentTag != ''" >
+                and a.department_tag = #{param.departmentTag,jdbcType=VARCHAR}
+            </if>
+            <if test="param.tagType != null and param.tagType != ''" >
+                and a.tag_type = #{param.tagType,jdbcType=VARCHAR}
+            </if>
+            <if test="param.position != null and param.position != ''" >
+                and a.position = #{param.position,jdbcType=VARCHAR}
+            </if>
+            <if test="param.tel != null and param.tel != ''" >
+                and a.tel = #{param.tel,jdbcType=VARCHAR}
+            </if>
+            <if test="param.state != null " >
+                and a.state = #{param.state,jdbcType=INTEGER}
+            </if>
+            <if test="param.updateBy != null " >
+                and a.update_by = #{param.updateBy,jdbcType=BIGINT}
+            </if>
+            <if test="param.updateTime != null " >
+                and a.update_time = #{param.updateTime,jdbcType=TIMESTAMP}
+            </if>
+            <if test="param.salt != null and param.salt != ''" >
+                and a.salt = #{param.salt,jdbcType=VARCHAR}
+            </if>
+        </where>
+        order by a.id desc
+    </sql>
+    
+    <select id="findByPage" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-06  分页查询 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit #{offset}, #{pageSize}
+    </select>
+    
+    <select id="findByPageCount" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-12-06  分页查询总条数 -->
+        select count(1) from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findById" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年12月06日 根据ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from sys_system_user
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    
+    <select id="load" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-06  根据多个ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from sys_system_user where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </select>
+    
+    <select id="all" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-06  查询所有 -->
+        select 
+        <include refid="Base_Column_List" />
+        from sys_system_user
+    </select>
+    
+    <select id="count" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-12-06 查询总条数 -->
+        select count(1) from sys_system_user
+    </select>
+    
+    <update id="update" parameterType="com.kapphk.system.bean.SystemUser" >
+        <!--  自动生成 2016年12月06日 更新数据 -->
+        update sys_system_user
+        <set >
+            <if test="userName != null" >
+                user_name = #{userName,jdbcType=VARCHAR},
+            </if>
+            <if test="pwd != null" >
+                pwd = #{pwd,jdbcType=VARCHAR},
+            </if>
+            <if test="realName != null" >
+                real_name = #{realName,jdbcType=VARCHAR},
+            </if>
+            <if test="companyId != null" >
+                company_id = #{companyId,jdbcType=BIGINT},
+            </if>
+            <if test="departmentTag != null" >
+                department_tag = #{departmentTag,jdbcType=VARCHAR},
+            </if>
+            <if test="tagType != null" >
+                tag_type = #{tagType,jdbcType=VARCHAR},
+            </if>
+            <if test="position != null" >
+                position = #{position,jdbcType=VARCHAR},
+            </if>
+            <if test="tel != null" >
+                tel = #{tel,jdbcType=VARCHAR},
+            </if>
+            <if test="state != null" >
+                state = #{state,jdbcType=INTEGER},
+            </if>
+            <if test="updateBy != null" >
+                update_by = #{updateBy,jdbcType=BIGINT},
+            </if>
+            <if test="updateTime != null" >
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="createTime != null" >
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="salt != null" >
+                salt = #{salt,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    
+    <insert id="insert" parameterType="com.kapphk.system.bean.SystemUser" useGeneratedKeys="true" keyProperty="id" >
+        <!--  自动生成 2016年12月06日 添加数据 -->
+        insert into sys_system_user
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="userName != null" >
+                user_name,
+            </if>
+            <if test="pwd != null" >
+                pwd,
+            </if>
+            <if test="realName != null" >
+                real_name,
+            </if>
+            <if test="companyId != null" >
+                company_id,
+            </if>
+            <if test="departmentTag != null" >
+                department_tag,
+            </if>
+            <if test="tagType != null" >
+                tag_type,
+            </if>
+            <if test="position != null" >
+                position,
+            </if>
+            <if test="tel != null" >
+                tel,
+            </if>
+            <if test="state != null" >
+                state,
+            </if>
+            <if test="updateBy != null" >
+                update_by,
+            </if>
+            <if test="updateTime != null" >
+                update_time,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+            <if test="salt != null" >
+                salt,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="userName != null" >
+                #{userName,jdbcType=VARCHAR},
+            </if>
+            <if test="pwd != null" >
+                #{pwd,jdbcType=VARCHAR},
+            </if>
+            <if test="realName != null" >
+                #{realName,jdbcType=VARCHAR},
+            </if>
+            <if test="companyId != null" >
+                #{companyId,jdbcType=BIGINT},
+            </if>
+            <if test="departmentTag != null" >
+                #{departmentTag,jdbcType=VARCHAR},
+            </if>
+            <if test="tagType != null" >
+                #{tagType,jdbcType=VARCHAR},
+            </if>
+            <if test="position != null" >
+                #{position,jdbcType=VARCHAR},
+            </if>
+            <if test="tel != null" >
+                #{tel,jdbcType=VARCHAR},
+            </if>
+            <if test="state != null" >
+                #{state,jdbcType=INTEGER},
+            </if>
+            <if test="updateBy != null" >
+                #{updateBy,jdbcType=BIGINT},
+            </if>
+            <if test="updateTime != null" >
+                #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="salt != null" >
+                #{salt,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+    
+    <insert id="inserts" parameterType="java.util.List" >
+        <!-- WARNING -  自动生成 2016-12-06 添加多条数据 -->
+        insert into sys_system_user (user_name, pwd, real_name, company_id, department_tag, tag_type, position, tel, state, update_by, update_time, create_time, salt)
+        values
+        <foreach collection="list" item="item" separator="," >
+            (#{item.userName,jdbcType=VARCHAR}, #{item.pwd,jdbcType=VARCHAR}, #{item.realName,jdbcType=VARCHAR}, #{item.companyId,jdbcType=BIGINT}, #{item.departmentTag,jdbcType=VARCHAR}, #{item.tagType,jdbcType=VARCHAR}, #{item.position,jdbcType=VARCHAR}, #{item.tel,jdbcType=VARCHAR}, #{item.state,jdbcType=INTEGER}, #{item.updateBy,jdbcType=BIGINT}, #{item.updateTime,jdbcType=TIMESTAMP}, #{item.createTime,jdbcType=TIMESTAMP}, #{item.salt,jdbcType=VARCHAR})
+        </foreach>
+    </insert>
+    
+    <delete id="delete" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年12月06日 删除数据 -->
+        delete from sys_system_user
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    
+    <delete id="deletes" >
+        <!-- WARNING -  自动生成 2016-12-06 删除多条数据 -->
+        delete from sys_system_user where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteByEntity" >
+        <!-- WARNING -  自动生成 2016-12-06 通过实体类中的条件删除数据 -->
+        delete from sys_system_user
+        <where >
+            <if test="param.id != null " >
+                and id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.userName != null and param.userName != ''" >
+                and user_name = #{param.userName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.pwd != null and param.pwd != ''" >
+                and pwd = #{param.pwd,jdbcType=VARCHAR}
+            </if>
+            <if test="param.realName != null and param.realName != ''" >
+                and real_name = #{param.realName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.companyId != null " >
+                and company_id = #{param.companyId,jdbcType=BIGINT}
+            </if>
+            <if test="param.departmentTag != null and param.departmentTag != ''" >
+                and department_tag = #{param.departmentTag,jdbcType=VARCHAR}
+            </if>
+            <if test="param.tagType != null and param.tagType != ''" >
+                and tag_type = #{param.tagType,jdbcType=VARCHAR}
+            </if>
+            <if test="param.position != null and param.position != ''" >
+                and position = #{param.position,jdbcType=VARCHAR}
+            </if>
+            <if test="param.tel != null and param.tel != ''" >
+                and tel = #{param.tel,jdbcType=VARCHAR}
+            </if>
+            <if test="param.state != null " >
+                and state = #{param.state,jdbcType=INTEGER}
+            </if>
+            <if test="param.updateBy != null " >
+                and update_by = #{param.updateBy,jdbcType=BIGINT}
+            </if>
+            <if test="param.updateTime != null " >
+                and update_time = #{param.updateTime,jdbcType=TIMESTAMP}
+            </if>
+            <if test="param.salt != null and param.salt != ''" >
+                and salt = #{param.salt,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </delete>
+    
+    <select id="findAll" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-06  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findList" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-12-06  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findHallUser" resultMap="BaseResultMap" >
+      select su.* from sys_system_user su left join 
+      user_company_hall uch on uch.sid = su.id 
+      where uch.company_hall_id = #{hallId,jdbcType=BIGINT}
+    </select>
+    
+    <select id="queryEmployeeByPage" resultMap="EmployeeResultMap" >
+      SELECT su.*,ach.hall_name,ac.company_name,su2.user_name AS operator ,sr.role_name as role
+      	FROM sys_system_user su 
+		LEFT JOIN user_company_hall uc ON su.id = uc.sid
+		LEFT JOIN app_company_hall ach ON uc.company_hall_id = ach.id
+		LEFT JOIN app_company ac ON ac.id = su.company_id
+		LEFT JOIN sys_system_user_role ssu ON su.id = ssu.user_id
+		LEFT JOIN sys_role sr ON sr.id = ssu.role_id
+		LEFT JOIN sys_system_user su2 ON su.update_by = su2.id
+		 <where >
+            <if test="param.id != null " >
+                and su.id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.userName != null and param.userName != ''" >
+                and (su.user_name like CONCAT('%', #{param.userName,jdbcType=VARCHAR},'%')
+                	OR su.real_name like CONCAT('%',#{param.userName,jdbcType=VARCHAR},'%')
+				)                
+            </if>
+            <if test="param.companyId != null " >
+                and su.company_id = #{param.companyId,jdbcType=BIGINT}
+            </if>
+            <if test="param.tel != null and param.tel != ''" >
+                and su.tel like CONCAT('%', #{param.tel,jdbcType=VARCHAR},'%')
+            </if>
+            <if test="param.state != null " >
+                and su.state = #{param.state,jdbcType=INTEGER}
+            </if>
+        </where>
+    </select>
+    
+    <update id="updateState" >
+        <!-- WARNING -  自动生成 2016-12-06 删除多条数据 -->
+        update sys_system_user set state = 0 where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </update>
+</mapper>

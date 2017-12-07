@@ -1,0 +1,948 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kapphk.web.dao.mapper.course.BeanCourseOrderMapper" >
+    <resultMap id="BaseResultMap" type="com.kapphk.web.bean.course.BeanCourseOrder" >
+        <!--  自动生成 2016年11月17日 表与实体类字段对应 -->
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="order_no" property="orderNo" jdbcType="VARCHAR" />
+        <result column="course_id" property="courseId" jdbcType="BIGINT" />
+        <result column="course_type_id" property="courseTypeId" jdbcType="BIGINT" />
+        <result column="record_type" property="recordType" jdbcType="INTEGER" />
+        <result column="uid" property="uid" jdbcType="BIGINT" />
+        <result column="goods_id" property="goodsId" jdbcType="BIGINT" />
+        <result column="qty" property="qty" jdbcType="INTEGER" />
+        <result column="origin_amount" property="originAmount" jdbcType="DECIMAL" />
+        <result column="coupon_id" property="couponId" jdbcType="BIGINT" />
+        <result column="is_coupon" property="isCoupon" jdbcType="INTEGER" />
+        <result column="discount_blue" property="discountBlue" jdbcType="DECIMAL" />
+        <result column="discount_red" property="discountRed" jdbcType="DECIMAL" />
+        <result column="pay_amount" property="payAmount" jdbcType="DECIMAL" />
+        <result column="pay_method" property="payMethod" jdbcType="VARCHAR" />
+        <result column="pay_method_type" property="payMethodType" jdbcType="VARCHAR" />
+        <result column="pay_status" property="payStatus" jdbcType="INTEGER" />
+        <result column="is_pay" property="isPay" jdbcType="INTEGER" />
+        <result column="pay_time" property="payTime" jdbcType="TIMESTAMP" />
+        <result column="course_code" property="courseCode" jdbcType="VARCHAR" />
+        <result column="is_use" property="isUse" jdbcType="INTEGER" />
+        <result column="student_name" property="studentName" jdbcType="VARCHAR" />
+        <result column="student_phone" property="studentPhone" jdbcType="VARCHAR" />
+        <result column="validation_uid" property="validationUid" jdbcType="BIGINT" />
+        <result column="validation_time" property="validationTime" jdbcType="TIMESTAMP" />
+        <result column="student_id_card" property="studentIdCard" jdbcType="VARCHAR" />
+        <result column="expiration_date" property="expirationDate" jdbcType="TIMESTAMP" />
+        <result column="system_course_name" property="systemCourseName" jdbcType="VARCHAR" />
+        <result column="address" property="address" jdbcType="VARCHAR" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+    
+    <!-- 更新订单状态 -->
+    <update id="updateIsPayByIds">
+    	UPDATE app_course_order SET is_pay=2 WHERE id IN 
+    	<foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </update>
+    
+    <!-- 验证该课程是否交易成功 -->
+    <select id="verifyByCourseIds" resultType="java.lang.Integer">
+    	SELECT COUNT(1) FROM app_course_order WHERE is_pay=1 AND course_id IN 
+    	<foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </select>
+    
+    <!-- 后台获取系统订单详情 -->
+    <select id="findCourseOrderDetail" resultType="java.util.Map">
+    	SELECT GROUP_CONCAT(c1.item_name) AS offlineName,GROUP_CONCAT(c2.item_name) AS onlineName,c.item_name AS itemName,
+		u.user_name AS userName,u.real_name AS realName,su.user_name AS sjUserName,su.real_name AS sjRealName,o.origin_amount AS originAmount,
+		o.pay_amount AS payAmount,o.discount_blue AS discountBlue,o.discount_red AS discountRed,o.pay_method AS payMethod,o.pay_time AS payTime,
+		(SELECT GROUP_CONCAT(item_name) FROM app_community WHERE id IN (SELECT community_id FROM user_community WHERE uid=o.uid)) AS community
+		FROM app_course_order o 
+		LEFT JOIN app_course c ON c.id=o.course_id
+		LEFT JOIN app_course_system s ON s.system_id=c.id
+		LEFT JOIN app_course c1 ON c1.id=s.course_id AND s.record_type=1
+		LEFT JOIN app_course c2 ON c2.id=s.course_id AND s.record_type=2
+		LEFT JOIN sys_user u ON u.id=o.uid
+		LEFT JOIN sys_user su ON su.id=u.uid_from
+		WHERE o.id = #{id}  GROUP BY o.id
+    </select>
+    
+    <!-- 获取课程抵扣券信息 -->
+    <select id="findCourseInfo" resultType="java.util.Map">
+    	SELECT act.id,act.course_month AS courseMonth,act.item_name AS itemName 
+		FROM app_course_type AS act 
+		INNER JOIN app_course_offline AS aco ON act.id = aco.course_type_id 
+		WHERE aco.id = #{courseId}
+    </select>
+    
+    <!-- 获取订单详情 -->
+    <select id="getCourseOrderDetail" resultType="java.util.Map">
+    	SELECT o.id,o.student_name AS studentName,o.student_phone AS studentPhone,o.student_id_card AS studentIdCard,
+		o.order_no AS orderNo,SUBSTRING(CAST(o.pay_time AS CHAR),1,16) AS payTime,o.pay_amount AS payAmount,
+		o.pay_method AS payMethod,c.item_name AS itemName,of.register_date AS registerDate,o.course_id AS courseId,
+		CONCAT(of.province,of.city,of.district,of.address) AS address,
+		IFNULL(t.course_group,`on`.course_group) AS courseGroup,(CASE o.pay_status WHEN 1 THEN '新训' WHEN 2 THEN '复训'END) AS payStatus,
+		(CASE o.is_use WHEN 1 THEN '完成' ELSE '进行中'END) AS isUse,(CASE o.is_use WHEN 1 THEN '已签到' ELSE '未签到'END) AS state,
+		(SELECT GROUP_CONCAT(user_name) FROM app_course_teacher WHERE course_id=c.id) AS teacherName,
+		FLOOR((o.pay_amount+o.discount_red)*s.value/100) AS amount
+		FROM app_course_order o 
+		INNER JOIN app_course c ON c.id=o.course_id
+		LEFT JOIN app_course_offline of ON of.id=c.id
+		LEFT JOIN app_course_type t ON t.id=of.course_type_id
+		LEFT JOIN app_course_online `on` ON `on`.id=c.id
+		LEFT JOIN sys_setting s ON s.id=<if test="staffPosition == '增量客服'">'increment_service'</if>
+		<if test="staffPosition == '存量客服'">'stock_service'</if>
+		WHERE o.id=#{id}
+    </select>
+    
+    <!-- 获取客户课程订单列表 -->
+    <select id="getCourseOrderList" resultType="java.util.Map">
+    	SELECT o.id,o.origin_amount AS originAmount,o.pay_amount AS payAmount,c.item_name AS itemName,SUBSTRING(co.register_date,1,16) AS registerDate,
+		(CASE o.is_use WHEN 1 THEN '完成' ELSE '进行中'END) AS isUse,(CASE o.is_use WHEN 1 THEN '已签到' ELSE '未签到'END) AS state,
+		(CASE o.pay_status WHEN 1 THEN '新训' WHEN 2 THEN '复训'END) AS payStatus,
+		CONCAT(co.province,co.city,co.district,co.address) AS address,
+		FLOOR((o.pay_amount+o.discount_red)*s.value/100) AS amount
+		FROM app_course_order o 
+		INNER JOIN app_course c ON c.id=o.course_id
+		LEFT JOIN app_course_offline co ON co.id=c.id
+		LEFT JOIN sys_setting s ON s.id=<if test="staffPosition == '增量客服'">'increment_service'</if><if test="staffPosition == '存量客服'">'stock_service'</if>
+		WHERE c.record_type IN (1,2) AND o.is_pay=1 AND o.pay_status != 3 AND o.uid=#{uid}
+		ORDER BY o.id DESC LIMIT #{page},#{rows}
+    </select>
+    
+    <!-- 获取个人管理的客户数据 -->
+    <select id="getClientList" resultType="java.util.Map">
+    		SELECT u.id,u.logo_path AS logoPath,u.user_name AS userName,u.real_name AS realName,
+			c.item_name AS itemName,(CASE o.is_use WHEN 1 THEN '完成' ELSE '进行中'END) AS isUse,
+			(CASE o.is_use WHEN 1 THEN '已消耗' ELSE SUBSTRING(co.register_date,1,16) END) AS state
+			FROM sys_user u
+			INNER JOIN app_course_order o ON o.id=(SELECT o.id FROM app_course_order o INNER JOIN app_course c ON o.course_id=c.id AND c.record_type=1 
+			WHERE uid=u.id AND pay_status !=3 ORDER BY id <if test="staffPosition == '增量客服'">DESC</if> LIMIT 1)
+			INNER JOIN app_course c ON c.id=o.course_id AND c.record_type IN (1,2)
+			LEFT JOIN app_course_offline co ON co.id=c.id
+			<where>
+				<if test="staffPosition == '增量客服'">u.service_begin</if>
+				<if test="staffPosition == '存量客服'">u.service_stock</if>
+				=#{uid} AND o.is_pay=1 
+				<if test="param != null and param != ''">
+					and (c.item_name like '%${param}%' or u.real_name like '%${param}%')
+				</if>
+			</where>
+			ORDER BY o.id DESC LIMIT #{page},#{rows}
+    </select>
+    
+    <!-- 课程购买人数列表 -->
+    <select id="findPurchaseList" resultType="java.util.Map">
+    	SELECT u.user_name AS userName,u.real_name AS realName,su.user_name AS sjUserName,su.real_name AS sjRealName,
+    	CAST(o.create_time AS CHAR) AS createTime
+		FROM app_course_order o 
+		INNER JOIN sys_user u ON u.id=o.uid
+		LEFT JOIN sys_user su ON u.uid_from=su.id
+		WHERE o.course_id= #{courseId} AND o.is_pay=1
+		ORDER BY o.create_time DESC LIMIT #{page},#{rows}
+    </select>
+    
+    <!-- 课程订单  网络课程  zoneyu 16-10-26 -->
+    <select id="getOnlineOrderList" resultType="java.util.Map">
+    	SELECT acor.id,ac.id AS courseId,ac.item_name AS itemName,ac.logo_path AS logoPath,
+    	ac.amount,ac.is_public as isPublic,
+		aco.item_remark AS itemRemark,aco.teacher_name AS teacherName,aco.course_type as courseType,
+		aco.teacher_remark AS teacherRemark,aco.vedio_length AS vedioLength,
+		aco.vedio_palys AS vedioPalys 
+		FROM app_course_order AS acor 
+		INNER JOIN app_course AS ac ON acor.course_id = ac.id AND ac.record_type = 2 
+		INNER JOIN app_course_online AS aco ON acor.course_id = aco.id 
+		where acor.is_pay = 1 and acor.uid = #{uid} 
+		order by acor.id desc limit #{page},#{rows}
+    </select>
+    
+    <!-- 获取用户详情 -->
+    <select id="findUserDetail" resultType="java.util.Map">
+    	SELECT u.real_name AS realName,(SELECT GROUP_CONCAT(item_name) FROM app_community WHERE id IN (SELECT community_id FROM user_community WHERE uid=u.id)) AS community,
+    	su.user_name AS sjUserName,su.real_name AS sjRealName 
+		FROM sys_user u
+		LEFT JOIN sys_user su ON su.id=u.uid_from
+    	WHERE u.user_name = #{userName}
+    </select>
+    
+    <!-- 课程详情 -->
+    <select id="findCourseDetail" resultType="java.util.Map">
+    	SELECT c.amount AS originAmount,co.register_date AS registerDate,CONCAT(co.province,co.city,co.district,co.address) AS pcda,
+		GROUP_CONCAT(c1.item_name) AS offlineName,GROUP_CONCAT(c2.item_name) AS onlineName,c.id,
+		SUM(c1.amount) AS amount1,SUM(c2.amount) AS amount2,c.item_name AS itemName,
+		(CASE WHEN c.record_type=1 THEN (c.amount*(t.blue_currency_rate/100)) ELSE (SELECT c.amount*(ss.value/100) FROM sys_setting ss WHERE ss.id=(CASE c.record_type 
+			WHEN 2 THEN 'ded_online_course' WHEN 3 THEN 'ded_system_course' END)) END) AS discountBlue
+		FROM app_course c 
+		LEFT JOIN app_course_offline co ON co.id=c.id
+		LEFT JOIN app_course_type t ON t.id=co.course_type_id
+		LEFT JOIN app_course_system s ON s.system_id=c.id
+		LEFT JOIN app_course c1 ON c1.id=s.course_id AND s.record_type=1
+		LEFT JOIN app_course c2 ON c2.id=s.course_id AND s.record_type=2
+		WHERE c.id = #{id} GROUP BY c.id
+    </select>
+    
+    <!-- 获取课程列表 -->
+    <select id="findCourseList" resultType="java.util.Map">
+    	SELECT c.id,c.item_name AS `text` FROM app_course c WHERE c.record_type = #{type} AND c.state=1
+    </select>
+    
+    <!-- 订单列表 -->
+    <select id="findList" resultType="java.util.Map">
+    	SELECT o.id,o.course_id AS courseId,c.item_name AS itemName,co.register_date AS  registerDate,CONCAT(co.province,co.city,co.district,co.address) AS pcda,
+		o.order_no AS orderNo,(CASE o.pay_status WHEN 1 THEN '新训' WHEN 2 THEN '复训' ELSE '赞赏' END) AS payStatus,o.origin_amount AS originAmount,o.discount_red AS discountRed,
+		o.pay_amount AS payAmount,o.pay_method AS payMethod,o.is_coupon AS isCoupon,CAST(o.pay_time AS CHAR) AS payTime,o.discount_blue AS discountBlue,su.user_name AS sjUserName,
+		su.real_name AS sjRealName,o.system_course_name AS scn,CAST(o.create_time AS CHAR) AS createTime,(CASE WHEN o.is_use=1 THEN '是' ELSE '否' END) AS isUse,
+		o.student_id_card AS studentIdCard,o.student_name AS studentName,o.student_phone AS studentPhone,u.user_name AS userName,u.real_name AS realName,
+		(SELECT GROUP_CONCAT(item_name) FROM app_community WHERE id IN (SELECT community_id FROM user_community WHERE uid=u.id)) AS community,
+		o.qty,o.is_pay AS isPay,GROUP_CONCAT(ac.item_name) AS meal,COUNT(ac.id) AS counts,cs.parent_name as parentName,cs.parent_relation as parentRelation,
+		cs.parent_phone as parentPhone,cs.parent_name2 as parentName2,cs.parent_relation2 as parentRelation2,cs.parent_phone2 as parentPhone2,cs.student_name as studentName1,
+		cs.sex,cs.student_id_card as studentIdCard1,cs.body_status as bodyStatus,cs.case_history as caseHistory,cs.remark,t.course_group as courseGroup
+		FROM app_course_order o
+		INNER JOIN app_course c ON c.id=o.course_id 
+		LEFT JOIN app_course_offline co ON co.id=c.id
+		LEFT JOIN app_course_type t ON t.id=co.course_type_id
+		INNER JOIN sys_user u ON o.uid=u.id 
+		LEFT JOIN sys_user su ON u.uid_from=su.id
+		LEFT JOIN app_course_system s ON s.system_id=c.id
+		LEFT JOIN app_course ac ON ac.id=s.course_id
+		LEFT JOIN app_course_student cs ON cs.id=o.id
+		<where>
+			o.record_type=#{type} AND pay_status != 3
+			<if test="uid != null ">
+				AND o.uid = #{uid}
+			</if>
+			<if test="list != null ">
+				AND o.is_coupon IN
+				<foreach collection="list" item="item" open="(" separator="," close=")" >
+            	#{item}
+       		</foreach>
+			</if>
+			<if test="payStatus != null">
+				AND o.pay_status = #{payStatus}
+			</if>
+			<if test="isUse != null">
+				AND o.is_use = #{isUse}
+			</if>
+			<if test="isPay != null">
+				AND o.is_pay = #{isPay}
+			</if>
+			<if test="orderNo != null and orderNo != ''">
+				AND o.order_no like '%${orderNo}%'
+			</if>
+			<if test="itemName != null and itemName != ''">
+				AND c.item_name like '%${itemName}%'
+			</if>
+			<if test="realName != null and realName != ''">
+				AND u.real_name like '%${realName}%'
+			</if>
+			<if test="startTime != null and endTime != null">
+				AND o.pay_time &gt;= #{startTime} and o.pay_time &lt;= #{endTime}
+			</if>
+			<if test="startTime != null and endTime == null">
+				AND o.pay_time &gt;= #{startTime}
+			</if>
+			<if test="startTime == null and endTime != null">
+				AND o.pay_time &lt;= #{endTime}
+			</if>
+		</where>
+		GROUP BY o.id order by o.id DESC LIMIT #{page},#{rows}
+    </select>
+    
+    <!-- 订单列表总数 -->
+    <select id="findCount" resultType="java.lang.Integer">
+    	SELECT COUNT(1)
+		FROM app_course_order o
+		INNER JOIN app_course c ON c.id=o.course_id
+		INNER JOIN sys_user u ON o.uid=u.id 
+		LEFT JOIN sys_user su ON u.uid_from=su.id
+		<where>
+			o.record_type=#{type} AND pay_status != 3
+			<if test="uid != null ">
+				AND o.uid = #{uid}
+			</if>
+			<if test="list != null ">
+				AND o.is_coupon IN
+				<foreach collection="list" item="item" open="(" separator="," close=")" >
+            	#{item}
+       			</foreach>
+       		</if>
+			<if test="payStatus != null ">
+				AND o.pay_status = #{payStatus}
+			</if>
+			<if test="isUse != null ">
+				AND o.is_use = #{isUse}
+			</if>
+			<if test="isPay != null">
+				AND o.is_pay = #{isPay}
+			</if>
+			<if test="orderNo != null and orderNo != ''">
+				AND o.order_no like '%${orderNo}%'
+			</if>
+			<if test="itemName != null and itemName != ''">
+				AND c.item_name like '%${itemName}%'
+			</if>
+			<if test="realName != null and realName != ''">
+				AND u.real_name like '%${realName}%'
+			</if>
+			<if test="startTime != null and endTime != null">
+				AND o.pay_time &gt;= #{startTime} and o.pay_time &lt;= #{endTime}
+			</if>
+			<if test="startTime != null and endTime == null">
+				AND o.pay_time &gt;= #{startTime}
+			</if>
+			<if test="startTime == null and endTime != null">
+				AND o.pay_time &lt;= #{endTime}
+			</if>
+		</where>
+    </select>
+    
+    <!-- 课程订单  线下课程  zoneyu 16-10-24 -->
+    <select id="getOfflineOrderList" resultType="java.util.Map">
+    	SELECT acor.id,acor.course_id AS courseId,acor.origin_amount AS originAmount,acor.course_code AS courseCode,
+		acor.expiration_date AS expirationDate,acor.is_use AS isUse,acor.validation_time as validationTime,
+		ac.item_name AS itemName,ac.is_public as isPublic,act.course_group AS courseGroup,
+		aco.register_date AS registerDate,actr.user_name AS teacherName,
+		CONCAT(aco.province,aco.city,aco.district,aco.address) AS address,
+		(SELECT tel FROM app_course_contact WHERE course_id = acor.course_id ORDER BY create_time LIMIT 1)AS phone  
+		FROM app_course_order AS acor 
+		INNER JOIN app_course AS ac ON acor.course_id = ac.id AND ac.record_type = 1 
+		INNER JOIN app_course_type AS act ON acor.course_type_id = act.id 
+		LEFT JOIN app_course_teacher AS actr ON acor.course_id = actr.course_id
+		INNER JOIN app_course_offline AS aco ON acor.course_id = aco.id 
+		<where>
+			acor.is_pay = 1 and acor.uid = #{uid} 
+			<if test="status != null ">
+				and acor.is_use = #{status}
+			</if>
+		</where>
+		order by acor.id desc limit #{page},#{rows}
+    </select>
+    
+    <!-- 赞赏记录  zoneyu 16-10-20 -->
+    <select id="getAdmirationList" resultType="java.util.Map">
+    	SELECT su.id AS uid,su.logo_path AS logoPath,su.nick_name AS nickName,
+		aco.qty,ag.item_name AS itemName,ag.logo_path AS goodsPath,aco.pay_amount AS payAmount,
+		CAST(aco.create_time AS CHAR) AS createTime 
+		FROM app_course_order AS aco 
+		INNER JOIN sys_user AS su ON aco.uid = su.id 
+		LEFT JOIN app_goods AS ag ON aco.goods_id = ag.id 
+		WHERE aco.pay_status = 3 AND aco.is_pay = 1 
+		AND aco.course_id = #{courseId} order by aco.id desc limit #{page},#{rows}
+    </select>
+    
+    <!-- 学员信息 父母课程  zoneyu 16-10-18 -->
+    <select id="getStudentInfoByParent" resultType="java.util.Map">
+    	SELECT aco.student_name AS studentName,aco.student_phone AS studentPhone,
+		aco.student_id_card AS studentIdCard,
+		su.user_name AS userName,su.real_name AS realName 
+		FROM app_course_order AS aco 
+		INNER JOIN sys_user AS su ON aco.uid = su.id 
+		WHERE aco.id = #{id}
+    </select>
+    
+    <!-- 学员信息 孩子课程  zoneyu 16-10-18 -->
+    <select id="getStudentInfoByChild" resultType="java.util.Map">
+    	SELECT acs.parent_name AS parentName,acs.parent_relation AS parentRelation,
+		acs.parent_phone AS parentPhone,acs.parent_name2 AS parentName2,acs.parent_relation2 AS parentRelation2,
+		acs.parent_phone2 AS parentPhone2,acs.student_name AS studentName,acs.sex,acs.student_id_card AS idCard,
+		acs.body_status AS bodyStatus,acs.case_history AS caseHistory,acs.remark,
+		su.user_name AS userName,su.real_name AS realName 
+		FROM app_course_order AS aco 
+		INNER JOIN app_course_student AS acs on aco.id = acs.id 
+		INNER JOIN sys_user AS su ON aco.uid = su.id 
+		WHERE aco.id = #{id} 
+    </select>
+    
+    <!-- 课程信息  zoneyu 16-10-18 -->
+    <select id="getCourseInfo" resultType="java.util.Map">
+    	SELECT aco.id,aco.student_name AS studentName,aco.student_phone AS studentPhone,
+    	aco.expiration_date AS expirationDate,aco.is_use as isUse,
+		aco.student_id_card AS studentIdCard,ac.item_name AS itemName,act.course_group AS courseGroup,aco.course_code as courseCode,
+		aco.order_no AS orderNo,aco.pay_status AS payStatus,acoe.register_date AS registerDate,
+		CONCAT(acoe.province,acoe.city,acoe.district,acoe.address) AS address,act.id as courseTypeId,
+		teacher.user_name AS userName,CAST(aco.pay_time AS CHAR) AS payTime,aco.pay_amount AS payAmount,
+		aco.pay_method AS payMethod 
+		FROM app_course_order AS aco 
+		INNER JOIN app_course AS ac ON aco.course_id = ac.id 
+		INNER JOIN app_course_type AS act ON aco.course_type_id = act.id 
+		INNER JOIN app_course_offline AS acoe ON aco.course_id = acoe.id 
+		LEFT JOIN app_course_teacher AS teacher ON aco.course_id = teacher.course_id 
+		WHERE aco.course_code = #{param.courseCode} AND is_pay = 1 GROUP BY aco.id 
+    </select>
+    
+    <!-- 支付成功订单信息  zoneyu 16-10-17 -->
+    <select id="getOrderInfo" resultType="java.util.Map">
+    	SELECT acor.id,ac.item_name AS itemName,acor.order_no AS orderNo,
+		CONCAT(aco.province,aco.city,aco.district,aco.address) AS address,
+		aco.register_date AS registerDate,acor.course_code AS courseCode
+		FROM app_course_order AS acor 
+		INNER JOIN app_course AS ac ON acor.course_id = ac.id 
+		INNER JOIN app_course_offline AS aco ON acor.course_id = aco.id 
+		WHERE acor.order_no = #{orderNo} AND acor.is_pay = 1 
+    </select>
+    
+    <!-- 是否享受复训价   zoneyu 16-10-14 -->
+    <select id="checkInfo" resultType="java.util.Map">
+<!-- 		SELECT COUNT(acor.id) AS isFirst, -->
+<!-- 		(CASE WHEN acor.id IS NOT NULL THEN act.retrain_amount ELSE ac.amount END) AS amount -->
+<!-- 		FROM app_course_offline AS aco  -->
+<!-- 		INNER JOIN app_course AS ac ON aco.id = ac.id  -->
+<!-- 		INNER JOIN app_course_type AS act ON aco.course_type_id = act.id  -->
+<!-- 		INNER JOIN app_course_order AS acor ON aco.id = acor.course_id AND acor.uid = #{param.uid} AND acor.is_pay = 1  -->
+<!-- 		WHERE aco.course_type_id = #{param.courseTypeId} -->
+		select count(acor.id) as isFirst,(CASE WHEN acor.id IS NOT NULL THEN act.retrain_amount ELSE ac.amount END) AS amount
+		from app_course AS ac cross join app_course_type AS act 
+		left join app_course_order AS acor on ac.id = acor.course_id and act.id = acor.course_type_id AND acor.is_pay = 1 AND acor.uid = #{param.uid}
+		where ac.id = #{param.courseId} and act.id = #{param.courseTypeId}
+    </select>
+    
+    <sql id="Base_Column_List" >
+        <!--  自动生成 2016年11月17日 表字段名称 -->
+        id, order_no, course_id, course_type_id, record_type, uid, goods_id, qty, origin_amount, 
+        coupon_id, is_coupon, discount_blue, discount_red, pay_amount, pay_method, pay_method_type, 
+        pay_status, is_pay, pay_time, course_code, is_use, student_name, address, student_phone, validation_uid, 
+        validation_time, student_id_card, expiration_date, system_course_name, create_time
+    </sql>
+    
+    <sql id="findByPageSql" >
+        <!-- WARNING -  自动生成 2016-11-17  分页查询SQL -->
+        select a.* from app_course_order a
+        <where >
+            <if test="param.id != null " >
+                and a.id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.orderNo != null and param.orderNo != ''" >
+                and a.order_no = #{param.orderNo,jdbcType=VARCHAR}
+            </if>
+            <if test="param.courseId != null " >
+                and a.course_id = #{param.courseId,jdbcType=BIGINT}
+            </if>
+            <if test="param.courseTypeId != null " >
+                and a.course_type_id = #{param.courseTypeId,jdbcType=BIGINT}
+            </if>
+            <if test="param.recordType != null " >
+                and a.record_type = #{param.recordType,jdbcType=INTEGER}
+            </if>
+            <if test="param.uid != null " >
+                and a.uid = #{param.uid,jdbcType=BIGINT}
+            </if>
+            <if test="param.goodsId != null " >
+                and a.goods_id = #{param.goodsId,jdbcType=BIGINT}
+            </if>
+            <if test="param.qty != null " >
+                and a.qty = #{param.qty,jdbcType=INTEGER}
+            </if>
+            <if test="param.originAmount != null " >
+                and a.origin_amount = #{param.originAmount,jdbcType=DECIMAL}
+            </if>
+            <if test="param.couponId != null " >
+                and a.coupon_id = #{param.couponId,jdbcType=BIGINT}
+            </if>
+            <if test="param.isCoupon != null " >
+                and a.is_coupon = #{param.isCoupon,jdbcType=INTEGER}
+            </if>
+            <if test="param.discountBlue != null " >
+                and a.discount_blue = #{param.discountBlue,jdbcType=DECIMAL}
+            </if>
+            <if test="param.discountRed != null " >
+                and a.discount_red = #{param.discountRed,jdbcType=DECIMAL}
+            </if>
+            <if test="param.payAmount != null " >
+                and a.pay_amount = #{param.payAmount,jdbcType=DECIMAL}
+            </if>
+            <if test="param.payMethod != null and param.payMethod != ''" >
+                and a.pay_method = #{param.payMethod,jdbcType=VARCHAR}
+            </if>
+            <if test="param.payMethodType != null and param.payMethodType != ''" >
+                and a.pay_method_type = #{param.payMethodType,jdbcType=VARCHAR}
+            </if>
+            <if test="param.payStatus != null " >
+                and a.pay_status = #{param.payStatus,jdbcType=INTEGER}
+            </if>
+            <if test="param.isPay != null " >
+                and a.is_pay = #{param.isPay,jdbcType=INTEGER}
+            </if>
+            <if test="param.payTime != null " >
+                and a.pay_time = #{param.payTime,jdbcType=TIMESTAMP}
+            </if>
+            <if test="param.courseCode != null and param.courseCode != ''" >
+                and a.course_code = #{param.courseCode,jdbcType=VARCHAR}
+            </if>
+            <if test="param.isUse != null " >
+                and a.is_use = #{param.isUse,jdbcType=INTEGER}
+            </if>
+            <if test="param.studentName != null and param.studentName != ''" >
+                and a.student_name = #{param.studentName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.studentPhone != null and param.studentPhone != ''" >
+                and a.student_phone = #{param.studentPhone,jdbcType=VARCHAR}
+            </if>
+            <if test="param.validationUid != null " >
+                and a.validation_uid = #{param.validationUid,jdbcType=BIGINT}
+            </if>
+            <if test="param.validationTime != null " >
+                and a.validation_time = #{param.validationTime,jdbcType=TIMESTAMP}
+            </if>
+            <if test="param.studentIdCard != null and param.studentIdCard != ''" >
+                and a.student_id_card = #{param.studentIdCard,jdbcType=VARCHAR}
+            </if>
+            <if test="param.expirationDate != null " >
+                and a.expiration_date = #{param.expirationDate,jdbcType=TIMESTAMP}
+            </if>
+            <if test="param.systemCourseName != null and param.systemCourseName != ''" >
+                and a.system_course_name = #{param.systemCourseName,jdbcType=VARCHAR}
+            </if>
+        </where>
+        order by a.id desc
+    </sql>
+    
+    <select id="findByPage" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-11-17  分页查询 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit #{offset}, #{pageSize}
+    </select>
+    
+    <select id="findByPageCount" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-11-17  分页查询总条数 -->
+        select count(1) from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findById" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年11月17日 根据ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_course_order
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    
+    <select id="load" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-11-17  根据多个ID查询 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_course_order where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </select>
+    
+    <select id="all" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-11-17  查询所有 -->
+        select 
+        <include refid="Base_Column_List" />
+        from app_course_order
+    </select>
+    
+    <select id="count" resultType="java.lang.Integer" >
+        <!-- WARNING -  自动生成 2016-11-17 查询总条数 -->
+        select count(1) from app_course_order
+    </select>
+    
+    <update id="update" parameterType="com.kapphk.web.bean.course.BeanCourseOrder" >
+        <!--  自动生成 2016年11月17日 更新数据 -->
+        update app_course_order
+        <set >
+            <if test="orderNo != null" >
+                order_no = #{orderNo,jdbcType=VARCHAR},
+            </if>
+            <if test="courseId != null" >
+                course_id = #{courseId,jdbcType=BIGINT},
+            </if>
+            <if test="courseTypeId != null" >
+                course_type_id = #{courseTypeId,jdbcType=BIGINT},
+            </if>
+            <if test="recordType != null" >
+                record_type = #{recordType,jdbcType=INTEGER},
+            </if>
+            <if test="uid != null" >
+                uid = #{uid,jdbcType=BIGINT},
+            </if>
+            <if test="goodsId != null" >
+                goods_id = #{goodsId,jdbcType=BIGINT},
+            </if>
+            <if test="qty != null" >
+                qty = #{qty,jdbcType=INTEGER},
+            </if>
+            <if test="originAmount != null" >
+                origin_amount = #{originAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="couponId != null" >
+                coupon_id = #{couponId,jdbcType=BIGINT},
+            </if>
+            <if test="isCoupon != null" >
+                is_coupon = #{isCoupon,jdbcType=INTEGER},
+            </if>
+            <if test="discountBlue != null" >
+                discount_blue = #{discountBlue,jdbcType=DECIMAL},
+            </if>
+            <if test="discountRed != null" >
+                discount_red = #{discountRed,jdbcType=DECIMAL},
+            </if>
+            <if test="payAmount != null" >
+                pay_amount = #{payAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="payMethod != null" >
+                pay_method = #{payMethod,jdbcType=VARCHAR},
+            </if>
+            <if test="payMethodType != null" >
+                pay_method_type = #{payMethodType,jdbcType=VARCHAR},
+            </if>
+            <if test="payStatus != null" >
+                pay_status = #{payStatus,jdbcType=INTEGER},
+            </if>
+            <if test="isPay != null" >
+                is_pay = #{isPay,jdbcType=INTEGER},
+            </if>
+            <if test="payTime != null" >
+                pay_time = #{payTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="courseCode != null" >
+                course_code = #{courseCode,jdbcType=VARCHAR},
+            </if>
+            <if test="isUse != null" >
+                is_use = #{isUse,jdbcType=INTEGER},
+            </if>
+            <if test="studentName != null" >
+                student_name = #{studentName,jdbcType=VARCHAR},
+            </if>
+            <if test="address != null" >
+                address = #{address,jdbcType=VARCHAR},
+            </if>
+            <if test="studentPhone != null" >
+                student_phone = #{studentPhone,jdbcType=VARCHAR},
+            </if>
+            <if test="validationUid != null" >
+                validation_uid = #{validationUid,jdbcType=BIGINT},
+            </if>
+            <if test="validationTime != null" >
+                validation_time = #{validationTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="studentIdCard != null" >
+                student_id_card = #{studentIdCard,jdbcType=VARCHAR},
+            </if>
+            <if test="expirationDate != null" >
+                expiration_date = #{expirationDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="systemCourseName != null" >
+                system_course_name = #{systemCourseName,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null" >
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    
+    <insert id="insert" parameterType="com.kapphk.web.bean.course.BeanCourseOrder" useGeneratedKeys="true" keyProperty="id" >
+        <!--  自动生成 2016年11月17日 添加数据 -->
+        insert into app_course_order
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="orderNo != null" >
+                order_no,
+            </if>
+            <if test="courseId != null" >
+                course_id,
+            </if>
+            <if test="courseTypeId != null" >
+                course_type_id,
+            </if>
+            <if test="recordType != null" >
+                record_type,
+            </if>
+            <if test="uid != null" >
+                uid,
+            </if>
+            <if test="goodsId != null" >
+                goods_id,
+            </if>
+            <if test="qty != null" >
+                qty,
+            </if>
+            <if test="originAmount != null" >
+                origin_amount,
+            </if>
+            <if test="couponId != null" >
+                coupon_id,
+            </if>
+            <if test="isCoupon != null" >
+                is_coupon,
+            </if>
+            <if test="discountBlue != null" >
+                discount_blue,
+            </if>
+            <if test="discountRed != null" >
+                discount_red,
+            </if>
+            <if test="payAmount != null" >
+                pay_amount,
+            </if>
+            <if test="payMethod != null" >
+                pay_method,
+            </if>
+            <if test="payMethodType != null" >
+                pay_method_type,
+            </if>
+            <if test="payStatus != null" >
+                pay_status,
+            </if>
+            <if test="isPay != null" >
+                is_pay,
+            </if>
+            <if test="payTime != null" >
+                pay_time,
+            </if>
+            <if test="courseCode != null" >
+                course_code,
+            </if>
+            <if test="isUse != null" >
+                is_use,
+            </if>
+            <if test="studentName != null" >
+                student_name,
+            </if>
+            <if test="address != null" >
+                address,
+            </if>
+            <if test="studentPhone != null" >
+                student_phone,
+            </if>
+            <if test="validationUid != null" >
+                validation_uid,
+            </if>
+            <if test="validationTime != null" >
+                validation_time,
+            </if>
+            <if test="studentIdCard != null" >
+                student_id_card,
+            </if>
+            <if test="expirationDate != null" >
+                expiration_date,
+            </if>
+            <if test="systemCourseName != null" >
+                system_course_name,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="orderNo != null" >
+                #{orderNo,jdbcType=VARCHAR},
+            </if>
+            <if test="courseId != null" >
+                #{courseId,jdbcType=BIGINT},
+            </if>
+            <if test="courseTypeId != null" >
+                #{courseTypeId,jdbcType=BIGINT},
+            </if>
+            <if test="recordType != null" >
+                #{recordType,jdbcType=INTEGER},
+            </if>
+            <if test="uid != null" >
+                #{uid,jdbcType=BIGINT},
+            </if>
+            <if test="goodsId != null" >
+                #{goodsId,jdbcType=BIGINT},
+            </if>
+            <if test="qty != null" >
+                #{qty,jdbcType=INTEGER},
+            </if>
+            <if test="originAmount != null" >
+                #{originAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="couponId != null" >
+                #{couponId,jdbcType=BIGINT},
+            </if>
+            <if test="isCoupon != null" >
+                #{isCoupon,jdbcType=INTEGER},
+            </if>
+            <if test="discountBlue != null" >
+                #{discountBlue,jdbcType=DECIMAL},
+            </if>
+            <if test="discountRed != null" >
+                #{discountRed,jdbcType=DECIMAL},
+            </if>
+            <if test="payAmount != null" >
+                #{payAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="payMethod != null" >
+                #{payMethod,jdbcType=VARCHAR},
+            </if>
+            <if test="payMethodType != null" >
+                #{payMethodType,jdbcType=VARCHAR},
+            </if>
+            <if test="payStatus != null" >
+                #{payStatus,jdbcType=INTEGER},
+            </if>
+            <if test="isPay != null" >
+                #{isPay,jdbcType=INTEGER},
+            </if>
+            <if test="payTime != null" >
+                #{payTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="courseCode != null" >
+                #{courseCode,jdbcType=VARCHAR},
+            </if>
+            <if test="isUse != null" >
+                #{isUse,jdbcType=INTEGER},
+            </if>
+            <if test="studentName != null" >
+                #{studentName,jdbcType=VARCHAR},
+            </if>
+            <if test="address != null" >
+                #{address,jdbcType=VARCHAR},
+            </if>
+            <if test="studentPhone != null" >
+                #{studentPhone,jdbcType=VARCHAR},
+            </if>
+            <if test="validationUid != null" >
+                #{validationUid,jdbcType=BIGINT},
+            </if>
+            <if test="validationTime != null" >
+                #{validationTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="studentIdCard != null" >
+                #{studentIdCard,jdbcType=VARCHAR},
+            </if>
+            <if test="expirationDate != null" >
+                #{expirationDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="systemCourseName != null" >
+                #{systemCourseName,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    
+    <insert id="inserts" parameterType="java.util.List" >
+        <!-- WARNING -  自动生成 2016-11-17 添加多条数据 -->
+        insert into app_course_order (order_no, course_id, course_type_id, record_type, uid, goods_id, qty, origin_amount, coupon_id, is_coupon, discount_blue, discount_red, pay_amount, pay_method, pay_method_type, pay_status, is_pay, pay_time, course_code, is_use, student_name, address, student_phone, validation_uid, validation_time, student_id_card, expiration_date, system_course_name, create_time)
+        values
+        <foreach collection="list" item="item" separator="," >
+            (#{item.orderNo,jdbcType=VARCHAR}, #{item.courseId,jdbcType=BIGINT}, #{item.courseTypeId,jdbcType=BIGINT}, #{item.recordType,jdbcType=INTEGER}, #{item.uid,jdbcType=BIGINT}, #{item.goodsId,jdbcType=BIGINT}, #{item.qty,jdbcType=INTEGER}, #{item.originAmount,jdbcType=DECIMAL}, #{item.couponId,jdbcType=BIGINT}, #{item.isCoupon,jdbcType=INTEGER}, #{item.discountBlue,jdbcType=DECIMAL}, #{item.discountRed,jdbcType=DECIMAL}, #{item.payAmount,jdbcType=DECIMAL}, #{item.payMethod,jdbcType=VARCHAR}, #{item.payMethodType,jdbcType=VARCHAR}, #{item.payStatus,jdbcType=INTEGER}, #{item.isPay,jdbcType=INTEGER}, #{item.payTime,jdbcType=TIMESTAMP}, #{item.courseCode,jdbcType=VARCHAR}, #{item.isUse,jdbcType=INTEGER}, #{item.studentName,jdbcType=VARCHAR}, #{item.address,jdbcType=VARCHAR}, #{item.studentPhone,jdbcType=VARCHAR}, #{item.validationUid,jdbcType=BIGINT}, #{item.validationTime,jdbcType=TIMESTAMP}, #{item.studentIdCard,jdbcType=VARCHAR}, #{item.expirationDate,jdbcType=TIMESTAMP}, #{item.systemCourseName,jdbcType=VARCHAR}, #{item.createTime,jdbcType=TIMESTAMP})
+        </foreach>
+    </insert>
+    
+    <delete id="delete" parameterType="java.lang.Long" >
+        <!--  自动生成 2016年11月17日 删除数据 -->
+        delete from app_course_order
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    
+    <delete id="deletes" >
+        <!-- WARNING -  自动生成 2016-11-17 删除多条数据 -->
+        delete from app_course_order where id in 
+        <foreach collection="ids" item="item" open="(" separator="," close=")" >
+            #{item}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteByEntity" >
+        <!-- WARNING -  自动生成 2016-11-17 通过实体类中的条件删除数据 -->
+        delete from app_course_order
+        <where >
+            <if test="param.id != null " >
+                and id = #{param.id,jdbcType=BIGINT}
+            </if>
+            <if test="param.orderNo != null and param.orderNo != ''" >
+                and order_no = #{param.orderNo,jdbcType=VARCHAR}
+            </if>
+            <if test="param.courseId != null " >
+                and course_id = #{param.courseId,jdbcType=BIGINT}
+            </if>
+            <if test="param.courseTypeId != null " >
+                and course_type_id = #{param.courseTypeId,jdbcType=BIGINT}
+            </if>
+            <if test="param.recordType != null " >
+                and record_type = #{param.recordType,jdbcType=INTEGER}
+            </if>
+            <if test="param.uid != null " >
+                and uid = #{param.uid,jdbcType=BIGINT}
+            </if>
+            <if test="param.goodsId != null " >
+                and goods_id = #{param.goodsId,jdbcType=BIGINT}
+            </if>
+            <if test="param.qty != null " >
+                and qty = #{param.qty,jdbcType=INTEGER}
+            </if>
+            <if test="param.originAmount != null " >
+                and origin_amount = #{param.originAmount,jdbcType=DECIMAL}
+            </if>
+            <if test="param.couponId != null " >
+                and coupon_id = #{param.couponId,jdbcType=BIGINT}
+            </if>
+            <if test="param.isCoupon != null " >
+                and is_coupon = #{param.isCoupon,jdbcType=INTEGER}
+            </if>
+            <if test="param.discountBlue != null " >
+                and discount_blue = #{param.discountBlue,jdbcType=DECIMAL}
+            </if>
+            <if test="param.discountRed != null " >
+                and discount_red = #{param.discountRed,jdbcType=DECIMAL}
+            </if>
+            <if test="param.payAmount != null " >
+                and pay_amount = #{param.payAmount,jdbcType=DECIMAL}
+            </if>
+            <if test="param.payMethod != null and param.payMethod != ''" >
+                and pay_method = #{param.payMethod,jdbcType=VARCHAR}
+            </if>
+            <if test="param.payMethodType != null and param.payMethodType != ''" >
+                and pay_method_type = #{param.payMethodType,jdbcType=VARCHAR}
+            </if>
+            <if test="param.payStatus != null " >
+                and pay_status = #{param.payStatus,jdbcType=INTEGER}
+            </if>
+            <if test="param.isPay != null " >
+                and is_pay = #{param.isPay,jdbcType=INTEGER}
+            </if>
+            <if test="param.payTime != null " >
+                and pay_time = #{param.payTime,jdbcType=TIMESTAMP}
+            </if>
+            <if test="param.courseCode != null and param.courseCode != ''" >
+                and course_code = #{param.courseCode,jdbcType=VARCHAR}
+            </if>
+            <if test="param.isUse != null " >
+                and is_use = #{param.isUse,jdbcType=INTEGER}
+            </if>
+            <if test="param.studentName != null and param.studentName != ''" >
+                and student_name = #{param.studentName,jdbcType=VARCHAR}
+            </if>
+            <if test="param.studentPhone != null and param.studentPhone != ''" >
+                and student_phone = #{param.studentPhone,jdbcType=VARCHAR}
+            </if>
+            <if test="param.validationUid != null " >
+                and validation_uid = #{param.validationUid,jdbcType=BIGINT}
+            </if>
+            <if test="param.validationTime != null " >
+                and validation_time = #{param.validationTime,jdbcType=TIMESTAMP}
+            </if>
+            <if test="param.studentIdCard != null and param.studentIdCard != ''" >
+                and student_id_card = #{param.studentIdCard,jdbcType=VARCHAR}
+            </if>
+            <if test="param.expirationDate != null " >
+                and expiration_date = #{param.expirationDate,jdbcType=TIMESTAMP}
+            </if>
+            <if test="param.systemCourseName != null and param.systemCourseName != ''" >
+                and system_course_name = #{param.systemCourseName,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </delete>
+    
+    <select id="findAll" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-11-17  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp 
+    </select>
+    
+    <select id="findEntityByCondition" resultMap="BaseResultMap" >
+        <!-- WARNING -  自动生成 2016-11-17  通过实体中的条件查询所有 -->
+        select temp.* from (
+        <include refid="findByPageSql" />
+        ) temp limit 0,1
+    </select>
+</mapper>

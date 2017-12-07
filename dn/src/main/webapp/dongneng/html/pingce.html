@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hans" class="bg-1">
+
+<head>
+    <!-- 声明文档使用的字符编码 -->
+    <meta charset="UTF-8">
+    <!-- 优先使用 IE 最新版本和 Chrome -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <!-- 页面描述 -->
+    <meta name="description" content="不超过150个字符" />
+    <!-- 禁用uc浏览器字体放大 -->
+    <meta name="wap-font-scale" content="no">
+    <!-- 页面关键词 -->
+    <meta name="keywords" content="" />
+    <!-- 网页作者 -->
+    <meta name="author" content="name, email@gmail.com" />
+    <!-- 添加到主屏后的标题（iOS 6 新增） -->
+    <meta name="apple-mobile-web-app-title" content="标题">
+    <!-- 添加 favicon icon -->
+    <!-- <link rel="shortcut icon" type="image/ico" href="/favicon.ico"/> -->
+    <!-- 标题 -->
+    <title>评测</title>
+    <script src="../js/flexible_css.debug.js"></script>
+    <link rel="stylesheet" href="../css/share.css" media="screen" title="no title">
+    <script src="../js/flexible.debug.js"></script>
+    <script type="text/javascript" src="../js/fastclick.js"></script>
+</head>
+
+<body>
+    <section class="mui-header mui-flex">
+        <a href="#" class="fixed cell"><i class="icon"></i></a>
+        <span class="cell title">评测</span>
+        <a href="#" class="fixed cell"></a>
+    </section>
+    <section class="list-layout-1">
+        <div class="title">1.测试题目</div>
+        <ul class="content">
+            <li class="list text-overflow active">选择题内容1</li>
+            <li class="list text-overflow">选择题内容2</li>
+            <li class="list text-overflow">选择题内容3</li>
+        </ul>
+        <input type="hidden" name="" class="input" />
+    </section>
+    <section class="list-layout-1">
+        <div class="title">1.测试题目</div>
+        <ul class="content">
+            <li class="list text-overflow">选择题内容4</li>
+            <li class="list text-overflow">选择题内容5</li>
+            <li class="list text-overflow">选择题内容6</li>
+        </ul>
+        <input type="hidden" name="" class="input" />
+    </section>
+    <div class="submit-1">
+        <button type="button" class="button" name="button">提交</button>
+    </div>
+
+    <script type="text/javascript" src="../js/zepto.js"></script>
+    <script type="text/javascript">
+        if ('addEventListener' in document) {
+            document.addEventListener('DOMContentLoaded', function() {
+                FastClick.attach(document.body);
+            }, false);
+        }
+
+        $('.list-layout-1').find('.content').on('click', '.list', function() {
+
+            var $this = $(this);
+            var $value = $this.text();
+
+            $this.siblings('.list').removeClass('active');
+
+            if ($this.hasClass('active')) {
+                $this.removeClass('active');
+                $this.parent('.content').siblings('.input').val('');
+            } else {
+                $this.addClass('active');
+                $this.parent('.content').siblings('.input').val($value);
+            }
+
+        });
+    </script>
+</body>
+
+</html>
