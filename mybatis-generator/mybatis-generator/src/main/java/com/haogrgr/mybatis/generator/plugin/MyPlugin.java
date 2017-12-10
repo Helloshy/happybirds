@@ -55,7 +55,7 @@ public class MyPlugin extends PluginAdapter implements Plugin {
     public boolean modelBaseRecordClassGenerated(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
         //所有model继承自BaseModel
         FullyQualifiedJavaType superInterface = new FullyQualifiedJavaType(Config.BASE_MODEL);
-        //topLevelClass.addImportedType(superInterface);
+        topLevelClass.addImportedType(superInterface);
         //topLevelClass.addSuperInterface(superInterface);
         
         topLevelClass.setSuperClass(superInterface);
@@ -98,7 +98,7 @@ public class MyPlugin extends PluginAdapter implements Plugin {
         IntrospectedColumn colum = introspectedTable.getColumn("id");
         
         StringBuilder sb = new StringBuilder();
-        sb.append(" * @author zoneyu ").append(getDateTimeStr("yyyy-MM-dd", new Date()));
+        sb.append(" * @author shy ").append(getDateTimeStr("yyyy-MM-dd", new Date()));
         topLevelClass.addJavaDocLine("/**");
         topLevelClass.addJavaDocLine(" * " + colum.getRemarks().replace("id", "") + "：" + introspectedTable.getFullyQualifiedTable());
         topLevelClass.addJavaDocLine(sb.toString());
@@ -164,7 +164,7 @@ public class MyPlugin extends PluginAdapter implements Plugin {
         IntrospectedColumn colum = introspectedTable.getColumn("id");
         
         StringBuilder sb = new StringBuilder();
-        sb.append(" * @author zoneyu ").append(getDateTimeStr("yyyy-MM-dd", new Date()));
+        sb.append(" * @author shy ").append(getDateTimeStr("yyyy-MM-dd", new Date()));
         interfaze.addJavaDocLine("/**");
         interfaze.addJavaDocLine(" * " + colum.getRemarks().replace("id", "") + "的数据操作接口");
         interfaze.addJavaDocLine(sb.toString());
@@ -228,7 +228,7 @@ public class MyPlugin extends PluginAdapter implements Plugin {
         addInsertsMethod(mapper, introspectedTable, "inserts");
         addDeletesMethod(mapper, introspectedTable, "deletes");
         
-        /*by zoneyu 15-4-28 新增删除方法，通过实体类中的条件删除*/
+        /*by shy 15-4-28 新增删除方法，通过实体类中的条件删除*/
         addDeleteByEntity(mapper, introspectedTable, "deleteByEntity") ;
         addFindByEntity(mapper, introspectedTable, "findAll") ;
                
@@ -280,7 +280,7 @@ public class MyPlugin extends PluginAdapter implements Plugin {
     
     /**
      * 通过实体类中的条件删除数据
-     * @author zoneyu 15-4-28
+     * @author shy 15-4-28
      */
     private void addFindByEntity(XmlElement mapper, IntrospectedTable table, String id) {
     	XmlElement ele = new XmlElement("select");
@@ -395,7 +395,7 @@ public class MyPlugin extends PluginAdapter implements Plugin {
     
     /**
      * 通过实体类中的条件删除数据
-     * @author zoneyu 15-4-28
+     * @author shy 15-4-28
      */
     private void addDeleteByEntity(XmlElement mapper, IntrospectedTable table, String id) {
     	if (table.getPrimaryKeyColumns().size() != 1) {

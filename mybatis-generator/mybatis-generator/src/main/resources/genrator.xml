@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>  
 <!DOCTYPE generatorConfiguration  
-  PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"  
-  "E:\works\stsworkspace2\mybatis-generator\src\main\java\org\mybatis\generator\config\xml\mybatis-generator-config_1_0.dtd">
+  PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+		"http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+  <!--"E:\works\stsworkspace2\mybatis-generator\src\main\java\org\mybatis\generator\config\xml\mybatis-generator-config_1_0.dtd"-->
   <!-- E:\works\stsworkspace2\mybatis-generator\src\main\java\org\mybatis\generator\config\xml\mybatis-generator-config_1_0.dtd -->
 <!-- http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd -->
 <generatorConfiguration>
@@ -23,7 +24,7 @@
 
 		<!--数据库连接的信息：驱动类、连接地址、用户名、密码 -->
 		<jdbcConnection driverClass="com.mysql.jdbc.Driver"
-			connectionURL="jdbc:mysql://127.0.0.1:3306/forum?autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=utf-8"
+			connectionURL="jdbc:mysql://127.0.0.1:3306/cheanxin?autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=utf-8"
 			userId="root" password="root">
 		</jdbcConnection>
 
@@ -34,27 +35,27 @@
 
 		<!-- 生成模型的包名和位置 -->
 		<!-- <javaModelGenerator targetProject="F:/workspace/forum/src/main/java" targetPackage="com.kapphk.forum.bean"> -->
-		<javaModelGenerator targetProject="F:/workspace/forum/src/main/java" targetPackage="com.kapphk.forum.bean">
+		<javaModelGenerator targetProject="D:\\ideaworkspace\\demo2\\src\\main\\java" targetPackage="com.example.demo.model">
 			<property name="enableSubPackages" value="false" />
 			<property name="trimStrings" value="false" />
 		</javaModelGenerator>
 		
 		<!-- 生成service包名和位置  暂未实现-->
-		<javaServiceGenerator targetPackage="F:/workspace/forum/src/main/java" targetProject="com.kapphk.forum.service">
+		<!--<javaServiceGenerator targetPackage="D:\\ideaworkspace\\demo2\\src\\main\\java" targetProject="com.example.demo.service">
 			<property name="enableSubPackages" value="false" />
-		</javaServiceGenerator>
+		</javaServiceGenerator>-->
 		<!-- 生成Controller包名和位置  暂未实现-->
-		<javaControllerGenerator targetPackage="F:/workspace/forum/src/main/java" targetProject="com.kapphk.forum.controller">
+		<!--<javaControllerGenerator targetPackage="D:\\ideaworkspace\\demo2\\src\\main\\java" targetProject="com.example.demo.web">
 			<property name="enableSubPackages" value="false" />
-		</javaControllerGenerator>
+		</javaControllerGenerator>-->
 
 		<!-- 生成的映射文件包名和位置 -->
-		<sqlMapGenerator targetProject="F:/workspace/forum/src/main/java" targetPackage="com.kapphk.forum.dao.mapperxml">
+		<sqlMapGenerator targetProject="D:\ideaworkspace\demo2\src\main\resources" targetPackage="mapper">
 			<property name="enableSubPackages" value="false" />
 		</sqlMapGenerator>
 
 		<!-- 生成DAO的包名和位置 -->
-		<javaClientGenerator type="XMLMAPPER" targetProject="F:/workspace/forum/src/main/java" targetPackage="com.kapphk.forum.dao.mapper">
+		<javaClientGenerator type="XMLMAPPER" targetProject="D:\\ideaworkspace\\demo2\\src\\main\\java" targetPackage="com.example.demo.mapper">
 			<property name="enableSubPackages" value="false" />
 		</javaClientGenerator>
 		
@@ -63,7 +64,7 @@
 		<!-- tableName:用于自动生成代码的数据库表；domainObjectName:对应于数据库表的javaBean类名 -->
 		
 		  
-		<table tableName="dynamic_album_photo" domainObjectName="BeanAlbumPhoto"
+		<table tableName="dept_city" domainObjectName="DeptCity"
 			enableSelectByExample="false" enableDeleteByExample="false" enableCountByExample="false"
 			enableUpdateByExample="false" selectByExampleQueryId="false">
 			<generatedKey column="id" sqlStatement="JDBC" />

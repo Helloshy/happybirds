@@ -218,7 +218,7 @@ public class DefaultCommentGenerator implements CommentGenerator {
         field.addJavaDocLine("/**"); //$NON-NLS-1$
         field.addJavaDocLine(" * 表字段：" + sb.toString() + " 注释：" + introspectedColumn.getRemarks()); //$NON-NLS-1$
         //field.addJavaDocLine(sb.toString());
-        field.addJavaDocLine(" * @author zoneyu " + getDateTimeStr("yyyy-MM-dd", new Date()));
+        field.addJavaDocLine(" * @author shy " + getDateTimeStr("yyyy-MM-dd", new Date()));
         //addJavadocTag(field, true);
         field.addJavaDocLine(" */"); //$NON-NLS-1$
     }

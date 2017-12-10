@@ -14,7 +14,7 @@ import com.haogrgr.mybatis.generator.plugin.MyPlugin;
 
 /**
  * Mybatis生成工具类
- * @author zoneyu 2014年10月20日
+ * @author shy 2014年10月20日
  */
 public class MybatisUtil {
 	public static void main(String[] args) throws Exception {

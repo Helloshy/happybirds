@@ -24,7 +24,7 @@ import org.mybatis.generator.api.dom.xml.Attribute;
 import org.mybatis.generator.api.dom.xml.XmlElement;
 
 /**
- * @author zoneyu
+ * @author shy
  */
 public class JavaServiceGeneratorConfiguration extends TypedPropertyHolder {
     private String targetPackage;

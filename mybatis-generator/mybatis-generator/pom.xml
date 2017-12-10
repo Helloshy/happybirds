@@ -23,14 +23,14 @@
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>5.1.29</version>
+			<version>5.1.39</version>
 		</dependency>
-		<dependency>
+		<!--<dependency>
 			<groupId>org.apache.tomcat</groupId>
 			<artifactId>servlet-api</artifactId>
 			<version>6.0.41</version>
 			<scope>test</scope>
-		</dependency>
+		</dependency>-->
 		<!-- log -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -53,7 +53,7 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.7</version>
+			<version>4.11</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
