@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.airparking.apms.api.parkEarning.mapper.ParkEarningMapper">
+	
+	<select id="findMonthrentRecByTenantId" resultType="java.util.Map"
+		parameterType="java.util.Map">
+		select
+		p.pname as parkName,
+		re.main_plate_no as mainPlateNo,
+		re.amount,
+		re.created_date as createdDate,
+		re.start_date as startDate,
+		re.end_date as endDate 
+		from 
+		monthrent_rec re join park p on p.id = re.park_id 
+		where 
+		re.created_date <![CDATA[ >=  ]]>#{start,jdbcType=TIMESTAMP} 
+		and re.created_date <![CDATA[ <  ]]> #{end, jdbcType=TIMESTAMP} 
+		and re.status = 0 and re.disabled = 0 
+		and re.operation_type = 1 
+	 	and re.payment_type = 1 
+		and p.tenancy_id = #{tenantId, jdbcType=BIGINT} 
+	</select>
+
+	<select id="findMonthrentParkAndTotal" resultType="java.util.Map"
+		parameterType="java.util.Map">
+		select
+		p.pname as parkName,
+		sum(amount) as total
+		from
+		monthrent_rec re join park p on re.park_id = p.id
+		where 
+		re.created_date <![CDATA[ >=  ]]>#{start,jdbcType=TIMESTAMP} 
+		and re.created_date <![CDATA[ <  ]]> #{end, jdbcType=TIMESTAMP} 
+		and re.operation_type = 1 
+		and re.payment_type = 1 
+		and re.status = 0 and re.disabled = 0 
+		and p.tenancy_id = #{tenantId, jdbcType=BIGINT} 
+		GROUP BY re.park_id 
+	</select>
+
+	<select id="findParkOrderByTenantId" resultType="java.util.Map"
+		parameterType="java.util.Map">
+		select p.pname as parkName,t.plate_no as plateNo,
+		t.amount as amount,o.updated_date as updateTime,
+		o.start_time as startTime,o.end_time as endTime
+		from payment t join park p on t.park_id =p.id join park_order o on o.trade_no = t.out_trade_no 
+		where t.payment_way = 1 and t.type =1  and o.is_deleted = 0 and t.amount>0 
+		and o.created_date <![CDATA[ >= ]]>#{start,jdbcType = TIMESTAMP} 
+		and o.created_date <![CDATA[ < ]]>#{end,jdbcType = TIMESTAMP} 
+		and p.tenancy_id = #{tenantId, jdbcType=BIGINT} 
+	</select>
+
+	<select id="findParkOrderAndTotal" resultType="java.util.Map"
+		parameterType="java.util.Map">
+		select p.pname as parkName, sum(t.amount) as total 
+		from payment t join park p on t.park_id =p.id  join park_order o on o.trade_no = t.out_trade_no 
+		where t.payment_way = 1 and t.type =1
+		and o.created_date <![CDATA[ >=  ]]>#{start,jdbcType=TIMESTAMP} 
+		and o.created_date <![CDATA[ <  ]]>#{end, jdbcType=TIMESTAMP} 
+		and o.is_deleted = 0 
+		and p.tenancy_id = #{tenantId, jdbcType=BIGINT} 
+		GROUP BY o.park_id 
+	</select>
+
+	<select id="findCodePay" resultType="java.util.Map" parameterType="java.util.Map">
+		select 
+		date_format(pa.created_date , '%Y-%m-%d') as payTime, p.pname as parkName, 
+		sum(pa.amount)/100 as paySum, count(pa.id) payCount 
+		from payment pa, park_order o, park p  
+		where pa.out_trade_no =o.trade_no and o.park_id =p.id and 
+		pa.payment_way in (1,4) and pa.type in(1,4)
+			<if test="start != null">
+			and pa.created_date <![CDATA[ >=  ]]>#{start,jdbcType=TIMESTAMP} 
+			</if> 
+			<if test="end != null"> 
+			and pa.created_date <![CDATA[ <  ]]>#{end, jdbcType=TIMESTAMP} 
+			</if>
+		GROUP BY  p.pname 
+	</select>
+
+	<select id="findCodePayOrder" resultType="java.util.Map" parameterType="java.util.Map">
+	select 
+	pa.created_date as payTime, p.pname as parkName,o.total_amount/100 as orderSum , 
+	pa.amount/100 as paySum ,pa.plate_no as plateNo,o.start_time as startTime,o.end_time as endTime 
+	from payment pa, park_order o, park p  
+	where pa.out_trade_no =o.trade_no and o.park_id =p.id and 
+	pa.payment_way in(1,4) and pa.type in(1,4) and
+	pa.created_date <![CDATA[ >=  ]]>#{start,jdbcType=TIMESTAMP}  and 
+	pa.created_date <![CDATA[ <  ]]>#{end, jdbcType=TIMESTAMP} 
+	
+	</select>
+
+	<select id="findTenantId" resultType="java.util.Map">
+	select id as tenantId ,tname as tenantName from tenant where is_deleted = 0 and is_disabled = 0
+	</select>
+	
+	<select id="findTenantMail" resultType="java.lang.String" parameterType="java.lang.Long">
+	select mail from tenant_mail where tenant_id = #{tenantId,jdbcType=BIGINT} and is_deleted = 0 and 
+	is_disabled = 0
+	</select>
+	
+</mapper>

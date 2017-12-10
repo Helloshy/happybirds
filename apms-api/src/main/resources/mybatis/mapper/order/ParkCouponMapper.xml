@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.airparking.apms.api.order.mapper.ParkCouponMapper">
+
+    <resultMap id="entityMap" type="com.airparking.apms.api.order.entity.ParkCoupon" >
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="park_id" property="parkId" jdbcType="BIGINT" />
+        <result column="plate_no" property="plateNo" jdbcType="VARCHAR" />
+        <result column="code" property="code" jdbcType="VARCHAR" />
+        <result column="status" property="status" jdbcType="TINYINT" />
+        <result column="mobile" property="mobile" jdbcType="VARCHAR" />
+        <result column="order_id" property="orderId" jdbcType="BIGINT" />
+        <result column="type" property="type" jdbcType="TINYINT" />
+        <result column="discount" property="discount" jdbcType="INTEGER" />
+        <result column="limit_time" property="limitTime" jdbcType="INTEGER" />
+        <result column="effective_date" property="effectiveDate" jdbcType="TIMESTAMP" />
+        <result column="expired_date" property="expiredDate" jdbcType="TIMESTAMP" />
+        <result column="is_deleted" property="isDeleted" jdbcType="BIT" />
+        <result column="created_date" property="createdDate" jdbcType="TIMESTAMP" />
+        <result column="created_by" property="createdBy" jdbcType="VARCHAR" />
+        <result column="updated_date" property="updatedDate" jdbcType="TIMESTAMP" />
+        <result column="updated_by" property="updatedBy" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <sql id="listColumn" >
+        id,park_id,plate_no,code,status,mobile,order_id,type,discount,limit_time,effective_date,expired_date,is_deleted,created_date,created_by,updated_date,updated_by
+    </sql>
+
+    <select id="get" resultMap="entityMap" parameterType="java.lang.Long" >
+        select
+        <include refid="listColumn" />
+        from user_park_coupon
+        where id = #{id, jdbcType=BIGINT}
+    </select>
+    
+    <select id="findAll" resultMap="entityMap">
+        select
+        <include refid="listColumn" />
+        from user_park_coupon where plate_no <![CDATA[<>]]> null OR plate_no <![CDATA[<>]]> '' 
+    </select>
+    
+    <select id="findByOrderId" resultMap="entityMap" parameterType="java.lang.Long">
+        select
+        <include refid="listColumn" />
+        from user_park_coupon
+        where order_id = #{orderId, jdbcType=BIGINT}
+    </select>
+    
+    <select id="findByCode" resultMap="entityMap" parameterType="java.lang.String">
+        select
+        <include refid="listColumn" />
+        from user_park_coupon
+        where code = #{code, jdbcType=VARCHAR}
+    </select>
+
+    <insert id="add" parameterType="com.airparking.apms.api.order.entity.ParkCoupon">
+        <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
+                SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into user_park_coupon
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                id,
+            </if>
+            <if test="parkId != null" >
+                park_id,
+            </if>
+            <if test="plateNo != null" >
+                plate_no,
+            </if>
+            <if test="code != null" >
+                code,
+            </if>
+            <if test="status != null" >
+                status,
+            </if>
+            <if test="mobile != null" >
+                mobile,
+            </if>
+            <if test="orderId != null" >
+                order_id,
+            </if>
+            <if test="type != null" >
+                type,
+            </if>
+            <if test="discount != null" >
+                discount,
+            </if>
+            <if test="limitTime != null" >
+                limit_time,
+            </if>
+            <if test="effectiveDate != null" >
+                effective_date,
+            </if>
+            <if test="expiredDate != null" >
+                expired_date,
+            </if>
+            <if test="isDeleted != null" >
+                is_deleted,
+            </if>
+            <if test="createdDate != null" >
+                created_date,
+            </if>
+            <if test="createdBy != null" >
+                created_by,
+            </if>
+            <if test="updatedDate != null" >
+                updated_date,
+            </if>
+            <if test="updatedBy != null" >
+                updated_by,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                #{id, jdbcType=BIGINT},
+            </if>
+            <if test="parkId != null" >
+                #{parkId, jdbcType=BIGINT},
+            </if>
+            <if test="plateNo != null" >
+                #{plateNo, jdbcType=VARCHAR},
+            </if>
+            <if test="code != null" >
+                #{code, jdbcType=VARCHAR},
+            </if>
+            <if test="status != null" >
+                #{status, jdbcType=TINYINT},
+            </if>
+            <if test="mobile != null" >
+                #{mobile, jdbcType=VARCHAR},
+            </if>
+            <if test="orderId != null" >
+                #{orderId, jdbcType=BIGINT},
+            </if>
+            <if test="type != null" >
+                #{type, jdbcType=TINYINT},
+            </if>
+            <if test="discount != null" >
+                #{discount, jdbcType=INTEGER},
+            </if>
+            <if test="limitTime != null" >
+                #{limitTime, jdbcType=INTEGER},
+            </if>
+            <if test="effectiveDate != null" >
+                #{effectiveDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="expiredDate != null" >
+                #{expiredDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="isDeleted != null" >
+                #{isDeleted, jdbcType=BIT},
+            </if>
+            <if test="createdDate != null" >
+                #{createdDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="createdBy != null" >
+                #{createdBy, jdbcType=VARCHAR},
+            </if>
+            <if test="updatedDate != null" >
+                #{updatedDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="updatedBy != null" >
+                #{updatedBy, jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.airparking.apms.api.order.entity.ParkCoupon" >
+        update user_park_coupon
+        set
+        <trim suffixOverrides=",">
+            <if test="id != null" >
+                id = #{id, jdbcType=BIGINT},
+            </if>
+            <if test="parkId != null" >
+                park_id = #{parkId, jdbcType=BIGINT},
+            </if>
+            <if test="plateNo != null" >
+                plate_no = #{plateNo, jdbcType=VARCHAR},
+            </if>
+            <if test="code != null" >
+                code = #{code, jdbcType=VARCHAR},
+            </if>
+            <if test="status != null" >
+                status = #{status, jdbcType=TINYINT},
+            </if>
+            <if test="mobile != null" >
+                mobile = #{mobile, jdbcType=VARCHAR},
+            </if>
+            <if test="orderId != null" >
+                order_id = #{orderId, jdbcType=BIGINT},
+            </if>
+            <if test="type != null" >
+                type = #{type, jdbcType=TINYINT},
+            </if>
+            <if test="discount != null" >
+                discount = #{discount, jdbcType=INTEGER},
+            </if>
+            <if test="limitTime != null" >
+                limit_time = #{limitTime, jdbcType=INTEGER},
+            </if>
+            <if test="effectiveDate != null" >
+                effective_date = #{effectiveDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="expiredDate != null" >
+                expired_date = #{expiredDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="isDeleted != null" >
+                is_deleted = #{isDeleted, jdbcType=BIT},
+            </if>
+            <if test="createdDate != null" >
+                created_date = #{createdDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="createdBy != null" >
+                created_by = #{createdBy, jdbcType=VARCHAR},
+            </if>
+            <if test="updatedDate != null" >
+                updated_date = #{updatedDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="updatedBy != null" >
+                updated_by = #{updatedBy, jdbcType=VARCHAR},
+            </if>
+        </trim>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <select id="count" resultType="java.lang.Integer" >
+        select count(1) from user_park_coupon
+    </select>
+
+    <select id="find" resultMap="entityMap" parameterType="map" >
+        select
+        <include refid="listColumn" />
+        from user_park_coupon
+        limit #{start},#{count}
+    </select>
+
+    <update id="delete" parameterType="java.lang.Long" >
+        update user_park_coupon
+        set is_deleted = true where is_deleted = false and id = #{id}
+    </update>
+    
+    <select id="findByParkId" resultMap="entityMap" parameterType="java.lang.Long">
+        select
+        <include refid="listColumn" />
+        from user_park_coupon
+        where park_id = #{parkId} and (plate_no <![CDATA[<>]]> null OR plate_no <![CDATA[<>]]> '')
+    </select>
+
+</mapper>

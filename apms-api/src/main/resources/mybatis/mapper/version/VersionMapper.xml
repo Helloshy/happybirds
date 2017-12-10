@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.airparking.apms.api.version.mapper.VersionMapper">
+
+    <select id="find" resultType="java.util.Map" parameterType="java.util.Map" >
+    	SELECT
+			*
+		FROM
+			offline_version
+		WHERE
+			appid = #{appid}
+		AND is_deleted = 0
+		AND is_disabled = 0
+		AND is_updated = 0
+    </select>
+
+    <update id="updateStatus" parameterType="java.util.Map" >
+        UPDATE offline_version SET is_updated = #{isUpdated} WHERE id = #{id}
+    </update>
+
+</mapper>

@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.airparking.apms.api.holiday.mapper.HolidayMapper">
+
+    <resultMap id="entityMap" type="com.airparking.apms.api.holiday.entity.Holiday" >
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="name" property="name" jdbcType="VARCHAR" />
+        <result column="start_time" property="startTime" jdbcType="TIMESTAMP" />
+        <result column="end_time" property="endTime" jdbcType="TIMESTAMP" />
+        <result column="days" property="days" jdbcType="INTEGER" />
+        <result column="is_send" property="isSend" jdbcType="BIT" />
+    </resultMap>
+
+    <sql id="listColumn" >
+        id,name,start_time,end_time,days,is_send
+    </sql>
+
+    <select id="get" resultMap="entityMap" parameterType="java.lang.Long" >
+        select
+        <include refid="listColumn" />
+        from holidays
+        where id = #{id, jdbcType=BIGINT}
+    </select>
+    
+    <select id="findByName" resultMap="entityMap" parameterType="java.lang.String" >
+        select
+        <include refid="listColumn" />
+        from holidays
+        where name = #{name, jdbcType=VARCHAR}
+    </select>
+
+    <select id="findByIsSend" resultMap="entityMap" parameterType="java.lang.Boolean" >
+        select
+        <include refid="listColumn" />
+        from holidays
+        where is_send = #{isSend, jdbcType=BIT}
+    </select>
+    
+    <select id="findAll" resultMap="entityMap">
+        select
+        <include refid="listColumn" />
+        from holidays
+    </select>
+
+    <insert id="add" parameterType="com.airparking.apms.api.holiday.entity.Holiday">
+        <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
+                SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into holidays
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                id,
+            </if>
+            <if test="name != null" >
+                name,
+            </if>
+            <if test="startTime != null" >
+                start_time,
+            </if>
+            <if test="endTime != null" >
+                end_time,
+            </if>
+            <if test="days != null" >
+                days,
+            </if>
+            <if test="isSend != null" >
+                is_send,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                #{id, jdbcType=BIGINT},
+            </if>
+            <if test="name != null" >
+                #{name, jdbcType=VARCHAR},
+            </if>
+            <if test="startTime != null" >
+                #{startTime, jdbcType=TIMESTAMP},
+            </if>
+            <if test="endTime != null" >
+                #{endTime, jdbcType=TIMESTAMP},
+            </if>
+            <if test="days != null" >
+                #{days, jdbcType=INTEGER},
+            </if>
+            <if test="isSend != null" >
+                #{isSend, jdbcType=BIT},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.airparking.apms.api.holiday.entity.Holiday" >
+        update holidays
+        set
+        <trim suffixOverrides=",">
+            <if test="id != null" >
+            id = #{id, jdbcType=BIGINT},
+            </if>
+            <if test="name != null" >
+                name = #{name, jdbcType=VARCHAR},
+            </if>
+            <if test="startTime != null" >
+                start_time = #{startTime, jdbcType=TIMESTAMP},
+            </if>
+            <if test="endTime != null" >
+                end_time = #{endTime, jdbcType=TIMESTAMP},
+            </if>
+            <if test="days != null" >
+                days = #{days, jdbcType=INTEGER},
+            </if>
+            <if test="isSend != null" >
+                is_send = #{isSend, jdbcType=BIT},
+            </if>
+        </trim>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <select id="count" resultType="java.lang.Integer" >
+        select count(1) from holidays
+    </select>
+
+    <select id="find" resultMap="entityMap" parameterType="map" >
+        select
+        <include refid="listColumn" />
+        from holidays
+        limit #{start},#{count}
+    </select>
+
+    <update id="delete" parameterType="java.lang.Long" >
+        delete from holidays where id = #{id,jdbcType=BIGINT}
+    </update>
+
+</mapper>

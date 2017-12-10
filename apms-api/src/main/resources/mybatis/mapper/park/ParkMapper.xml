@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.airparking.apms.api.park.mapper.ParkMapper">
+
+    <resultMap id="entityMap" type="com.airparking.apms.api.park.entity.Park" >
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="pname" property="pname" jdbcType="VARCHAR" />
+        <result column="tenancy_id" property="tenancyId" jdbcType="BIGINT" />
+        <result column="longitude" property="longitude" jdbcType="DOUBLE" />
+        <result column="latitude" property="latitude" jdbcType="DOUBLE" />
+        <result column="district_id" property="districtId" jdbcType="BIGINT" />
+        <result column="address" property="address" jdbcType="VARCHAR" />
+        <result column="contact" property="contact" jdbcType="VARCHAR" />
+        <result column="mobile" property="mobile" jdbcType="VARCHAR" />
+        <result column="free_time" property="freeTime" jdbcType="INTEGER" />
+        <result column="flags" property="flags" jdbcType="TINYINT" />
+        <result column="month_died_days" property="monthDiedDays" jdbcType="TINYINT" />
+        <result column="no_temp_start_date" property="noTempStartDate" jdbcType="TIMESTAMP" />
+        <result column="no_temp_end_date" property="noTempEndDate" jdbcType="TIMESTAMP" />
+        <result column="total_space" property="totalSpace" jdbcType="INTEGER" />
+        <result column="temp_space" property="tempSpace" jdbcType="INTEGER" />
+        <result column="fix_space" property="fixSpace" jdbcType="INTEGER" />
+        <result column="is_disabled" property="isDisabled" jdbcType="BIT" />
+        <result column="is_deleted" property="isDeleted" jdbcType="BIT" />
+        <result column="created_date" property="createdDate" jdbcType="TIMESTAMP" />
+        <result column="created_by" property="createdBy" jdbcType="VARCHAR" />
+        <result column="updated_date" property="updatedDate" jdbcType="TIMESTAMP" />
+        <result column="updated_by" property="updatedBy" jdbcType="VARCHAR" />
+        <result column="is_day_parting" property="isDayParting" jdbcType="TINYINT" />
+        <result column="is_online_pay" property="isOnlinePay" jdbcType="TINYINT" />
+    </resultMap>
+
+    <sql id="listColumn" >
+        id,pname,tenancy_id,longitude,latitude,district_id,address,contact,mobile,free_time,flags,month_died_days,no_temp_start_date,no_temp_end_date,total_space,temp_space,fix_space,is_disabled,is_deleted,created_date,created_by,updated_date,updated_by,is_online_pay,is_day_parting
+    </sql>
+
+    <select id="get" resultMap="entityMap" parameterType="java.lang.Long" >
+        select
+        <include refid="listColumn" />
+        from park
+        where id = #{id, jdbcType=BIGINT}
+    </select>
+    
+    <select id="findByName" resultMap="entityMap" parameterType="java.lang.String" >
+        select
+        <include refid="listColumn" />
+        from park
+        where pname = #{name, jdbcType=VARCHAR}
+    </select>
+    
+    <select id="findAll" resultMap="entityMap">
+        select
+        <include refid="listColumn" />
+        from park
+    </select>
+
+    <insert id="add" parameterType="com.airparking.apms.api.park.entity.Park">
+        <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
+                SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into park
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                id,
+            </if>
+            <if test="pname != null" >
+                pname,
+            </if>
+            <if test="tenancyId != null" >
+                tenancy_id,
+            </if>
+            <if test="longitude != null" >
+                longitude,
+            </if>
+            <if test="latitude != null" >
+                latitude,
+            </if>
+            <if test="districtId != null" >
+                district_id,
+            </if>
+            <if test="address != null" >
+                address,
+            </if>
+            <if test="contact != null" >
+                contact,
+            </if>
+            <if test="mobile != null" >
+                mobile,
+            </if>
+            <if test="freeTime != null" >
+                free_time,
+            </if>
+            <if test="flags != null" >
+                flags,
+            </if>
+            <if test="monthDiedDays != null" >
+                month_died_days,
+            </if>
+            <if test="noTempStartDate != null" >
+                no_temp_start_date,
+            </if>
+            <if test="noTempEndDate != null" >
+                no_temp_end_date,
+            </if>
+            <if test="totalSpace != null" >
+                total_space,
+            </if>
+            <if test="tempSpace != null" >
+                temp_space,
+            </if>
+            <if test="fixSpace != null" >
+                fix_space,
+            </if>
+            <if test="isDisabled != null" >
+                is_disabled,
+            </if>
+            <if test="isDeleted != null" >
+                is_deleted,
+            </if>
+            <if test="createdDate != null" >
+                created_date,
+            </if>
+            <if test="createdBy != null" >
+                created_by,
+            </if>
+            <if test="updatedDate != null" >
+                updated_date,
+            </if>
+            <if test="updatedBy != null" >
+                updated_by,
+            </if>
+            <if test="isDayParting != null" >
+                is_day_parting,
+            </if>
+            <if test="isOnlinePay != null" >
+                is_online_pay,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                #{id, jdbcType=BIGINT},
+            </if>
+            <if test="pname != null" >
+                #{pname, jdbcType=VARCHAR},
+            </if>
+            <if test="tenancyId != null" >
+                #{tenancyId, jdbcType=BIGINT},
+            </if>
+            <if test="longitude != null" >
+                #{longitude, jdbcType=DOUBLE},
+            </if>
+            <if test="latitude != null" >
+                #{latitude, jdbcType=DOUBLE},
+            </if>
+            <if test="districtId != null" >
+                #{districtId, jdbcType=BIGINT},
+            </if>
+            <if test="address != null" >
+                #{address, jdbcType=VARCHAR},
+            </if>
+            <if test="contact != null" >
+                #{contact, jdbcType=VARCHAR},
+            </if>
+            <if test="mobile != null" >
+                #{mobile, jdbcType=VARCHAR},
+            </if>
+            <if test="freeTime != null" >
+                #{freeTime, jdbcType=INTEGER},
+            </if>
+            <if test="flags != null" >
+                #{flags, jdbcType=TINYINT},
+            </if>
+            <if test="monthDiedDays != null" >
+                #{monthDiedDays, jdbcType=TINYINT},
+            </if>
+            <if test="noTempStartDate != null" >
+                #{noTempStartDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="noTempEndDate != null" >
+                #{noTempEndDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="totalSpace != null" >
+                #{totalSpace, jdbcType=INTEGER},
+            </if>
+            <if test="tempSpace != null" >
+                #{tempSpace, jdbcType=INTEGER},
+            </if>
+            <if test="fixSpace != null" >
+                #{fixSpace, jdbcType=INTEGER},
+            </if>
+            <if test="isDisabled != null" >
+                #{isDisabled, jdbcType=BIT},
+            </if>
+            <if test="isDeleted != null" >
+                #{isDeleted, jdbcType=BIT},
+            </if>
+            <if test="createdDate != null" >
+                #{createdDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="createdBy != null" >
+                #{createdBy, jdbcType=VARCHAR},
+            </if>
+            <if test="updatedDate != null" >
+                #{updatedDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="updatedBy != null" >
+                #{updatedBy, jdbcType=VARCHAR},
+            </if>
+            <if test="isDayParting != null" >
+                #{isDayParting, jdbcType=TINYINT},
+            </if>
+            <if test="isOnlinePay != null" >
+                #{isOnlinePay, jdbcType=TINYINT},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.airparking.apms.api.park.entity.Park" >
+        update park
+        set
+        <trim suffixOverrides=",">
+            <if test="id != null" >
+                id = #{id, jdbcType=BIGINT},
+            </if>
+            <if test="pname != null" >
+                pname = #{pname, jdbcType=VARCHAR},
+            </if>
+            <if test="tenancyId != null" >
+                tenancy_id = #{tenancyId, jdbcType=BIGINT},
+            </if>
+            <if test="longitude != null" >
+                longitude = #{longitude, jdbcType=DOUBLE},
+            </if>
+            <if test="latitude != null" >
+                latitude = #{latitude, jdbcType=DOUBLE},
+            </if>
+            <if test="districtId != null" >
+                district_id = #{districtId, jdbcType=BIGINT},
+            </if>
+            <if test="address != null" >
+                address = #{address, jdbcType=VARCHAR},
+            </if>
+            <if test="contact != null" >
+                contact = #{contact, jdbcType=VARCHAR},
+            </if>
+            <if test="mobile != null" >
+                mobile = #{mobile, jdbcType=VARCHAR},
+            </if>
+            <if test="freeTime != null" >
+                free_time = #{freeTime, jdbcType=INTEGER},
+            </if>
+            <if test="flags != null" >
+                flags = #{flags, jdbcType=TINYINT},
+            </if>
+            <if test="monthDiedDays != null" >
+                month_died_days = #{monthDiedDays, jdbcType=TINYINT},
+            </if>
+            <if test="noTempStartDate != null" >
+                no_temp_start_date = #{noTempStartDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="noTempEndDate != null" >
+                no_temp_end_date = #{noTempEndDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="totalSpace != null" >
+                total_space = #{totalSpace, jdbcType=INTEGER},
+            </if>
+            <if test="tempSpace != null" >
+                temp_space = #{tempSpace, jdbcType=INTEGER},
+            </if>
+            <if test="fixSpace != null" >
+                fix_space = #{fixSpace, jdbcType=INTEGER},
+            </if>
+            <if test="isDisabled != null" >
+                is_disabled = #{isDisabled, jdbcType=BIT},
+            </if>
+            <if test="isDeleted != null" >
+                is_deleted = #{isDeleted, jdbcType=BIT},
+            </if>
+            <if test="createdDate != null" >
+                created_date = #{createdDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="createdBy != null" >
+                created_by = #{createdBy, jdbcType=VARCHAR},
+            </if>
+            <if test="updatedDate != null" >
+                updated_date = #{updatedDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="updatedBy != null" >
+                updated_by = #{updatedBy, jdbcType=VARCHAR},
+            </if>
+        </trim>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <select id="count" resultType="java.lang.Integer" >
+        select count(1) from park
+    </select>
+
+    <select id="find" resultMap="entityMap" parameterType="map" >
+        select
+        <include refid="listColumn" />
+        from park
+        limit #{start},#{count}
+    </select>
+
+    <update id="delete" parameterType="java.lang.Long" >
+        update park
+        set is_deleted = true where is_deleted = false and id = #{id}
+    </update>
+
+    <select id="findAllByDate" resultMap="entityMap" parameterType="java.util.Map">
+        select
+        <include refid="listColumn" />
+        from park
+        where updated_date <![CDATA[ >= ]]>#{startDate,jdbcType = TIMESTAMP}
+        and updated_date <![CDATA[ <= ]]>#{endDate,jdbcType = TIMESTAMP}
+    </select>
+</mapper>

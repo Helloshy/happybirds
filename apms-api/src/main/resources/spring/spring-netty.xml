@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="
+            http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.1.xsd
+            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.1.xsd
+            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.1.xsd">
+
+    <context:property-placeholder location="classpath*:/application.properties"/>
+
+    <context:annotation-config/>
+    <context:component-scan base-package="com.airparking.apms.api"/>
+
+    <bean id="nettyContainer" class="com.airparking.apms.server.container.netty.NettyContainer" destroy-method="stop">
+        <property name="port" value="${server.port}"/>
+        <property name="enableSsl" value="${ssl.enabled}"/>
+        <property name="bossGroup" ref="bossGroup"/>
+        <property name="workerGroup" ref="workerGroup"/>
+        <property name="channelInitializer" ref="channelInitializer"/>
+    </bean>
+
+    <bean id="bossGroup" class="com.aliyun.openservices.shade.com.alibaba.rocketmq.shade.io.netty.channel.nio.NioEventLoopGroup" destroy-method="shutdownGracefully">
+        <constructor-arg value="${netty.boss.threads}"/>
+    </bean>
+
+    <bean id="workerGroup" class="com.aliyun.openservices.shade.com.alibaba.rocketmq.shade.io.netty.channel.nio.NioEventLoopGroup" destroy-method="shutdownGracefully">
+        <constructor-arg value="${netty.worker.threads}"/>
+    </bean>
+
+    <bean id="channelInitializer" class="com.airparking.apms.server.container.netty.NettyHttpHandlerInitializer">
+        <property name="businessGroup" ref="businessGroup"/>
+    </bean>
+
+    <bean id="businessGroup" class="com.aliyun.openservices.shade.com.alibaba.rocketmq.shade.io.netty.util.concurrent.DefaultEventExecutorGroup" destroy-method="shutdownGracefully">
+        <constructor-arg value="${netty.business.threads}"/>
+    </bean>
+
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" destroy-method="close">
+        <property name="driverClassName" value="${db.driverClass}"/>
+        <property name="url" value="${db.url}" />
+        <property name="username" value="${db.user}" />
+        <property name="password" value="${db.password}" />
+
+        <property name="maxActive" value="${db.maxActive}" />
+        <property name="initialSize" value="${db.initialSize}" />
+        <property name="maxWait" value="${db.maxWait}" />
+        <property name="minIdle" value="${db.minIdle}" />
+
+        <!-- Interval (ms) for check and close idle connection, 3000 -->
+        <property name="timeBetweenEvictionRunsMillis" value="${db.timeBetweenEviction}" />
+        <!-- Connection life time (ms) in this dataSource, 300000 -->
+        <property name="minEvictableIdleTimeMillis" value="${db.minEvictableIdle}" />
+
+        <!--<property name="validationQuery" value="SELECT 'x' FROM DUAL" />-->
+        <property name="testWhileIdle" value="${db.testWhileIdle}" />
+        <property name="testOnBorrow" value="${db.testOnBorrow}" />
+        <property name="testOnReturn" value="${db.testOnReturn}" />
+        <!-- mysql not support poolPreparedStatements-->
+        <!--<property name="poolPreparedStatements" value="true" />-->
+        <!--<property name="maxPoolPreparedStatementPerConnectionSize" value="20" />-->
+
+        <!-- enabled Druid monitor -->
+        <!--<property name="filters" value="stat" />-->
+    </bean>
+
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+</beans>

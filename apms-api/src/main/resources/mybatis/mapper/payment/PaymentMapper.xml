@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.airparking.apms.api.payment.mapper.PaymentMapper">
+
+    <resultMap id="entityMap" type="com.airparking.apms.api.payment.entity.Payment" >
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="park_id" property="parkId" jdbcType="BIGINT" />
+        <result column="trade_no" property="tradeNo" jdbcType="VARCHAR" />
+        <result column="type" property="type" jdbcType="TINYINT" />
+        <result column="amount" property="amount" jdbcType="INTEGER" />
+        <result column="out_trade_no" property="outTradeNo" jdbcType="VARCHAR" />
+        <result column="payment_way" property="paymentWay" jdbcType="INTEGER" />
+        <result column="is_deleted" property="isDeleted" jdbcType="BIT" />
+        <result column="created_date" property="createdDate" jdbcType="TIMESTAMP" />
+        <result column="created_by" property="createdBy" jdbcType="VARCHAR" />
+        <result column="updated_date" property="updatedDate" jdbcType="TIMESTAMP" />
+        <result column="updated_by" property="updatedBy" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <sql id="listColumn" >
+        id,park_id,trade_no,type,amount,out_trade_no,payment_way,is_deleted,created_date,created_by,updated_date,updated_by
+    </sql>
+
+    <select id="get" resultMap="entityMap" parameterType="java.lang.Long" >
+        select
+        <include refid="listColumn" />
+        from payment
+        where id = #{id, jdbcType=BIGINT}
+    </select>
+
+    <insert id="add" parameterType="com.airparking.apms.api.payment.entity.Payment">
+        <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
+                SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into payment
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                id,
+            </if>
+            <if test="parkId != null" >
+                park_id,
+            </if>
+            <if test="tradeNo != null" >
+                trade_no,
+            </if>
+            <if test="plateNo != null" >
+                plate_no,
+            </if>
+            <if test="type != null" >
+                type,
+            </if>
+            <if test="amount != null" >
+                amount,
+            </if>
+            <if test="outTradeNo != null" >
+                out_trade_no,
+            </if>
+            <if test="paymentWay != null" >
+                payment_way,
+            </if>
+            <if test="isDeleted != null" >
+                is_deleted,
+            </if>
+            <if test="createdDate != null" >
+                created_date,
+            </if>
+            <if test="createdBy != null" >
+                created_by,
+            </if>
+            <if test="updatedDate != null" >
+                updated_date,
+            </if>
+            <if test="updatedBy != null" >
+                updated_by,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                #{id, jdbcType=BIGINT},
+            </if>
+            <if test="parkId != null" >
+                #{parkId, jdbcType=BIGINT},
+            </if>
+            <if test="tradeNo != null" >
+                #{tradeNo, jdbcType=VARCHAR},
+            </if>
+            <if test="plateNo != null" >
+                #{plateNo, jdbcType=VARCHAR},
+            </if>
+            <if test="type != null" >
+                #{type, jdbcType=TINYINT},
+            </if>
+            <if test="amount != null" >
+                #{amount, jdbcType=INTEGER},
+            </if>
+            <if test="outTradeNo != null" >
+                #{outTradeNo, jdbcType=VARCHAR},
+            </if>
+            <if test="paymentWay != null" >
+                #{paymentWay, jdbcType=INTEGER},
+            </if>
+            <if test="isDeleted != null" >
+                #{isDeleted, jdbcType=BIT},
+            </if>
+            <if test="createdDate != null" >
+                #{createdDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="createdBy != null" >
+                #{createdBy, jdbcType=VARCHAR},
+            </if>
+            <if test="updatedDate != null" >
+                #{updatedDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="updatedBy != null" >
+                #{updatedBy, jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.airparking.apms.api.payment.entity.Payment" >
+        update payment
+        set
+        <trim suffixOverrides=",">
+            <if test="id != null" >
+                id = #{id, jdbcType=BIGINT},
+            </if>
+            <if test="parkId != null" >
+                park_id = #{parkId, jdbcType=BIGINT},
+            </if>
+            <if test="tradeNo != null" >
+                trade_no = #{tradeNo, jdbcType=VARCHAR},
+            </if>
+            <if test="type != null" >
+                type = #{type, jdbcType=TINYINT},
+            </if>
+            <if test="amount != null" >
+                amount = #{amount, jdbcType=INTEGER},
+            </if>
+            <if test="outTradeNo != null" >
+                out_trade_no = #{outTradeNo, jdbcType=VARCHAR},
+            </if>
+            <if test="paymentWay != null" >
+                payment_way = #{paymentWay, jdbcType=INTEGER},
+            </if>
+            <if test="isDeleted != null" >
+                is_deleted = #{isDeleted, jdbcType=BIT},
+            </if>
+            <if test="createdDate != null" >
+                created_date = #{createdDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="createdBy != null" >
+                created_by = #{createdBy, jdbcType=VARCHAR},
+            </if>
+            <if test="updatedDate != null" >
+                updated_date = #{updatedDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="updatedBy != null" >
+                updated_by = #{updatedBy, jdbcType=VARCHAR},
+            </if>
+        </trim>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <select id="count" resultType="java.lang.Integer" >
+        select count(1) from payment
+    </select>
+
+    <select id="find" resultMap="entityMap" parameterType="map" >
+        select
+        <include refid="listColumn" />
+        from payment
+        limit #{start},#{count}
+    </select>
+
+    <update id="delete" parameterType="java.lang.Long" >
+        update payment
+        set is_deleted = true where is_deleted = false and id = #{id}
+    </update>
+    
+    <select id="findLastPaidFee" resultType="java.lang.Integer" parameterType="map" >
+        	select
+        		SUM(amount)
+			FROM
+				payment
+			WHERE
+				plate_no = #{plateNo}
+			AND out_trade_no = #{outTradeNo}
+			AND park_id = #{parkId}
+			AND is_deleted = 0
+			GROUP BY
+				out_trade_no,
+				plate_no,
+				park_id
+			ORDER BY
+				created_date DESC
+			LIMIT 1
+    </select>
+
+</mapper>

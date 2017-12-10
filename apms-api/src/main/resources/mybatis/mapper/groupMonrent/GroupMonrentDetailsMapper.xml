@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.airparking.apms.api.groupMonrent.mapper.GroupMonrentDetailsMapper">
+
+    <resultMap id="entityMap" type="com.airparking.apms.api.groupMonrent.entity.GroupMonrentDetails" >
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="space_no" property="spaceNo" jdbcType="VARCHAR" />
+        <result column="mrrid" property="mrrid" jdbcType="VARCHAR" />
+        <result column="gm_id" property="groupMonrentId" jdbcType="BIGINT" />
+    </resultMap>
+
+    <sql id="listColumn" >
+        id,space_no,mrrid,gm_id
+    </sql>
+
+    <select id="get" resultMap="entityMap" parameterType="java.lang.Long" >
+        select
+        <include refid="listColumn" />
+        from group_monrent_details
+        where id = #{id, jdbcType=BIGINT}
+    </select>
+
+    <select id="findAll" resultMap="entityMap">
+        select
+        <include refid="listColumn" />
+        from group_monrent_details
+    </select>
+    <select id="findByGmId" resultMap="entityMap" parameterType="java.lang.Long">
+        select
+        <include refid="listColumn" />
+        from group_monrent_details
+        where gm_id = #{groupMonrentId, jdbcType=BIGINT}
+    </select>
+    <insert id="add" parameterType="com.airparking.apms.api.groupMonrent.entity.GroupMonrentDetails">
+        <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into group_monrent_details
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                id,
+            </if>
+            <if test="spaceNo != null" >
+                space_no,
+            </if>
+            <if test="mrrid != null" >
+                mrrid,
+            </if>
+            <if test="groupMonrentId != null" >
+                gm_id,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                #{id, jdbcType=BIGINT},
+            </if>
+            <if test="spaceNo != null" >
+                #{spaceNo, jdbcType=VARCHAR},
+            </if>
+            <if test="mrrid != null" >
+                #{mrrid, jdbcType=VARCHAR},
+            </if>
+            <if test="groupMonrentId != null" >
+                #{groupMonrentId, jdbcType=BIGINT},
+            </if>
+        </trim>
+    </insert>
+    <update id="update" parameterType="com.airparking.apms.api.groupMonrent.entity.GroupMonrentDetails" >
+        update group_monrent_details
+        set
+        <trim suffixOverrides=",">
+            <if test="id != null" >
+                id = #{id, jdbcType=BIGINT},
+            </if>
+            <if test="spaceNo != null" >
+                space_no = #{spaceNo, jdbcType=VARCHAR},
+            </if>
+            <if test="mrrid != null" >
+                mrrid = #{mrrid, jdbcType=VARCHAR},
+            </if>
+            <if test="groupMonrentId != null" >
+                gm_id = #{groupMonrentId, jdbcType=BIGINT},
+            </if>
+        </trim>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <select id="count" resultType="java.lang.Integer" >
+        select count(1) from group_monrent_details
+    </select>
+
+    <select id="find" resultMap="entityMap" parameterType="map" >
+        select
+        <include refid="listColumn" />
+        from group_monrent_details
+        limit #{start},#{count}
+    </select>
+
+    <delete id="deleteDetailsByGmId" parameterType="java.lang.Long" >
+        delete from group_monrent_details where gm_id = #{groupMonrentId, jdbcType=BIGINT}
+    </delete>
+</mapper>

@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.airparking.apms.api.groupMonrent.mapper.GroupMorentMapper">
+
+    <resultMap id="entityMap" type="com.airparking.apms.api.groupMonrent.entity.GroupMonrent" >
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <id column="park_id" property="parkId" jdbcType="BIGINT" />
+        <id column="gmr_id" property="gmrid" jdbcType="BIGINT" />
+        <result column="name" property="name" jdbcType="VARCHAR" />
+        <result column="mobile" property="mobile" jdbcType="VARCHAR" />
+        <result column="start_time" property="startTime" jdbcType="TIMESTAMP" />
+        <result column="end_time" property="startTime" jdbcType="TIMESTAMP" />
+        <result column="status" property="status" jdbcType="TINYINT" />
+        <result column="space_num" property="spaceNum" jdbcType="INTEGER" />
+        <result column="car_num" property="carNum" jdbcType="INTEGER" />
+        <result column="plate_no" property="plateNo" jdbcType="VARCHAR" />
+        <result column="is_deleted" property="isDeleted" jdbcType="BIT" />
+        <result column="created_date" property="createdDate" jdbcType="TIMESTAMP" />
+        <result column="updated_date" property="updatedDate" jdbcType="TIMESTAMP" />
+    </resultMap>
+
+    <sql id="listColumn" >
+        id,park_id,gmr_id,name,mobile,start_time,end_time,status,space_num,car_num,plate_no,is_deleted,created_date,updated_date
+    </sql>
+
+    <select id="get" resultMap="entityMap" parameterType="java.lang.Long" >
+        select
+        <include refid="listColumn" />
+        from group_monrent
+        where id = #{id, jdbcType=BIGINT}
+    </select>
+
+    <select id="findAll" resultMap="entityMap">
+        select
+        <include refid="listColumn" />
+        from group_monrent
+    </select>
+
+    <select id="findByGmrid" resultMap="entityMap" parameterType="java.lang.String">
+        select
+        <include refid="listColumn" />
+        from group_monrent
+        where gmr_id = #{gmrid, jdbcType=BIGINT}
+    </select>
+
+    <insert id="add" parameterType="com.airparking.apms.api.groupMonrent.entity.GroupMonrent">
+        <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into group_monrent
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                id,
+            </if>
+            <if test="parkId != null" >
+                park_id,
+            </if>
+            <if test="gmrid != null" >
+                gmr_id,
+            </if>
+            <if test="name != null" >
+                name,
+            </if>
+            <if test="mobile != null" >
+                mobile,
+            </if>
+            <if test="startTime != null" >
+                start_time,
+            </if>
+            <if test="startTime != null" >
+                end_time,
+            </if>
+            <if test="status != null" >
+                status,
+            </if>
+            <if test="spaceNum != null" >
+                space_num,
+            </if>
+            <if test="carNum != null" >
+                car_num,
+            </if>
+            <if test="plateNo != null" >
+                plate_no,
+            </if>
+            <if test="isDeleted != null" >
+                is_deleted,
+            </if>
+            <if test="createdDate != null" >
+                created_date,
+            </if>
+            <if test="updatedDate != null" >
+                updated_date,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                #{id, jdbcType=BIGINT},
+            </if>
+            <if test="parkId != null" >
+                #{parkId, jdbcType=BIGINT},
+            </if>
+            <if test="gmrid != null" >
+                #{gmrid, jdbcType=BIGINT},
+            </if>
+            <if test="name != null" >
+                #{name, jdbcType=VARCHAR},
+            </if>
+            <if test="mobile != null" >
+                #{mobile, jdbcType=VARCHAR},
+            </if>
+            <if test="startTime != null" >
+                #{startTime, jdbcType=TIMESTAMP},
+            </if>
+            <if test="endTime != null" >
+                #{endTime, jdbcType=TIMESTAMP},
+            </if>
+            <if test="status != null" >
+                #{status, jdbcType=TINYINT},
+            </if>
+            <if test="spaceNum != null" >
+                #{spaceNum, jdbcType=INTEGER},
+            </if>
+            <if test="carNum != null" >
+                #{carNum, jdbcType=INTEGER},
+            </if>
+            <if test="plateNo != null" >
+                #{plateNo, jdbcType=VARCHAR},
+            </if>
+            <if test="isDeleted != null" >
+                #{isDeleted, jdbcType=BIT},
+            </if>
+            <if test="createdDate != null" >
+                #{createdDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="updatedDate != null" >
+                #{updatedDate, jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.airparking.apms.api.groupMonrent.entity.GroupMonrent" >
+        update group_monrent
+        set
+        <trim suffixOverrides=",">
+            <if test="id != null" >
+                id = #{id, jdbcType=BIGINT},
+            </if>
+            <if test="parkId != null" >
+                park_id = #{parkId, jdbcType=BIGINT},
+            </if>
+            <if test="parkId != null" >
+                gmr_id = #{gmrid, jdbcType=BIGINT},
+            </if>
+            <if test="name != null" >
+                name = #{name, jdbcType=VARCHAR},
+            </if>
+            <if test="mobile != null" >
+                mobile = #{mobile, jdbcType=VARCHAR},
+            </if>
+            <if test="startTime != null" >
+                start_time = #{startTime, jdbcType=TIMESTAMP},
+            </if>
+            <if test="endTime != null" >
+                end_time = #{endTime, jdbcType=TIMESTAMP},
+            </if>
+            <if test="status != null" >
+                status = #{status, jdbcType=TINYINT},
+            </if>
+            <if test="carNum != null" >
+                car_num = #{carNum, jdbcType=INTEGER},
+            </if>
+            <if test="spaceNum != null" >
+                space_num = #{spaceNum, jdbcType=INTEGER},
+            </if>
+            <if test="plateNo != null" >
+                plate_no = #{plateNo, jdbcType=VARCHAR},
+            </if>
+            <if test="isDeleted != null" >
+                is_deleted = #{isDeleted, jdbcType=BIT},
+            </if>
+            <if test="createdDate != null" >
+                created_date = #{createdDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="updatedDate != null" >
+                updated_date = #{updatedDate, jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <select id="count" resultType="java.lang.Integer" >
+        select count(1) from group_monrent
+    </select>
+
+    <select id="find" resultMap="entityMap" parameterType="map" >
+        select
+        <include refid="listColumn" />
+        from group_monrent
+        limit #{start},#{count}
+    </select>
+
+    <update id="delete" parameterType="java.lang.Long" >
+        update group_monrent
+        set is_deleted = true where is_deleted = false and id = #{id}
+    </update>
+
+</mapper>

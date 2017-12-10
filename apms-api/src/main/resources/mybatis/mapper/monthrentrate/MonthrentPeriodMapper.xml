@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.airparking.apms.api.monthrentrate.mapper.MonthrentPeriodMapper">
+    <resultMap id="entityMap" type="com.airparking.apms.api.monthrentrate.entity.MonthrentPeriod" >
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="monthrentrate_id" property="monthrentrateId" jdbcType="BIGINT" />
+        <result column="park_id" property="parkId" jdbcType="BIGINT" />
+        <result column="week_day" property="weekDay" jdbcType="TINYINT" />
+        <result column="is_holiday" property="isHoliday" jdbcType="BIT" />
+        <result column="typ" property="typ" jdbcType="TINYINT" />
+        <result column="start_time" property="startTime" jdbcType="TIME" />
+        <result column="end_time" property="endTime" jdbcType="TIME" />
+        <result column="is_deleted" property="isDeleted" jdbcType="BIT" />
+        <result column="created_date" property="createdDate" jdbcType="TIMESTAMP" />
+        <result column="created_by" property="createdBy" jdbcType="VARCHAR" />
+        <result column="updated_date" property="updatedDate" jdbcType="TIMESTAMP" />
+        <result column="updated_by" property="updatedBy" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <insert id="add" parameterType="com.airparking.apms.api.monthrentrate.entity.MonthrentPeriod">
+        <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into monthrent_period
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                id,
+            </if>
+            <if test="monthrentrateId != null" >
+                monthrentrate_id,
+            </if>
+            <if test="parkId != null" >
+                park_id,
+            </if>
+            <if test="weekDay != null" >
+                week_day,
+            </if>
+            <if test="isHoliday != null" >
+                is_holiday,
+            </if>
+            <if test="typ != null" >
+                typ,
+            </if>
+            <if test="startTime != null" >
+                start_time,
+            </if>
+            <if test="endTime != null" >
+                end_time,
+            </if>
+            <if test="isDeleted != null" >
+                is_deleted,
+            </if>
+            <if test="createdDate != null" >
+                created_date,
+            </if>
+            <if test="createdBy != null" >
+                created_by,
+            </if>
+            <if test="updatedDate != null" >
+                updated_date,
+            </if>
+            <if test="updatedBy != null" >
+                updated_by,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                #{id, jdbcType=BIGINT},
+            </if>
+            <if test="monthrentrateId != null" >
+                #{monthrentrateId, jdbcType=BIGINT},
+            </if>
+            <if test="parkId != null" >
+                #{parkId, jdbcType=BIGINT},
+            </if>
+            <if test="weekDay != null" >
+                #{weekDay, jdbcType=TINYINT},
+            </if>
+            <if test="isHoliday != null" >
+                #{isHoliday, jdbcType=BIT},
+            </if>
+            <if test="typ != null" >
+                #{typ, jdbcType=TINYINT},
+            </if>
+            <if test="startTime != null" >
+                #{startTime, jdbcType=TIME},
+            </if>
+            <if test="endTime != null" >
+                #{endTime, jdbcType=TIME},
+            </if>
+            <if test="isDeleted != null" >
+                #{isDeleted, jdbcType=TIME},
+            </if>
+            <if test="createdDate != null" >
+                #{createdDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="createdBy != null" >
+                #{createdDate, jdbcType=VARCHAR},
+            </if>
+            <if test="updatedDate != null" >
+                #{updatedDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="updatedBy != null" >
+                #{updatedBy, jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.airparking.apms.api.monthrentrate.entity.MonthrentPeriod" >
+        update monthrent_period
+        set
+        <trim suffixOverrides=",">
+            <if test="id != null" >
+                id = #{id, jdbcType=BIGINT},
+            </if>
+            <if test="monthrentrateId != null" >
+                monthrentrate_id = #{monthrentrateId, jdbcType=BIGINT},
+            </if>
+            <if test="parkId != null" >
+                park_id = #{parkId, jdbcType=BIGINT},
+            </if>
+            <if test="weekDay != null" >
+                week_day = #{weekDay, jdbcType=TINYINT},
+            </if>
+            <if test="isHoliday != null" >
+                is_holiday = #{isHoliday, jdbcType=BIT},
+            </if>
+            <if test="typ != null" >
+                typ = #{typ, jdbcType=TINYINT},
+            </if>
+            <if test="startTime != null" >
+                start_time = #{startTime, jdbcType=TIME},
+            </if>
+            <if test="endTime != null" >
+                end_time = #{endTime, jdbcType=TIME},
+            </if>
+            <if test="isDeleted != null" >
+                is_deleted = #{isDeleted, jdbcType=TIME},
+            </if>
+            <if test="createdDate != null" >
+                created_date = #{createdDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="createdBy != null" >
+                created_by = #{createdBy, jdbcType=VARCHAR},
+            </if>
+            <if test="updatedDate != null" >
+                updated_date = #{updatedDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="updatedBy != null" >
+                updated_by = #{updatedBy, jdbcType=VARCHAR},
+            </if>
+        </trim>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+
+    <select id="findByMonthrentrateId" resultMap="entityMap" parameterType="java.lang.Long">
+        select
+        id,monthrentrate_id,park_id,week_day,is_holiday,typ,start_time,end_time,is_deleted,created_date,created_by,
+        updated_date,updated_by
+        from monthrent_period
+        where monthrentrate_id = #{monthrentRateId, jdbcType=BIGINT} and is_deleted = false
+    </select>
+
+    <select id="findByMonthrentrateIdAndTyp" resultMap="entityMap" parameterType="map" >
+         select
+        id,monthrentrate_id,park_id,week_day,is_holiday,typ,start_time,end_time,is_deleted,created_date,created_by,
+        updated_date,updated_by
+        from monthrent_period
+        where monthrentrate_id = #{monthrentRateId, jdbcType=BIGINT} AND typ = #{typ, jdbcType=TINYINT}
+        and is_deleted = false
+    </select>
+
+    <select id="findHoliday" resultType="java.lang.Integer">
+        select status from legal_holiday_records where is_deleted = 0 and status = 0
+    </select>
+</mapper>

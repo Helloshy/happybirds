@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.airparking.apms.api.district.mapper.DistrictMapper">
+
+    <resultMap id="entityMap" type="District" >
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="name" property="name" jdbcType="VARCHAR" />
+        <result column="short_name" property="shortName" jdbcType="VARCHAR" />
+        <result column="city_cde" property="cityCde" jdbcType="VARCHAR" />
+        <result column="adcode" property="adcode" jdbcType="VARCHAR" />
+        <result column="longitude" property="longitude" jdbcType="DOUBLE" />
+        <result column="latitude" property="latitude" jdbcType="DOUBLE" />
+        <result column="level" property="level" jdbcType="TINYINT" />
+        <result column="parent_id" property="parentId" jdbcType="BIGINT" />
+        <result column="enabled" property="enabled" jdbcType="TINYINT" />
+        <result column="created_date" property="createdDate" jdbcType="TIMESTAMP" />
+        <result column="created_by" property="createdBy" jdbcType="VARCHAR" />
+        <result column="updated_date" property="updatedDate" jdbcType="TIMESTAMP" />
+        <result column="updated_by" property="updatedBy" jdbcType="VARCHAR" />
+        <result column="is_deleted" property="isDeleted" jdbcType="TINYINT" />
+    </resultMap>
+
+    <sql id="listColumn" >
+        id,name,short_name,city_cde,adcode,longitude,latitude,level,parent_id,enabled,created_date,created_by,updated_date,updated_by,is_deleted
+    </sql>
+
+    <select id="get" resultMap="entityMap" parameterType="java.lang.Long" >
+        select
+        <include refid="listColumn" />
+        from ap_district
+        where id = #{id, jdbcType=BIGINT}
+    </select>
+
+    <select id="count" resultType="java.lang.Integer" >
+        select count(1) from ap_district
+    </select>
+
+    <select id="find" resultMap="entityMap" parameterType="map" >
+        select
+        <include refid="listColumn" />
+        from ap_district
+        limit #{start},#{count}
+    </select>
+
+    <select id="listAllMap" resultType="java.util.Map">
+        SELECT
+        id,
+        name,
+        parent_id as parentId,
+        level
+        FROM
+        ap_district
+    </select>
+
+</mapper>

@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.airparking.apms.api.order.mapper.OrderMapper">
+
+    <resultMap id="entityMap" type="com.airparking.apms.api.order.entity.Order" >
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="park_id" property="parkId" jdbcType="BIGINT" />
+        <result column="trade_no" property="tradeNo" jdbcType="VARCHAR" />
+        <result column="rate_id" property="rateId" jdbcType="BIGINT" />
+        <result column="type" property="type" jdbcType="TINYINT" />
+        <result column="plate_no" property="plateNo" jdbcType="VARCHAR" />
+        <result column="start_time" property="startTime" jdbcType="TIMESTAMP" />
+        <result column="end_time" property="endTime" jdbcType="TIMESTAMP" />
+        <result column="total_time" property="totalTime" jdbcType="BIGINT" />
+        <result column="total_amount" property="totalAmount" jdbcType="INTEGER" />
+        <result column="pay_amount" property="payAmount" jdbcType="INTEGER" />
+        <result column="order_status" property="orderStatus" jdbcType="INTEGER" />
+        <result column="is_deleted" property="isDeleted" jdbcType="BIT" />
+        <result column="created_date" property="createdDate" jdbcType="TIMESTAMP" />
+        <result column="created_by" property="createdBy" jdbcType="VARCHAR" />
+        <result column="updated_date" property="updatedDate" jdbcType="TIMESTAMP" />
+        <result column="updated_by" property="updatedBy" jdbcType="VARCHAR" />
+        <result column="card_no" property="cardNo" jdbcType="VARCHAR" />
+        <result column="is_send" property="isSend" jdbcType="BIT" />
+    </resultMap>
+
+    <sql id="listColumn" >
+        id,park_id,trade_no,rate_id,type,plate_no,start_time,end_time,
+        total_time,total_amount,pay_amount,order_status,is_deleted,created_date,
+        created_by,updated_date,updated_by,card_no,is_send
+    </sql>
+
+    <select id="get" resultMap="entityMap" parameterType="java.lang.Long" >
+        select
+        <include refid="listColumn" />
+        from `park_order`
+        where id = #{id, jdbcType=BIGINT}
+    </select>
+    
+    <select id="findByTradeNo" resultMap="entityMap" parameterType="java.lang.String" >
+        select
+        <include refid="listColumn" />
+        from `park_order`
+        where trade_no = #{tradeNo, jdbcType=VARCHAR}
+    </select>
+
+    <insert id="add" parameterType="com.airparking.apms.api.order.entity.Order">
+        <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
+                SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into `park_order`
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                id,
+            </if>
+            <if test="parkId != null" >
+                park_id,
+            </if>
+            <if test="tradeNo != null" >
+                trade_no,
+            </if>
+            <if test="rateId != null" >
+                rate_id,
+            </if>
+            <if test="type != null" >
+                type,
+            </if>
+            <if test="plateNo != null" >
+                plate_no,
+            </if>
+            <if test="startTime != null" >
+                start_time,
+            </if>
+            <if test="endTime != null" >
+                end_time,
+            </if>
+            <if test="totalTime != null" >
+                total_time,
+            </if>
+            <if test="totalAmount != null" >
+                total_amount,
+            </if>
+            <if test="payAmount != null" >
+                pay_amount,
+            </if>
+            <if test="orderStatus != null" >
+                order_status,
+            </if>
+            <if test="additions != null">
+                additions,
+            </if>
+            <if test="isDeleted != null" >
+                is_deleted,
+            </if>
+            <if test="createdDate != null" >
+                created_date,
+            </if>
+            <if test="createdBy != null" >
+                created_by,
+            </if>
+            <if test="updatedDate != null" >
+                updated_date,
+            </if>
+            <if test="updatedBy != null" >
+                updated_by,
+            </if>
+            <if test="cardNo != null" >
+                card_no,
+            </if>
+            <if test="isSend != null" >
+                is_send,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                #{id, jdbcType=BIGINT},
+            </if>
+            <if test="parkId != null" >
+                #{parkId, jdbcType=BIGINT},
+            </if>
+            <if test="tradeNo != null" >
+                #{tradeNo, jdbcType=VARCHAR},
+            </if>
+            <if test="rateId != null" >
+                #{rateId, jdbcType=BIGINT},
+            </if>
+            <if test="type != null" >
+                #{type, jdbcType=TINYINT},
+            </if>
+            <if test="plateNo != null" >
+                #{plateNo, jdbcType=VARCHAR},
+            </if>
+            <if test="startTime != null" >
+                #{startTime, jdbcType=TIMESTAMP},
+            </if>
+            <if test="endTime != null" >
+                #{endTime, jdbcType=TIMESTAMP},
+            </if>
+            <if test="totalTime != null" >
+                #{totalTime, jdbcType=BIGINT},
+            </if>
+            <if test="totalAmount != null" >
+                #{totalAmount, jdbcType=INTEGER},
+            </if>
+            <if test="payAmount != null" >
+                #{payAmount, jdbcType=INTEGER},
+            </if>
+            <if test="orderStatus != null" >
+                #{orderStatus, jdbcType=INTEGER},
+            </if>
+            <if test="additions != null">
+                #{additions, jdbcType=VARCHAR},
+            </if>
+            <if test="isDeleted != null" >
+                #{isDeleted, jdbcType=BIT},
+            </if>
+            <if test="createdDate != null" >
+                #{createdDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="createdBy != null" >
+                #{createdBy, jdbcType=VARCHAR},
+            </if>
+            <if test="updatedDate != null" >
+                #{updatedDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="updatedBy != null" >
+                #{updatedBy, jdbcType=VARCHAR},
+            </if>
+            <if test="cardNo != null" >
+                #{cardNo, jdbcType=VARCHAR},
+            </if>
+            <if test="isSend != null" >
+                #{isSend, jdbcType=BIT},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.airparking.apms.api.order.entity.Order" >
+        update `park_order`
+        set
+        <trim suffixOverrides=",">
+            <if test="id != null" >
+                id = #{id, jdbcType=BIGINT},
+            </if>
+            <if test="parkId != null" >
+                park_id = #{parkId, jdbcType=BIGINT},
+            </if>
+            <if test="tradeNo != null" >
+                trade_no = #{tradeNo, jdbcType=VARCHAR},
+            </if>
+            <if test="rateId != null" >
+                rate_id = #{rateId, jdbcType=BIGINT},
+            </if>
+            <if test="type != null" >
+                type = #{type, jdbcType=TINYINT},
+            </if>
+            <if test="plateNo != null" >
+                plate_no = #{plateNo, jdbcType=VARCHAR},
+            </if>
+            <if test="startTime != null" >
+                start_time = #{startTime, jdbcType=TIMESTAMP},
+            </if>
+            <if test="endTime != null" >
+                end_time = #{endTime, jdbcType=TIMESTAMP},
+            </if>
+            <if test="totalTime != null" >
+                total_time = #{totalTime, jdbcType=BIGINT},
+            </if>
+            <if test="totalAmount != null" >
+                total_amount = #{totalAmount, jdbcType=INTEGER},
+            </if>
+            <if test="payAmount != null" >
+                pay_amount = #{payAmount, jdbcType=INTEGER},
+            </if>
+            <if test="orderStatus != null" >
+                order_status = #{orderStatus, jdbcType=INTEGER},
+            </if>
+            <if test="isDeleted != null" >
+                is_deleted = #{isDeleted, jdbcType=BIT},
+            </if>
+            <if test="createdDate != null" >
+                created_date = #{createdDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="createdBy != null" >
+                created_by = #{createdBy, jdbcType=VARCHAR},
+            </if>
+            <if test="updatedDate != null" >
+                updated_date = #{updatedDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="updatedBy != null" >
+                updated_by = #{updatedBy, jdbcType=VARCHAR},
+            </if>
+            <if test="cardNo != null" >
+                card_no = #{cardNo, jdbcType=VARCHAR},
+            </if>
+            <if test="isSend != null" >
+                is_send = #{isSend, jdbcType=BIT},
+            </if>
+        </trim>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <select id="count" resultType="java.lang.Integer" >
+        select count(1) from `park_order`
+    </select>
+
+    <select id="find" resultMap="entityMap" parameterType="map" >
+        select
+        <include refid="listColumn" />
+        from `park_order`
+        limit #{start},#{count}
+    </select>
+
+    <update id="delete" parameterType="java.lang.Long" >
+        update `park_order`
+        set is_deleted = true where is_deleted = false and id = #{id}
+    </update>
+
+    <update id="updateByTradeNo" parameterType="com.airparking.apms.api.order.entity.Order" >
+        update `park_order`
+        set
+        <trim suffixOverrides=",">
+            <if test="rateId != null" >
+                rate_id = #{rateId, jdbcType=BIGINT},
+            </if>
+            <if test="type != null" >
+                type = #{type, jdbcType=TINYINT},
+            </if>
+            <if test="startTime != null" >
+                start_time = #{startTime, jdbcType=TIMESTAMP},
+            </if>
+            <if test="endTime != null" >
+                end_time = #{endTime, jdbcType=TIMESTAMP},
+            </if>
+            <if test="totalTime != null" >
+                total_time = #{totalTime, jdbcType=BIGINT},
+            </if>
+            <if test="totalAmount != null" >
+                total_amount = #{totalAmount, jdbcType=INTEGER},
+            </if>
+            <if test="payAmount != null" >
+                pay_amount = #{payAmount, jdbcType=INTEGER},
+            </if>
+            <if test="orderStatus != null" >
+                order_status = #{orderStatus, jdbcType=INTEGER},
+            </if>
+            <if test="additions != null">
+                additions = #{additions, jdbcType=VARCHAR},
+            </if>
+            <if test="updatedDate != null" >
+                updated_date = #{updatedDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="updatedBy != null" >
+                updated_by = #{updatedBy, jdbcType=VARCHAR},
+            </if>
+            <if test="cardNo != null" >
+                card_no = #{cardNo, jdbcType=VARCHAR},
+            </if>
+            <if test="isSend != null" >
+                is_send = #{isSend, jdbcType=BIT},
+            </if>
+        </trim>
+        where trade_no = #{tradeNo, jdbcType=VARCHAR}
+    </update>
+
+	<select id="findByIsSend" resultMap="entityMap" parameterType="java.util.Map" >
+        select
+        <include refid="listColumn" />
+        from `park_order`
+        where is_send = 0 and is_deleted = 0 and card_no <![CDATA[ <> ]]> ''
+    </select>
+    
+    <select id="getByTradeNo" resultMap="entityMap" parameterType="java.util.Map" >
+       	select
+        	<include refid="listColumn" />
+        FROM
+			park_order
+		WHERE
+			trade_no = #{tradeNo}
+		AND order_status <![CDATA[ <> ]]> 4
+		AND order_status <![CDATA[ <> ]]> 8
+		AND is_deleted = 0
+		ORDER BY
+			created_date DESC
+		LIMIT 1 
+    </select>
+    
+    <select id="getByCardNo" resultMap="entityMap" parameterType="java.util.Map" >
+        select
+        	<include refid="listColumn" />
+		FROM
+			park_order
+		WHERE
+			card_no = #{cardNo}
+		AND order_status <![CDATA[ <> ]]> 4
+		AND order_status <![CDATA[ <> ]]> 8
+		AND is_deleted = 0
+		ORDER BY
+			created_date DESC
+		LIMIT 1
+    </select>
+
+</mapper>

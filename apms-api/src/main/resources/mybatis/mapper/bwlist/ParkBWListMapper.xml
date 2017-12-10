@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.airparking.apms.api.bwlist.mapper.ParkBWListMapper">
+
+    <resultMap id="entityMap" type="com.airparking.apms.api.bwlist.entity.ParkBWList" >
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="park_id" property="parkId" jdbcType="BIGINT" />
+        <result column="plate_no" property="plateNo" jdbcType="VARCHAR" />
+        <result column="mobile" property="mobile" jdbcType="VARCHAR" />
+        <result column="effective_date" property="effectiveDate" jdbcType="TIMESTAMP" />
+        <result column="expired_date" property="expiredDate" jdbcType="TIMESTAMP" />
+        <result column="flags" property="flags" jdbcType="INTEGER" />
+        <result column="type" property="type" jdbcType="INTEGER" />
+        <result column="reason" property="reason" jdbcType="VARCHAR" />
+        <result column="is_deleted" property="isDeleted" jdbcType="BIT" />
+        <result column="created_date" property="createdDate" jdbcType="TIMESTAMP" />
+        <result column="created_by" property="createdBy" jdbcType="VARCHAR" />
+        <result column="updated_date" property="updatedDate" jdbcType="TIMESTAMP" />
+        <result column="updated_by" property="updatedBy" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <sql id="listColumn" >
+        id,park_id,plate_no,mobile,effective_date,expired_date,type,flags,reason,is_deleted,created_date,created_by,updated_date,updated_by
+    </sql>
+
+    <select id="get" resultMap="entityMap" parameterType="java.lang.Long" >
+        select
+        <include refid="listColumn" />
+        from park_bw_list
+        where id = #{id, jdbcType=BIGINT}
+    </select>
+
+    <insert id="add" parameterType="com.airparking.apms.api.bwlist.entity.ParkBWList">
+        <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
+                SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into park_bw_list
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                id,
+            </if>
+            <if test="parkId != null" >
+                park_id,
+            </if>
+            <if test="plateNo != null" >
+                plate_no,
+            </if>
+            <if test="mobile != null" >
+                mobile,
+            </if>
+            <if test="effectiveDate != null" >
+                effective_date,
+            </if>
+            <if test="expiredDate != null" >
+                expired_date,
+            </if>
+            <if test="flags != null" >
+                flags,
+            </if>
+            <if test="type != null" >
+                type,
+            </if>
+            <if test="reason != null" >
+                reason,
+            </if>
+            <if test="isDeleted != null" >
+                is_deleted,
+            </if>
+            <if test="createdDate != null" >
+                created_date,
+            </if>
+            <if test="createdBy != null" >
+                created_by,
+            </if>
+            <if test="updatedDate != null" >
+                updated_date,
+            </if>
+            <if test="updatedBy != null" >
+                updated_by,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                #{id, jdbcType=BIGINT},
+            </if>
+            <if test="parkId != null" >
+                #{parkId, jdbcType=BIGINT},
+            </if>
+            <if test="plateNo != null" >
+                #{plateNo, jdbcType=VARCHAR},
+            </if>
+            <if test="mobile != null" >
+                #{mobile, jdbcType=VARCHAR},
+            </if>
+            <if test="effectiveDate != null" >
+                #{effectiveDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="expiredDate != null" >
+                #{expiredDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="flags != null" >
+                #{flags, jdbcType=INTEGER},
+            </if>
+            <if test="type != null" >
+                #{type, jdbcType=INTEGER},
+            </if>
+            <if test="reason != null" >
+                #{reason, jdbcType=VARCHAR},
+            </if>
+            <if test="isDeleted != null" >
+                #{isDeleted, jdbcType=BIT},
+            </if>
+            <if test="createdDate != null" >
+                #{createdDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="createdBy != null" >
+                #{createdBy, jdbcType=VARCHAR},
+            </if>
+            <if test="updatedDate != null" >
+                #{updatedDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="updatedBy != null" >
+                #{updatedBy, jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.airparking.apms.api.bwlist.entity.ParkBWList" >
+        update park_bw_list
+        set
+        <trim suffixOverrides=",">
+            <if test="id != null" >
+                id = #{id, jdbcType=BIGINT},
+            </if>
+            <if test="parkId != null" >
+                park_id = #{parkId, jdbcType=BIGINT},
+            </if>
+            <if test="plateNo != null" >
+                plate_no = #{plateNo, jdbcType=VARCHAR},
+            </if>
+            <if test="mobile != null" >
+                mobile = #{mobile, jdbcType=VARCHAR},
+            </if>
+            <if test="effectiveDate != null" >
+                effective_date = #{effectiveDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="expiredDate != null" >
+                expired_date = #{expiredDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="flags != null" >
+                flags = #{flags, jdbcType=INTEGER},
+            </if>
+            <if test="type != null" >
+                type = #{type, jdbcType=INTEGER},
+            </if>
+            <if test="reason != null" >
+                reason = #{reason, jdbcType=VARCHAR},
+            </if>
+            <if test="isDeleted != null" >
+                is_deleted = #{isDeleted, jdbcType=BIT},
+            </if>
+            <if test="createdDate != null" >
+                created_date = #{createdDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="createdBy != null" >
+                created_by = #{createdBy, jdbcType=VARCHAR},
+            </if>
+            <if test="updatedDate != null" >
+                updated_date = #{updatedDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="updatedBy != null" >
+                updated_by = #{updatedBy, jdbcType=VARCHAR},
+            </if>
+        </trim>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <update id="saveOrUpdate" >
+        insert into park_bw_list (park_id, plate_no, mobile, effective_date, expired_date, flags, type, reason, is_deleted, created_by, created_date, updated_by, updated_date)
+        values
+        <foreach collection="list" item="item" index="idx" separator=",">
+            (#{item.parkId}, #{item.plateNo}, #{item.mobile}, #{item.effectiveDate}, #{item.expiredDate}, #{item.flags}, #{item.type}, #{item.reason}, #{item.isDeleted}, #{item.createdBy}, #{item.createdDate}, #{item.updatedBy}, #{item.updatedDate})
+        </foreach>
+        on duplicate key update
+        park_id = values(park_id), plate_no = values(plate_no), mobile = values(mobile), effective_date = values(effective_date), expired_date = values(expired_date), flags = values(flags), type = values(type), reason = values(reason), is_deleted = values(is_deleted), created_by = values(updated_by), updated_date = values(updated_date)
+    </update>
+</mapper>

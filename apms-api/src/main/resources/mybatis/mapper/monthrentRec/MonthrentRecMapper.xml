@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.airparking.apms.api.monthrentRec.mapper.MonthrentRecMapper">
+
+    <resultMap id="entityMap" type="com.airparking.apms.api.monthrentRec.entity.MonthrentRec" >
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="serial_mrid" property="serialMrid" jdbcType="VARCHAR" />
+        <result column="serial_mrrid" property="serialMrrid" jdbcType="VARCHAR" />
+        <result column="park_id" property="parkId" jdbcType="BIGINT" />
+        <result column="main_plate_no" property="mainPlateNo" jdbcType="VARCHAR" />
+        <result column="space_no" property="spaceNo" jdbcType="VARCHAR" />
+        <result column="start_date" property="startDate" jdbcType="TIMESTAMP" />
+        <result column="end_date" property="endDate" jdbcType="TIMESTAMP" />
+        <result column="amount" property="amount" jdbcType="INTEGER" />
+        <result column="payment_type" property="paymentType" jdbcType="TINYINT" />
+        <result column="operation_type" property="operationType" jdbcType="TINYINT" />
+        <result column="status" property="status" jdbcType="TINYINT" />
+        <result column="is_deleted" property="isDeleted" jdbcType="TINYINT" />
+        <result column="disabled" property="disabled" jdbcType="TINYINT" />
+        <result column="owner_name" property="ownerName" jdbcType="VARCHAR" />
+        <result column="owner_mobile" property="ownerMobile" jdbcType="VARCHAR" />
+        <result column="carmode" property="carmode" jdbcType="VARCHAR" />
+        <result column="remark" property="remark" jdbcType="VARCHAR" />
+        <result column="created_date" property="createdDate" jdbcType="TIMESTAMP" />
+        <result column="created_by" property="createdBy" jdbcType="VARCHAR" />
+        <result column="updated_date" property="updatedDate" jdbcType="TIMESTAMP" />
+        <result column="updated_by" property="updatedBy" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <sql id="listColumn" >
+        id,serial_mrid,serial_mrrid,park_id,main_plate_no,space_no,start_date,end_date,amount,payment_type,operation_type,status,is_deleted,disabled,owner_name,owner_mobile,carmode,remark,created_date,created_by,updated_date,updated_by
+    </sql>
+
+    <select id="get" resultMap="entityMap" parameterType="java.lang.Long" >
+        select
+        <include refid="listColumn" />
+        from monthrent_rec
+        where id = #{id, jdbcType=BIGINT}
+    </select>
+    
+    <select id="findByserialMrIdAndserialMrrId" resultMap="entityMap" parameterType="map" >
+        select
+        <include refid="listColumn" />
+        from monthrent_rec
+        where serial_mrid = #{serialMrId, jdbcType=VARCHAR} 
+        and serial_mrrid = #{serialMrrId, jdbcType=VARCHAR}
+    </select>
+    
+    <select id="findBySerialMridAndCreatedDate" resultMap="entityMap" parameterType="map" >
+        select
+        <include refid="listColumn" />
+        from monthrent_rec
+        where serial_mrid = #{serialMrId} 
+        and created_date = #{createdDate}
+    </select>
+
+    <insert id="add" parameterType="com.airparking.apms.api.monthrentRec.entity.MonthrentRec">
+        <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
+                SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into monthrent_rec
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                id,
+            </if>
+            <if test="serialMrid != null" >
+                serial_mrid,
+            </if>
+            <if test="serialMrrid != null" >
+                serial_mrrid,
+            </if>
+            <if test="parkId != null" >
+                park_id,
+            </if>
+            <if test="mainPlateNo != null" >
+                main_plate_no,
+            </if>
+            <if test="spaceNo != null" >
+                space_no,
+            </if>
+            <if test="startDate != null" >
+                start_date,
+            </if>
+            <if test="endDate != null" >
+                end_date,
+            </if>
+            <if test="amount != null" >
+                amount,
+            </if>
+            <if test="paymentType != null" >
+                payment_type,
+            </if>
+            <if test="operationType != null" >
+                operation_type,
+            </if>
+            <if test="status != null" >
+                status,
+            </if>
+            <if test="isDeleted != null" >
+                is_deleted,
+            </if>
+            <if test="disabled != null" >
+                disabled,
+            </if>
+            <if test="ownerName != null" >
+                owner_name,
+            </if>
+            <if test="ownerMobile != null" >
+                owner_mobile,
+            </if>
+            <if test="carmode != null" >
+                carmode,
+            </if>
+            <if test="remark != null" >
+                remark,
+            </if>
+            <if test="createdDate != null" >
+                created_date,
+            </if>
+            <if test="createdBy != null" >
+                created_by,
+            </if>
+            <if test="updatedDate != null" >
+                updated_date,
+            </if>
+            <if test="updatedBy != null" >
+                updated_by,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                #{id, jdbcType=BIGINT},
+            </if>
+            <if test="serialMrid != null" >
+                #{serialMrid, jdbcType=VARCHAR},
+            </if>
+            <if test="serialMrrid != null" >
+                #{serialMrrid, jdbcType=VARCHAR},
+            </if>
+            <if test="parkId != null" >
+                #{parkId, jdbcType=BIGINT},
+            </if>
+            <if test="mainPlateNo != null" >
+                #{mainPlateNo, jdbcType=VARCHAR},
+            </if>
+            <if test="spaceNo != null" >
+                #{spaceNo, jdbcType=VARCHAR},
+            </if>
+            <if test="startDate != null" >
+                #{startDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="endDate != null" >
+                #{endDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="amount != null" >
+                #{amount, jdbcType=INTEGER},
+            </if>
+            <if test="paymentType != null" >
+                #{paymentType, jdbcType=TINYINT},
+            </if>
+            <if test="operationType != null" >
+                #{operationType, jdbcType=TINYINT},
+            </if>
+            <if test="status != null" >
+                #{status, jdbcType=TINYINT},
+            </if>
+            <if test="isDeleted != null" >
+                #{isDeleted, jdbcType=TINYINT},
+            </if>
+            <if test="disabled != null" >
+                #{disabled, jdbcType=TINYINT},
+            </if>
+            <if test="ownerName != null" >
+                #{ownerName, jdbcType=VARCHAR},
+            </if>
+            <if test="ownerMobile != null" >
+                #{ownerMobile, jdbcType=VARCHAR},
+            </if>
+            <if test="carmode != null" >
+                #{carmode, jdbcType=VARCHAR},
+            </if>
+            <if test="remark != null" >
+                #{remark, jdbcType=VARCHAR},
+            </if>
+            <if test="createdDate != null" >
+                #{createdDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="createdBy != null" >
+                #{createdBy, jdbcType=VARCHAR},
+            </if>
+            <if test="updatedDate != null" >
+                #{updatedDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="updatedBy != null" >
+                #{updatedBy, jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.airparking.apms.api.monthrentRec.entity.MonthrentRec" >
+        update monthrent_rec
+        set
+        <trim suffixOverrides=",">
+            <if test="id != null" >
+                id = #{id, jdbcType=BIGINT},
+            </if>
+            <if test="serialMrid != null" >
+                serial_mrid = #{serialMrid, jdbcType=VARCHAR},
+            </if>
+            <if test="serialMrrid != null" >
+                serial_mrrid = #{serialMrrid, jdbcType=VARCHAR},
+            </if>
+            <if test="parkId != null" >
+                park_id = #{parkId, jdbcType=BIGINT},
+            </if>
+            <if test="mainPlateNo != null" >
+                main_plate_no = #{mainPlateNo, jdbcType=VARCHAR},
+            </if>
+            <if test="spaceNo != null" >
+                space_no = #{spaceNo, jdbcType=VARCHAR},
+            </if>
+            <if test="startDate != null" >
+                start_date = #{startDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="endDate != null" >
+                end_date = #{endDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="amount != null" >
+                amount = #{amount, jdbcType=INTEGER},
+            </if>
+            <if test="paymentType != null" >
+                payment_type = #{paymentType, jdbcType=TINYINT},
+            </if>
+            <if test="operationType != null" >
+                operation_type = #{operationType, jdbcType=TINYINT},
+            </if>
+            <if test="status != null" >
+                status = #{status, jdbcType=TINYINT},
+            </if>
+            <if test="isDeleted != null" >
+                is_deleted = #{isDeleted, jdbcType=TINYINT},
+            </if>
+            <if test="disabled != null" >
+                disabled = #{disabled, jdbcType=TINYINT},
+            </if>
+            <if test="ownerName != null" >
+                owner_name = #{ownerName, jdbcType=VARCHAR},
+            </if>
+            <if test="ownerMobile != null" >
+                owner_mobile = #{ownerMobile, jdbcType=VARCHAR},
+            </if>
+            <if test="carmode != null" >
+                carmode = #{carmode, jdbcType=VARCHAR},
+            </if>
+            <if test="remark != null" >
+                remark = #{remark, jdbcType=VARCHAR},
+            </if>
+            <if test="createdDate != null" >
+                created_date = #{createdDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="createdBy != null" >
+                created_by = #{createdBy, jdbcType=VARCHAR},
+            </if>
+            <if test="updatedDate != null" >
+                updated_date = #{updatedDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="updatedBy != null" >
+                updated_by = #{updatedBy, jdbcType=VARCHAR},
+            </if>
+        </trim>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <select id="count" resultType="java.lang.Integer" >
+        select count(1) from monthrent_rec
+    </select>
+
+    <select id="find" resultMap="entityMap" parameterType="map" >
+        select
+        <include refid="listColumn" />
+        from monthrent_rec
+        limit #{start},#{count}
+    </select>
+
+    <update id="delete" parameterType="java.lang.Long" >
+        update monthrent_rec
+        set is_deleted = true where is_deleted = false and id = #{id}
+    </update>
+
+</mapper>

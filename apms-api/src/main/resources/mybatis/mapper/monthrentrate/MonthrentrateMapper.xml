@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.airparking.apms.api.monthrentrate.mapper.MonthrentrateMapper">
+
+    <resultMap id="entityMap" type="com.airparking.apms.api.monthrentrate.entity.Monthrentrate" >
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="serial_mrrid" property="serialMrrid" jdbcType="VARCHAR" />
+        <result column="mrr_id" property="mrrId" jdbcType="VARCHAR" />
+        <result column="park_id" property="parkId" jdbcType="BIGINT" />
+        <result column="name" property="name" jdbcType="VARCHAR" />
+        <result column="start_date" property="startDate" jdbcType="TIMESTAMP" />
+        <result column="end_date" property="endDate" jdbcType="TIMESTAMP" />
+        <result column="monthfee" property="monthfee" jdbcType="INTEGER" />
+        <result column="adminfee" property="adminfee" jdbcType="INTEGER" />
+        <result column="disabled" property="disabled" jdbcType="TINYINT" />
+        <result column="status" property="status" jdbcType="TINYINT" />
+        <result column="is_deleted" property="isDeleted" jdbcType="BIT" />
+        <result column="created_date" property="createdDate" jdbcType="TIMESTAMP" />
+        <result column="created_by" property="createdBy" jdbcType="VARCHAR" />
+        <result column="updated_date" property="updatedDate" jdbcType="TIMESTAMP" />
+        <result column="updated_by" property="updatedBy" jdbcType="VARCHAR" />
+        <result column="version" property="version" jdbcType="BIGINT" />
+        <result column="update_status" property="updateStatus" jdbcType="TINYINT" />
+    </resultMap>
+
+    <sql id="listColumn" >
+        id,serial_mrrid,mrr_id,park_id,name,start_date,end_date,monthfee,adminfee,disabled,status,is_deleted,created_date,created_by,updated_date,updated_by,version
+    </sql>
+
+    <select id="get" resultMap="entityMap" parameterType="java.lang.Long" >
+        select
+        <include refid="listColumn" />
+        from monthrentrate
+        where id = #{id, jdbcType=BIGINT}
+    </select>
+    
+    <select id="findByMrrId" resultMap="entityMap" parameterType="java.lang.String" >
+        select
+        <include refid="listColumn" />
+        from monthrentrate
+        where mrr_id = #{mrrId, jdbcType=VARCHAR}
+    </select>
+
+    <insert id="add" parameterType="com.airparking.apms.api.monthrentrate.entity.Monthrentrate" >
+        <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
+               SELECT LAST_INSERT_ID() AS id
+        </selectKey>
+        insert into monthrentrate
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                id,
+            </if>
+            <if test="serialMrrid != null" >
+                serial_mrrid,
+            </if>
+            <if test="mrrId != null" >
+                mrr_id,
+            </if>
+            <if test="parkId != null" >
+                park_id,
+            </if>
+            <if test="name != null" >
+                name,
+            </if>
+            <if test="startDate != null" >
+                start_date,
+            </if>
+            <if test="endDate != null" >
+                end_date,
+            </if>
+            <if test="monthfee != null" >
+                monthfee,
+            </if>
+            <if test="adminfee != null" >
+                adminfee,
+            </if>
+            <if test="disabled != null" >
+                disabled,
+            </if>
+            <if test="status != null" >
+                status,
+            </if>
+            <if test="isDeleted != null" >
+                is_deleted,
+            </if>
+            <if test="createdDate != null" >
+                created_date,
+            </if>
+            <if test="createdBy != null" >
+                created_by,
+            </if>
+            <if test="updatedDate != null" >
+                updated_date,
+            </if>
+            <if test="updatedBy != null" >
+                updated_by,
+            </if>
+            <if test="version != null" >
+                version,
+            </if>
+            <if test="updateStatus != null" >
+                update_status,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                #{id, jdbcType=BIGINT},
+            </if>
+            <if test="serialMrrid != null" >
+                #{serialMrrid, jdbcType=VARCHAR},
+            </if>
+            <if test="mrrId != null" >
+                #{mrrId, jdbcType=VARCHAR},
+            </if>
+            <if test="parkId != null" >
+                #{parkId, jdbcType=BIGINT},
+            </if>
+            <if test="name != null" >
+                #{name, jdbcType=VARCHAR},
+            </if>
+            <if test="startDate != null" >
+                #{startDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="endDate != null" >
+                #{endDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="monthfee != null" >
+                #{monthfee, jdbcType=INTEGER},
+            </if>
+            <if test="adminfee != null" >
+                #{adminfee, jdbcType=INTEGER},
+            </if>
+            <if test="disabled != null" >
+                #{disabled, jdbcType=TINYINT},
+            </if>
+            <if test="status != null" >
+                #{status, jdbcType=TINYINT},
+            </if>
+            <if test="isDeleted != null" >
+                #{isDeleted, jdbcType=BIT},
+            </if>
+            <if test="createdDate != null" >
+                #{createdDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="createdBy != null" >
+                #{createdBy, jdbcType=VARCHAR},
+            </if>
+            <if test="updatedDate != null" >
+                #{updatedDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="updatedBy != null" >
+                #{updatedBy, jdbcType=VARCHAR},
+            </if>
+            <if test="version != null" >
+                #{version, jdbcType=BIGINT},
+            </if>
+            <if test="updateStatus != null" >
+                #{updateStatus,jdbcType=TINYINT}
+            </if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.airparking.apms.api.monthrentrate.entity.Monthrentrate" >
+        update monthrentrate
+        set
+        <trim suffixOverrides=",">
+            <if test="id != null" >
+                id = #{id, jdbcType=BIGINT},
+            </if>
+            <if test="serialMrrid != null" >
+                serial_mrrid = #{serialMrrid, jdbcType=VARCHAR},
+            </if>
+            <if test="mrrId != null" >
+                mrr_id = #{mrrId, jdbcType=VARCHAR},
+            </if>
+            <if test="parkId != null" >
+                park_id = #{parkId, jdbcType=BIGINT},
+            </if>
+            <if test="name != null" >
+                name = #{name, jdbcType=VARCHAR},
+            </if>
+            <if test="startDate != null" >
+                start_date = #{startDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="endDate != null" >
+                end_date = #{endDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="monthfee != null" >
+                monthfee = #{monthfee, jdbcType=INTEGER},
+            </if>
+            <if test="adminfee != null" >
+                adminfee = #{adminfee, jdbcType=INTEGER},
+            </if>
+            <if test="disabled != null" >
+                disabled = #{disabled, jdbcType=TINYINT},
+            </if>
+            <if test="status != null" >
+                status = #{status, jdbcType=TINYINT},
+            </if>
+            <if test="isDeleted != null" >
+                is_deleted = #{isDeleted, jdbcType=BIT},
+            </if>
+            <if test="createdDate != null" >
+                created_date = #{createdDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="createdBy != null" >
+                created_by = #{createdBy, jdbcType=VARCHAR},
+            </if>
+            <if test="updatedDate != null" >
+                updated_date = #{updatedDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="updatedBy != null" >
+                updated_by = #{updatedBy, jdbcType=VARCHAR},
+            </if>
+            <if test="version != null" >
+                version = #{version, jdbcType=BIGINT},
+            </if>
+            <if test="updateStatus != null" >
+                update_status = #{updateStatus,jdbcType=TINYINT},
+            </if>
+        </trim>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <select id="count" resultType="java.lang.Integer" >
+        select count(1) from monthrentrate
+    </select>
+    
+    <select id="findMaxVersion" resultType="java.lang.Long" >
+        select version from monthrentrate order by version desc limit 1
+    </select>
+
+    <select id="find" resultMap="entityMap" parameterType="map" >
+        select
+        <include refid="listColumn" />
+        from monthrentrate
+        limit #{start},#{count}
+    </select>
+
+    <update id="delete" parameterType="java.lang.Long" >
+        update monthrentrate
+        set is_deleted = true where is_deleted = false and id = #{id}
+    </update>
+
+	<select id="findByThisYearWithParkId" resultMap="entityMap" parameterType="map" >
+        select
+        <include refid="listColumn" />
+        from monthrentrate
+        where updated_date <![CDATA[ >= ]]> #{startYear, jdbcType=TIMESTAMP} and 
+        updated_date <![CDATA[ < ]]> #{endYear, jdbcType=TIMESTAMP} and
+        park_id = #{parkId, jdbcType=BIGINT}
+    </select>
+    
+    <select id="findIsExistByParkIdAndTimeAndName" resultMap="entityMap" parameterType="map" >
+    	SELECT
+			<include refid="listColumn" />
+		FROM
+			monthrentrate mrr
+		WHERE
+			mrr.park_id = #{parkId, jdbcType=BIGINT} 
+		and mrr.start_date <![CDATA[ <=  ]]> #{startDate, jdbcType=TIMESTAMP} 
+		AND mrr.end_date <![CDATA[ >=  ]]> #{endDate, jdbcType=TIMESTAMP} 
+		AND mrr.name = #{name, jdbcType=VARCHAR} 
+		AND mrr.disabled = 0
+		AND mrr.status = 1
+		AND mrr.is_deleted = 0
+		ORDER BY
+			mrr.created_date DESC
+		LIMIT 1
+    </select>
+    
+    <select id="findIsExistByParkIdAndName" resultMap="entityMap" parameterType="map" >
+    	SELECT 
+    		<include refid="listColumn" />
+      	FROM  monthrentrate mrr  WHERE 
+        mrr.name = #{name, jdbcType=VARCHAR} AND mrr.park_id = #{parkId, jdbcType=BIGINT}  AND mrr.disabled = 0 
+        AND mrr.status = 1 AND mrr.is_deleted = 0 
+    </select>
+
+    <select id="findByUpdatedStatus" resultMap="entityMap">
+        SELECT
+          <include refid="listColumn" />
+        FROM monthrentrate mrr WHERE
+        mrr.update_status = 1
+    </select>
+
+    <update id="updatedStatus" parameterType="java.lang.Long">
+        update monthrentrate set update_status = 0 where id = #{id, jdbcType=BIGINT}
+    </update>
+
+</mapper>

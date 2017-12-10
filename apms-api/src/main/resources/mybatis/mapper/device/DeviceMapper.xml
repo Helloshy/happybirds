@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.airparking.apms.api.device.mapper.DeviceMapper">
+
+    <resultMap id="entityMap" type="com.airparking.apms.api.device.entity.Device" >
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="name" property="name" jdbcType="VARCHAR" />
+        <result column="ip" property="ip" jdbcType="VARCHAR" />
+        <result column="lane_id" property="laneId" jdbcType="BIGINT" />
+        <result column="status" property="status" jdbcType="TINYINT" />
+        <result column="type" property="type" jdbcType="TINYINT" />
+        <result column="is_deleted" property="isDeleted" jdbcType="BIT" />
+        <result column="created_date" property="createdDate" jdbcType="TIMESTAMP" />
+        <result column="updated_date" property="updatedDate" jdbcType="TIMESTAMP" />
+        <result column="park_id" property="parkId" jdbcType="BIGINT"/>
+    </resultMap>
+
+    <sql id="listColumn" >
+        id,name,ip,status,lane_id,type,is_deleted,created_date,updated_date,park_id
+    </sql>
+
+    <select id="get" resultMap="entityMap" parameterType="java.lang.Long" >
+        select
+        <include refid="listColumn" />
+        from device
+        where id = #{id, jdbcType=BIGINT}
+    </select>
+
+    <select id="findByIp" resultMap="entityMap" parameterType="java.lang.String" >
+        select
+        <include refid="listColumn" />
+        from device
+        where ip = #{ip, jdbcType=VARCHAR}
+    </select>
+
+    <select id="findAll" resultMap="entityMap">
+        select
+        <include refid="listColumn" />
+        from device
+    </select>
+
+    <insert id="add" parameterType="com.airparking.apms.api.device.entity.Device">
+        <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into device
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                id,
+            </if>
+            <if test="name != null" >
+                name,
+            </if>
+            <if test="ip != null" >
+                ip,
+            </if>
+            <if test="laneId != null" >
+                lane_id,
+            </if>
+            <if test="status != null" >
+                status,
+            </if>
+            <if test="type != null" >
+                type,
+            </if>
+            <if test="isDeleted != null" >
+                is_deleted,
+            </if>
+            <if test="createdDate != null" >
+                created_date,
+            </if>
+            <if test="updatedDate != null" >
+                updated_date,
+            </if>
+            <if test="parkId != null">
+                park_id,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                #{id, jdbcType=BIGINT},
+            </if>
+            <if test="name != null" >
+                #{name, jdbcType=VARCHAR},
+            </if>
+            <if test="ip != null" >
+                #{ip, jdbcType=VARCHAR},
+            </if>
+            <if test="laneId != null" >
+                #{laneId, jdbcType=BIGINT},
+            </if>
+            <if test="status != null" >
+                #{status, jdbcType=TINYINT},
+            </if>
+            <if test="type != null" >
+                #{type, jdbcType=TINYINT},
+            </if>
+            <if test="isDeleted != null" >
+                #{isDeleted, jdbcType=BIT},
+            </if>
+            <if test="createdDate != null" >
+                #{createdDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="updatedDate != null" >
+                #{updatedDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="parkId != null">
+                #{parkId , jdbcType=BIGINT}
+            </if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.airparking.apms.api.device.entity.Device" >
+        update device
+        set
+        <trim suffixOverrides=",">
+            <if test="id != null" >
+                id = #{id, jdbcType=BIGINT},
+            </if>
+            <if test="name != null" >
+                name = #{name, jdbcType=VARCHAR},
+            </if>
+            <if test="ip != null" >
+                ip = #{ip, jdbcType=VARCHAR},
+            </if>
+            <if test="laneId != null" >
+                lane_id = #{laneId, jdbcType=BIGINT},
+            </if>
+            <if test="status != null" >
+                status = #{status, jdbcType=TINYINT},
+            </if>
+            <if test="type != null" >
+                type = #{type, jdbcType=TINYINT},
+            </if>
+            <if test="isDeleted != null" >
+                is_deleted = #{isDeleted, jdbcType=BIT},
+            </if>
+            <if test="createdDate != null" >
+                created_date = #{createdDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="updatedDate != null" >
+                updated_date = #{updatedDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="parkId != null" >
+                park_id = #{parkId, jdbcType=BIGINT},
+            </if>
+        </trim>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <select id="count" resultType="java.lang.Integer" >
+        select count(1) from device
+    </select>
+
+    <select id="find" resultMap="entityMap" parameterType="map" >
+        select
+        <include refid="listColumn" />
+        from device
+        limit #{start},#{count}
+    </select>
+
+    <update id="delete" parameterType="java.lang.Long" >
+        update device
+        set is_deleted = true where is_deleted = false and id = #{id}
+    </update>
+
+    <select id="findByIpAndLaneId" resultMap="entityMap" parameterType="map" >
+        select
+        <include refid="listColumn" />
+        from device
+        where lane_id=#{id} and ip=#{ip} and type=#{type}
+    </select>
+
+    <select id="findByParkIdAndType" resultMap="entityMap" parameterType="map">
+        select
+        <include refid="listColumn" />
+        from device
+        where park_id=#{parkId} and type =#{type} and is_deleted = 0 and ip <![CDATA[<>]]> '127.0.0.1' limit 1
+    </select>
+
+    <select id="findByDeviceId" resultType="java.lang.Long" parameterType="map">
+        select id from device where park_id = #{parkId} and ip = #{ip} and name = #{deviceName} and is_deleted = 0
+    </select>
+
+    <select id="findById" resultMap="entityMap" parameterType="java.lang.Long">
+        select <include refid="listColumn"/> from device where id = #{deviceId}
+    </select>
+
+    <select id="findByParkIdAndIpAndType" resultMap="entityMap" parameterType="map">
+        select
+        <include refid="listColumn" />
+        from device
+        where park_id=#{parkId} and type =#{type} and ip = #{ip} and is_deleted = 0
+    </select>
+
+</mapper>

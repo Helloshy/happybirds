@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.airparking.apms.api.device.mapper.PcInfoMapper">
+
+    <resultMap id="entityMap" type="com.airparking.apms.api.device.entity.PcInfo" >
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="park_id" property="parkId" jdbcType="BIGINT" />
+        <result column="device_id" property="deviceId" jdbcType="BIGINT" />
+        <result column="query_speed" property="querySpeed" jdbcType="TINYINT" />
+        <result column="derive_speed" property="deriveSpeed" jdbcType="TINYINT" />
+        <result column="cpu_utilization" property="cpuUtilization" jdbcType="TINYINT" />
+        <result column="cpu_temperature" property="cpuTemperature" jdbcType="TINYINT" />
+        <result column="is_deleted" property="isDeleted" jdbcType="BIT" />
+        <result column="memory_usage" property="memoryUsage" jdbcType="TINYINT" />
+        <result column="hard_disk_usage" property="hardDiskUsage" jdbcType="TINYINT" />
+        <result column="created_date" property="createdDate" jdbcType="TIMESTAMP" />
+        <result column="updated_date" property="updatedDate" jdbcType="TIMESTAMP" />
+    </resultMap>
+
+    <sql id="listColumn" >
+        id,device_id,park_id,query_speed,derive_speed,cpu_utilization,cpu_temperature,is_deleted,memory_usage,hard_disk_usage,created_date,updated_date
+    </sql>
+
+    <insert id="add" parameterType="com.airparking.apms.api.device.entity.PcInfo">
+        <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into park_pc_info
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                id,
+            </if>
+            <if test="deviceId != null" >
+                device_id,
+            </if>
+            <if test="parkId != null" >
+                park_id,
+            </if>
+            <if test="querySpeed != null" >
+                query_speed,
+            </if>
+            <if test="deriveSpeed != null" >
+                derive_speed,
+            </if>
+            <if test="cpuUtilization != null" >
+                cpu_utilization,
+            </if>
+            <if test="cpuTemperature != null" >
+                cpu_temperature,
+            </if>
+            <if test="isDeleted != null" >
+                is_deleted,
+            </if>
+            <if test="memoryUsage != null" >
+                memory_usage,
+            </if>
+            <if test="hardDiskUsage != null" >
+                hard_disk_usage,
+            </if>
+            <if test="createdDate != null ">
+                created_date,
+            </if>
+            <if test="updatedDate != null">
+                updated_date,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                #{id, jdbcType=BIGINT},
+            </if>
+            <if test="deviceId != null" >
+                #{deviceId, jdbcType=BIGINT},
+            </if>
+            <if test="parkId != null" >
+                #{parkId, jdbcType=BIGINT},
+            </if>
+            <if test="querySpeed != null" >
+                #{querySpeed, jdbcType=TINYINT},
+            </if>
+            <if test="deriveSpeed != null" >
+                #{deriveSpeed, jdbcType=TINYINT},
+            </if>
+            <if test="cpuUtilization != null" >
+                #{cpuUtilization, jdbcType=TINYINT},
+            </if>
+            <if test="cpuTemperature != null" >
+                #{cpuTemperature, jdbcType=TINYINT},
+            </if>
+            <if test="isDeleted != null">
+                #{isDeleted , jdbcType=BIT},
+            </if>
+            <if test="memoryUsage != null">
+                #{memoryUsage , jdbcType=TINYINT},
+            </if>
+            <if test="hardDiskUsage != null">
+                #{hardDiskUsage , jdbcType=TINYINT},
+            </if>
+            <if test="createdDate != null ">
+                #{createdDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updatedDate != null">
+                #{updatedDate,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.airparking.apms.api.device.entity.PcInfo" >
+        update park_pc_info
+        set
+        <trim suffixOverrides=",">
+            <if test="deviceId != null" >
+                device_id = #{deviceId, jdbcType=BIGINT},
+            </if>
+            <if test="parkId != null" >
+                park_id = #{parkId, jdbcType=BIGINT},
+            </if>
+            <if test="querySpeed != null" >
+                query_speed = #{querySpeed, jdbcType=TINYINT},
+            </if>
+            <if test="deriveSpeed != null" >
+                derive_speed = #{deriveSpeed, jdbcType=TINYINT},
+            </if>
+            <if test="cpuUtilization != null" >
+                cpu_utilization = #{cpuUtilization, jdbcType=TINYINT},
+            </if>
+            <if test="cpuTemperature != null" >
+                cpu_temperature = #{cpuTemperature, jdbcType=TINYINT},
+            </if>
+            <if test="memoryUsage != null">
+                memory_usage = #{memoryUsage , jdbcType=TINYINT},
+            </if>
+            <if test="hardDiskUsage != null">
+                hard_disk_usage = #{hardDiskUsage , jdbcType=TINYINT},
+            </if>
+            <if test="isDeleted != null">
+                is_deleted = #{isDeleted , jdbcType=BIT},
+            </if>
+            <if test="updatedDate != null">
+                updated_date = #{updatedDate,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <select id="findByDeviceId" resultMap="entityMap" parameterType="java.lang.Long">
+        select
+        <include refid="listColumn"/>
+        from park_pc_info
+        where device_id = #{deviceId} and is_deleted = 0
+    </select>
+
+    <select id="findIdByDeviceId" resultType="java.lang.Long" parameterType="java.lang.Long">
+        select
+        id
+        from park_pc_info
+        where device_id = #{deviceId} and is_deleted = 0
+    </select>
+
+    <select id="findByParkId" resultMap="entityMap"  parameterType="java.lang.Long">
+        select
+        <include refid="listColumn" />
+        from park_pc_info
+        where park_id = #{parkId} and is_deleted = 0
+    </select>
+</mapper>

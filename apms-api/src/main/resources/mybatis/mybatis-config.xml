@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+    <typeAliases>
+        <typeAlias type="com.airparking.apms.api.key.entity.SecretKey" alias="SecretKey"/>
+        <typeAlias type="com.airparking.apms.api.district.entity.District" alias="District" />
+    </typeAliases>
+</configuration>

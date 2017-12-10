@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.airparking.apms.api.record.mapper.RecordMapper">
+
+    <resultMap id="entityMap" type="com.airparking.apms.api.record.entity.Record" >
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="park_id" property="parkId" jdbcType="BIGINT" />
+        <result column="name" property="name" jdbcType="VARCHAR" />
+        <result column="username" property="username" jdbcType="VARCHAR" />
+        <result column="start_time" property="startTime" jdbcType="TIMESTAMP" />
+        <result column="end_time" property="endTime" jdbcType="TIMESTAMP" />
+        <result column="month_in" property="monthIn" jdbcType="INTEGER" />
+        <result column="month_out" property="monthOut" jdbcType="INTEGER" />
+        <result column="ap_in" property="apIn" jdbcType="INTEGER" />
+        <result column="ap_out" property="apOut" jdbcType="INTEGER" />
+        <result column="temp_in" property="tempIn" jdbcType="INTEGER" />
+        <result column="temp_out" property="tempOut" jdbcType="INTEGER" />
+        <result column="current_month" property="currentMonth" jdbcType="INTEGER" />
+        <result column="current_temp" property="currentTemp" jdbcType="INTEGER" />
+        <result column="current_ap" property="currentAp" jdbcType="INTEGER" />
+        <result column="month_income" property="monthIncome" jdbcType="INTEGER" />
+        <result column="month_refund" property="monthRefund" jdbcType="INTEGER" />
+        <result column="temp_income" property="tempIncome" jdbcType="INTEGER" />
+        <result column="is_deleted" property="isDeleted" jdbcType="BIT" />
+        <result column="created_date" property="createdDate" jdbcType="TIMESTAMP" />
+        <result column="created_by" property="createdBy" jdbcType="VARCHAR" />
+        <result column="updated_date" property="updatedDate" jdbcType="TIMESTAMP" />
+        <result column="updated_by" property="updatedBy" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <sql id="listColumn" >
+        id,park_id,name,username,start_time,end_time,month_in,month_out,ap_in,ap_out,temp_in,temp_out,current_month,current_temp,current_ap,month_income,month_refund,temp_income,is_deleted,created_date,created_by,updated_date,updated_by
+    </sql>
+
+    <select id="get" resultMap="entityMap" parameterType="java.lang.Long" >
+        select
+        <include refid="listColumn" />
+        from handover_record
+        where id = #{id, jdbcType=BIGINT}
+    </select>
+
+    <insert id="add" parameterType="com.airparking.apms.api.record.entity.Record">
+        <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
+                SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into handover_record
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                id,
+            </if>
+            <if test="parkId != null" >
+                park_id,
+            </if>
+            <if test="name != null" >
+                name,
+            </if>
+            <if test="username != null" >
+                username,
+            </if>
+            <if test="startTime != null" >
+                start_time,
+            </if>
+            <if test="endTime != null" >
+                end_time,
+            </if>
+            <if test="monthIn != null" >
+                month_in,
+            </if>
+            <if test="monthOut != null" >
+                month_out,
+            </if>
+            <if test="apIn != null" >
+                ap_in,
+            </if>
+            <if test="apOut != null" >
+                ap_out,
+            </if>
+            <if test="tempIn != null" >
+                temp_in,
+            </if>
+            <if test="tempOut != null" >
+                temp_out,
+            </if>
+            <if test="currentMonth != null" >
+                current_month,
+            </if>
+            <if test="currentTemp != null" >
+                current_temp,
+            </if>
+            <if test="currentAp != null" >
+                current_ap,
+            </if>
+            <if test="monthIncome != null" >
+                month_income,
+            </if>
+            <if test="monthRefund != null" >
+                month_refund,
+            </if>
+            <if test="tempIncome != null" >
+                temp_income,
+            </if>
+            <if test="isDeleted != null" >
+                is_deleted,
+            </if>
+            <if test="createdDate != null" >
+                created_date,
+            </if>
+            <if test="createdBy != null" >
+                created_by,
+            </if>
+            <if test="updatedDate != null" >
+                updated_date,
+            </if>
+            <if test="updatedBy != null" >
+                updated_by,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                #{id, jdbcType=BIGINT},
+            </if>
+            <if test="parkId != null" >
+                #{parkId, jdbcType=BIGINT},
+            </if>
+            <if test="name != null" >
+                #{name, jdbcType=VARCHAR},
+            </if>
+            <if test="username != null" >
+                #{username, jdbcType=VARCHAR},
+            </if>
+            <if test="startTime != null" >
+                #{startTime, jdbcType=TIMESTAMP},
+            </if>
+            <if test="endTime != null" >
+                #{endTime, jdbcType=TIMESTAMP},
+            </if>
+            <if test="monthIn != null" >
+                #{monthIn, jdbcType=INTEGER},
+            </if>
+            <if test="monthOut != null" >
+                #{monthOut, jdbcType=INTEGER},
+            </if>
+            <if test="apIn != null" >
+                #{apIn, jdbcType=INTEGER},
+            </if>
+            <if test="apOut != null" >
+                #{apOut, jdbcType=INTEGER},
+            </if>
+            <if test="tempIn != null" >
+                #{tempIn, jdbcType=INTEGER},
+            </if>
+            <if test="tempOut != null" >
+                #{tempOut, jdbcType=INTEGER},
+            </if>
+            <if test="currentMonth != null" >
+                #{currentMonth, jdbcType=INTEGER},
+            </if>
+            <if test="currentTemp != null" >
+                #{currentTemp, jdbcType=INTEGER},
+            </if>
+            <if test="currentAp != null" >
+                #{currentAp, jdbcType=INTEGER},
+            </if>
+            <if test="monthIncome != null" >
+                #{monthIncome, jdbcType=INTEGER},
+            </if>
+            <if test="monthRefund != null" >
+                #{monthRefund, jdbcType=INTEGER},
+            </if>
+            <if test="tempIncome != null" >
+                #{tempIncome, jdbcType=INTEGER},
+            </if>
+            <if test="isDeleted != null" >
+                #{isDeleted, jdbcType=BIT},
+            </if>
+            <if test="createdDate != null" >
+                #{createdDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="createdBy != null" >
+                #{createdBy, jdbcType=VARCHAR},
+            </if>
+            <if test="updatedDate != null" >
+                #{updatedDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="updatedBy != null" >
+                #{updatedBy, jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.airparking.apms.api.record.entity.Record" >
+        update handover_record
+        set
+        <trim suffixOverrides=",">
+            <if test="id != null" >
+                id = #{id, jdbcType=BIGINT},
+            </if>
+            <if test="parkId != null" >
+                park_id = #{parkId, jdbcType=BIGINT},
+            </if>
+            <if test="name != null" >
+                name = #{name, jdbcType=VARCHAR},
+            </if>
+            <if test="username != null" >
+                username = #{username, jdbcType=VARCHAR},
+            </if>
+            <if test="startTime != null" >
+                start_time = #{startTime, jdbcType=TIMESTAMP},
+            </if>
+            <if test="endTime != null" >
+                end_time = #{endTime, jdbcType=TIMESTAMP},
+            </if>
+            <if test="monthIn != null" >
+                month_in = #{monthIn, jdbcType=INTEGER},
+            </if>
+            <if test="monthOut != null" >
+                month_out = #{monthOut, jdbcType=INTEGER},
+            </if>
+            <if test="apIn != null" >
+                ap_in = #{apIn, jdbcType=INTEGER},
+            </if>
+            <if test="apOut != null" >
+                ap_out = #{apOut, jdbcType=INTEGER},
+            </if>
+            <if test="tempIn != null" >
+                temp_in = #{tempIn, jdbcType=INTEGER},
+            </if>
+            <if test="tempOut != null" >
+                temp_out = #{tempOut, jdbcType=INTEGER},
+            </if>
+            <if test="currentMonth != null" >
+                current_month = #{currentMonth, jdbcType=INTEGER},
+            </if>
+            <if test="currentTemp != null" >
+                current_temp = #{currentTemp, jdbcType=INTEGER},
+            </if>
+            <if test="currentAp != null" >
+                current_ap = #{currentAp, jdbcType=INTEGER},
+            </if>
+            <if test="monthIncome != null" >
+                month_income = #{monthIncome, jdbcType=INTEGER},
+            </if>
+            <if test="monthRefund != null" >
+                month_refund = #{monthRefund, jdbcType=INTEGER},
+            </if>
+            <if test="tempIncome != null" >
+                temp_income = #{tempIncome, jdbcType=INTEGER},
+            </if>
+            <if test="isDeleted != null" >
+                is_deleted = #{isDeleted, jdbcType=BIT},
+            </if>
+            <if test="createdDate != null" >
+                created_date = #{createdDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="createdBy != null" >
+                created_by = #{createdBy, jdbcType=VARCHAR},
+            </if>
+            <if test="updatedDate != null" >
+                updated_date = #{updatedDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="updatedBy != null" >
+                updated_by = #{updatedBy, jdbcType=VARCHAR},
+            </if>
+        </trim>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <select id="count" resultType="java.lang.Integer" >
+        select count(1) from handover_record
+    </select>
+
+    <select id="find" resultMap="entityMap" parameterType="map" >
+        select
+        <include refid="listColumn" />
+        from handover_record
+        limit #{start},#{count}
+    </select>
+
+    <update id="delete" parameterType="java.lang.Long" >
+        update handover_record
+        set is_deleted = true where is_deleted = false and id = #{id}
+    </update>
+
+</mapper>

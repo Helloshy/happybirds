@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.airparking.apms.api.parkPrice.mapper.ParkPriceExtMapper">
+
+    <resultMap id="entityMap" type="com.airparking.apms.api.parkPrice.entity.ParkPriceExt" >
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="free_time" property="freeTime" jdbcType="INTEGER" />
+        <result column="ext_free_time" property="extFreeTime" jdbcType="INTEGER" />
+        <result column="price_unit" property="priceUnit" jdbcType="INTEGER" />
+        <result column="price" property="price" jdbcType="INTEGER" />
+        <result column="limit_time" property="limitTime" jdbcType="INTEGER" />
+        <result column="limit_fee" property="limitFee" jdbcType="INTEGER" />
+        <result column="start_time" property="startTime" jdbcType="TIME" />
+        <result column="end_time" property="endTime" jdbcType="TIME" />
+        <result column="max_fee" property="maxFee" jdbcType="INTEGER" />
+        <result column="price_id" property="priceId" jdbcType="BIGINT" />
+        <result column="is_deleted" property="isDeleted" jdbcType="BIT" />
+        <result column="created_date" property="createdDate" jdbcType="TIMESTAMP" />
+        <result column="created_by" property="createdBy" jdbcType="VARCHAR" />
+        <result column="updated_date" property="updatedDate" jdbcType="TIMESTAMP" />
+        <result column="updated_by" property="updatedBy" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <sql id="listColumn" >
+        id,free_time,ext_free_time,price_unit,price,limit_time,limit_fee,start_time,end_time,max_fee,price_id,is_deleted,created_date,created_by,updated_date,updated_by
+    </sql>
+
+    <select id="get" resultMap="entityMap" parameterType="java.lang.Long" >
+        select
+        <include refid="listColumn" />
+        from park_price_ext
+        where id = #{id, jdbcType=BIGINT}
+    </select>
+    
+    <select id="findByPriceId" resultMap="entityMap" parameterType="java.lang.Long" >
+        select
+        <include refid="listColumn" />
+        from park_price_ext
+        where price_id = #{priceId, jdbcType=BIGINT}
+    </select>
+
+    <insert id="add" parameterType="com.airparking.apms.api.parkPrice.entity.ParkPriceExt">
+        <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
+                SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into park_price_ext
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                id,
+            </if>
+            <if test="freeTime != null" >
+                free_time,
+            </if>
+            <if test="extFreeTime != null" >
+                ext_free_time,
+            </if>
+            <if test="priceUnit != null" >
+                price_unit,
+            </if>
+            <if test="price != null" >
+                price,
+            </if>
+            <if test="limitTime != null" >
+                limit_time,
+            </if>
+            <if test="limitFee != null" >
+                limit_fee,
+            </if>
+            <if test="startTime != null" >
+                start_time,
+            </if>
+            <if test="endTime != null" >
+                end_time,
+            </if>
+            <if test="maxFee != null" >
+                max_fee,
+            </if>
+            <if test="priceId != null" >
+                price_id,
+            </if>
+            <if test="isDeleted != null" >
+                is_deleted,
+            </if>
+            <if test="createdDate != null" >
+                created_date,
+            </if>
+            <if test="createdBy != null" >
+                created_by,
+            </if>
+            <if test="updatedDate != null" >
+                updated_date,
+            </if>
+            <if test="updatedBy != null" >
+                updated_by,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                #{id, jdbcType=BIGINT},
+            </if>
+            <if test="freeTime != null" >
+                #{freeTime, jdbcType=INTEGER},
+            </if>
+            <if test="extFreeTime != null" >
+                #{extFreeTime, jdbcType=INTEGER},
+            </if>
+            <if test="priceUnit != null" >
+                #{priceUnit, jdbcType=INTEGER},
+            </if>
+            <if test="price != null" >
+                #{price, jdbcType=INTEGER},
+            </if>
+            <if test="limitTime != null" >
+                #{limitTime, jdbcType=INTEGER},
+            </if>
+            <if test="limitFee != null" >
+                #{limitFee, jdbcType=INTEGER},
+            </if>
+            <if test="startTime != null" >
+                #{startTime, jdbcType=TIME},
+            </if>
+            <if test="endTime != null" >
+                #{endTime, jdbcType=TIME},
+            </if>
+            <if test="maxFee != null" >
+                #{maxFee, jdbcType=INTEGER},
+            </if>
+            <if test="priceId != null" >
+                #{priceId, jdbcType=BIGINT},
+            </if>
+            <if test="isDeleted != null" >
+                #{isDeleted, jdbcType=BIT},
+            </if>
+            <if test="createdDate != null" >
+                #{createdDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="createdBy != null" >
+                #{createdBy, jdbcType=VARCHAR},
+            </if>
+            <if test="updatedDate != null" >
+                #{updatedDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="updatedBy != null" >
+                #{updatedBy, jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.airparking.apms.api.parkPrice.entity.ParkPriceExt" >
+        update park_price_ext
+        set
+        <trim suffixOverrides=",">
+            <if test="id != null" >
+                id = #{id, jdbcType=BIGINT},
+            </if>
+            <if test="freeTime != null" >
+                free_time = #{freeTime, jdbcType=INTEGER},
+            </if>
+            <if test="extFreeTime != null" >
+                ext_free_time = #{extFreeTime, jdbcType=INTEGER},
+            </if>
+            <if test="priceUnit != null" >
+                price_unit = #{priceUnit, jdbcType=INTEGER},
+            </if>
+            <if test="price != null" >
+                price = #{price, jdbcType=INTEGER},
+            </if>
+            <if test="limitTime != null" >
+                limit_time = #{limitTime, jdbcType=INTEGER},
+            </if>
+            <if test="limitFee != null" >
+                limit_fee = #{limitFee, jdbcType=INTEGER},
+            </if>
+            <if test="startTime != null" >
+                start_time = #{startTime, jdbcType=TIME},
+            </if>
+            <if test="endTime != null" >
+                end_time = #{endTime, jdbcType=TIME},
+            </if>
+            <if test="maxFee != null" >
+                max_fee = #{maxFee, jdbcType=INTEGER},
+            </if>
+            <if test="priceId != null" >
+                price_id = #{priceId, jdbcType=BIGINT},
+            </if>
+            <if test="isDeleted != null" >
+                is_deleted = #{isDeleted, jdbcType=BIT},
+            </if>
+            <if test="createdDate != null" >
+                created_date = #{createdDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="createdBy != null" >
+                created_by = #{createdBy, jdbcType=VARCHAR},
+            </if>
+            <if test="updatedDate != null" >
+                updated_date = #{updatedDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="updatedBy != null" >
+                updated_by = #{updatedBy, jdbcType=VARCHAR},
+            </if>
+        </trim>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <select id="count" resultType="java.lang.Integer" >
+        select count(1) from park_price_ext
+    </select>
+
+    <select id="find" resultMap="entityMap" parameterType="map" >
+        select
+        <include refid="listColumn" />
+        from park_price_ext
+        limit #{start},#{count}
+    </select>
+
+    <update id="delete" parameterType="java.lang.Long" >
+        update park_price_ext
+        set is_deleted = true where is_deleted = false and id = #{id}
+    </update>
+    
+    <update id="deleteInTrue" parameterType="java.lang.Long" >
+        delete from park_price_ext where id = #{id}
+    </update>
+
+</mapper>
